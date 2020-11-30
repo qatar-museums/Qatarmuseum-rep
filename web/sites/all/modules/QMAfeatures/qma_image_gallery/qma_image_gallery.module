@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA Image Gallery feature.
+ */
+
+include_once 'qma_image_gallery.features.inc';

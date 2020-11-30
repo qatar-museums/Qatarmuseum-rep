@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA site config feature.
+ */
+
+include_once 'qma_site_config.features.inc';

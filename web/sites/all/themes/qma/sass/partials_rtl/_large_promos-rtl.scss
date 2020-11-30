@@ -1,0 +1,36 @@
+/* large promos on project pages */
+.wide-promo {
+
+	.title-container {
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(6 omega, 16);
+		}
+	}
+
+	.content {
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(10, 16);
+		}
+
+		.field-name-field-promo-image,
+		.filter_image {
+			
+			@include at-breakpoint($bp-tablet) {
+				@include span-columns(5 omega, 10);
+			}
+
+		}
+
+		.group-promo-text {
+
+			@include at-breakpoint($bp-tablet) {
+				@include span-columns(5, 10);
+			}
+
+		}
+
+	}
+
+}

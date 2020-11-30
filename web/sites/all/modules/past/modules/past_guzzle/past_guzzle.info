@@ -1,0 +1,20 @@
+name=Past Guzzle Log Adapter
+description=Past log adapter for the Guzzle log plugin.
+package = Logging
+core=7.x
+
+dependencies[]=past
+
+# @todo: Enable when tesbot support composer dependencies.
+#test_dependencies[]=composer_manager
+
+files[]=past_guzzle.adapter.inc
+files[]=past_guzzle.test
+
+
+; Information added by Drupal.org packaging script on 2016-04-02
+version = "7.x-1.0-alpha3"
+core = "7.x"
+project = "past"
+datestamp = "1459591740"
+

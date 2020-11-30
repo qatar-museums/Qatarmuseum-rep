@@ -1,0 +1,24 @@
+// Simple mixin to ensure consistent line-heights and fallback font sizes for IE.
+@mixin fontsize($size:1.6, $line: $size * 1.5){
+  font-size:   ($size * 10) + px;
+  line-height: ($line * 10) + px;
+  font-size:   $size + rem;
+  line-height: $line + rem;
+}
+
+/**
+PLACEHOLDERS
+**/
+
+%clearfix {
+  zoom:1;
+  &:before, &:after {
+    content: "\0020";
+    display: block;
+    height: 0;
+    overflow: hidden;
+  }
+  &:after {
+    clear: both;
+  }
+}

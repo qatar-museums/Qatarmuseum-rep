@@ -1,0 +1,123 @@
+/* full view mode */
+.node-hero-wrapper {
+
+	.hero-container {
+
+		.field-name-field-hero-image-caption {
+			left: auto;
+			right: 1em;
+		}
+
+	}
+
+	.header-area {
+
+		.title-container {
+
+			@include at-breakpoint($bp-tablet) {
+				@include span-columns(7 omega, 16);
+			}
+
+			.node-interview & {
+				
+				@include at-breakpoint($bp-tablet) {
+					width: 100%;
+					margin-left: 0;
+				}	
+
+				@include at-breakpoint($bp-860) {
+					@include span-columns(7 omega, 16);
+				}				
+			}
+		}
+
+		.intro-text {
+
+			@include at-breakpoint($bp-tablet) {
+				@include span-columns(7, 16);
+			}
+
+			.node-interview & {
+				
+				@include at-breakpoint($bp-tablet) {
+					width: 100%;
+					margin-right: 0;
+				}	
+
+				@include at-breakpoint($bp-860) {
+					@include span-columns(7, 16);
+				}				
+			}
+		}
+
+	}
+}
+
+/** repeating field body elements **/
+.field-name-field-body-elements {
+
+	// we only want the top level field item
+	&>.field-items>.field-item {
+
+		@include at-breakpoint($bp-tablet) {
+			@include span-columns(8 omega, 16);
+			clear: right;
+		}
+
+		&.odd {
+			@include at-breakpoint($bp-tablet) {
+				@include span-columns(7, 16);
+				clear: left;
+			}
+		}
+
+		&.wide-element {
+			width: 100%;
+		}
+
+	}
+
+	.group-user-quote {
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(6, 8);
+		}
+
+		@include at-breakpoint($bp-desktop) {
+			@include span-columns(4, 8);
+		}
+
+	}
+
+	.odd .group-user-quote {
+		
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(6 omega, 8);
+		}
+
+		@include at-breakpoint($bp-desktop) {
+			@include span-columns(4 omega, 8);
+		}
+		
+	}
+
+	.wide-user-quote .group-user-quote {
+		width: 100%;
+	}
+
+}
+
+.project-social-container {
+
+	.tweet-item,
+	.instagram-item {
+		float: right;
+
+		&:nth-child(2n-1) {
+			margin-left: 5%;
+			margin-right: 0;
+		}
+
+	}
+
+}

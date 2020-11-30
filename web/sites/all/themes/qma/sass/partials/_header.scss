@@ -1,0 +1,631 @@
+.site-header {
+
+	.block-logintoboggan {
+		display: none;
+	}
+
+	/* Hide video logo as default */
+	.video-logo {
+		display: none !important;
+		overflow: hidden;
+
+		video {
+			// Fix for black bar in IE
+			display: block;
+			width: 101%;
+		}
+	}
+
+	/* The video class is applied when modernizr detects video support */
+	.video & {
+		/* On $bp-small-desktop with video class, hide image and show video */
+		.video-logo {
+			@include at-breakpoint($bp-small-desktop) {
+				// display: block !important;
+			}
+		}
+
+		.image-logo {
+			@include at-breakpoint($bp-small-desktop) {
+				// display: none !important;
+			}
+		}
+	}
+
+	background-color: $blue;
+	margin-bottom: 3em;
+
+	.header-span {
+		padding: 0.778em 0 0 0; /*14px 0 0 0*/
+		position: relative;
+		display: inline-block;
+		width: 100%;
+		overflow: hidden;
+
+		.container {
+			height: 100%;
+			z-index: auto;
+		}
+	}
+
+	p {
+		margin-bottom: 0.5em;
+		position: relative;
+
+		a {
+			border-bottom: none;
+			font-weight: normal;
+		}
+	}
+
+
+
+	.breadcrumb {
+		// float: left;
+		width: 100%;
+		position: relative;
+	}
+
+	.main-header {
+		width: 100%;
+		display: inline-block;
+		padding: 0 0 2em 0; //28px;
+		text-align: center;
+
+		@include at-breakpoint($bp-small-desktop) {
+			text-align: left;
+			padding-bottom: 0;
+		}
+
+	}
+
+	.logo-container {
+		@include at-breakpoint($bp-desktop) {
+			width: columns(2) + $gutter-percentage;
+			margin-left: 0;
+		}
+
+		.site-title {
+			float: left;
+			top: 0.1em;
+
+			@include at-breakpoint($bp-tablet) {
+				// left: 0.786em;
+			}
+
+			@include at-breakpoint($bp-desktop) {
+				@include hide-content;
+			}
+		}
+
+		.logo {
+			background-color: transparent;
+			display: block;
+			position: relative;
+			top: 0.4em;
+			padding-bottom: 0;
+			text-align: center;
+			clear: left;
+			margin-left: 0;
+
+			@include at-breakpoint($bp-tablet) {
+				margin-left: 18%;
+			}
+
+			@include at-breakpoint($bp-small-desktop) {
+				margin-left: 17px;
+				max-width: 272px;
+			}
+
+			&:hover {
+				border-bottom: none;
+			}
+
+			img {
+				float: none;
+			}
+
+		}
+
+	}
+
+	.site-nav {
+		width: 100%;
+		text-align: center;
+
+		@include at-breakpoint($bp-desktop) {
+			width: columns(13);
+			position: absolute;
+			bottom: -6px;
+			margin-left: columns(2);
+			text-align: left;
+		}
+
+		@include at-breakpoint($bp-desktop) {
+			padding-left: $gutter-percentage + 0%;
+		}
+
+		a {
+			background-color: transparent;
+			text-transform: uppercase;
+			@include adjust-font-size-to(16px);
+			font-weight: normal;
+		}
+
+		// Main menu link styling
+		.menu {
+
+			display: inline-block;
+			text-align: center;
+
+			@include at-breakpoint($bp-desktop) {
+				margin: 0;
+				// @include push(1);
+			}
+
+			li {
+				// Add styling to indicate the current section
+				&.active-trail {
+					a {
+						font-weight: bold;
+					}
+
+					.menu li a {
+						font-weight: normal;
+					}
+				}
+
+				// Hide the level 2 nav
+				.menu {
+					display: none;
+					margin-left: 0; // Overide the push(1) above
+				}
+
+				@include adjust-font-size-to(18px);
+				@include at-breakpoint($bp-desktop) {
+					@include adjust-font-size-to(14px);
+
+					.menu li a {
+						font-size: 1.5em;
+					}
+				}
+
+				@include at-breakpoint($bp-fullwidth) {
+					@include adjust-font-size-to(18px);
+
+					.menu li a {
+						font-size: 0.9em;
+					}
+				}
+
+				@include at-breakpoint($bp-desktop) {
+					float: left;
+					position: relative;
+					text-align: left;
+					margin-bottom: 0;
+
+					a {
+						padding: 10px 15px 17px 15px;
+						float: left;
+						font-weight: normal;
+
+						&:hover {
+							border-bottom: none;
+						}
+						&:focus {
+							background-color: $grey-blue;
+
+							&~.menu {
+								display: block;
+							}
+						}
+					}
+
+					&:hover {
+						background-color: $grey-blue;
+						.menu {
+							display: block;
+						}
+					}
+
+					&:focus {
+						background-color: $grey-blue;
+						.menu {
+							display: block;
+						}
+					}
+
+					// So that when the submen links have focus
+					&.open-focus {
+						background-color: $grey-blue;
+						.menu {
+							display: block;
+						}
+					}
+
+					.menu {
+						position: absolute;
+						left: 0;
+						top: 36px;
+						background-color: $grey-blue;
+						z-index: 100;
+						padding: 0 18px;
+						width: 240px;
+
+						li {
+							position: static;
+							float: none;
+							border-bottom: 1px solid #000000;
+
+							&.last {
+								border-bottom: none;
+							}
+						}
+
+						li a {
+							display: inline-block;
+							padding: 12px 0;
+							float: none;
+							font-weight: normal;
+
+							&:hover {
+								text-decoration: underline;
+							}
+						}
+
+					}
+
+
+				}
+
+				@include at-breakpoint($bp-fullwidth) {
+
+					.menu {
+						top: 47px;
+					}
+				}
+
+			}
+
+
+
+		}
+
+	}
+
+	.language-switcher {
+
+		text-align: center;
+		margin-bottom: 0;
+
+		@include at-breakpoint($bp-desktop) {
+			width: columns(1);
+			position: absolute;
+			bottom: 0;
+			right: $grid-padding;
+			margin-bottom: 8px;
+		}
+
+		@include at-breakpoint($bp-fullwidth) {
+			right: 0;
+		}
+
+		h2 {
+			@include hide-content;
+		}
+
+		a {
+			background-color: transparent;
+			font-weight: normal;
+		}
+
+		a:hover {
+			border-bottom: 1px solid #000000;
+		}
+
+		ul {
+			display: inline-block;
+			text-align: center;
+			min-width: 5em;
+			margin-bottom: 0;
+
+			@include at-breakpoint($bp-tablet) {
+				min-width: 0;
+			}
+
+			li {
+				float: left;
+				clear: left;
+				width: 100%;
+				text-align: center;
+
+				@include at-breakpoint($bp-small-desktop) {
+					text-align: center;
+					margin-bottom: 0;
+				}
+			}
+		}
+
+		li.active {
+			display: none;
+		}
+	}
+
+	.region-header-search {
+
+		float: none;
+		margin: 0 auto;
+		clear: both;
+		text-align: center;
+		margin-top: -0.6em;
+
+		@include at-breakpoint($bp-desktop) {
+			float: right;
+			position: absolute;
+			right: $grid-padding;
+			top: 0;
+			text-align: left;
+			margin-top: 0;
+		}
+
+		@include at-breakpoint($bp-fullwidth) {
+			right: 0;
+		}
+
+		.block-search .container-inline div {
+			width: auto;
+			margin-bottom: 0;
+		}
+
+		form {
+			.form-type-textfield {
+				clear: none;
+			}
+		}
+
+		.form-wrapper {
+			&:after {
+				display: none !important;
+			}
+			&:before {
+				display: none !important;
+			}
+		}
+
+	  	.form-item {
+			&:after {
+				display: none !important;
+			}
+			&:before {
+				display: none !important;
+			}
+		}
+	}
+
+}
+
+.breadcrumb {
+	background-color: $pale-yellow;
+
+	ul {
+		max-width: 530px;
+		padding: 0.5em 0;
+		margin-bottom: -11px;
+		@include adjust-font-size-to(16px);
+		display: inline-block;
+		margin-left: 0;
+
+		@include at-breakpoint($bp-small-desktop) {
+			margin-left: -5%;
+		}
+
+		@include at-breakpoint($bp-desktop) {
+			margin-left: 1em;
+		}
+
+		li {
+			display: inline;
+			float: left;
+
+			&.first {
+				margin-right: 0.3em;
+
+				&:after {
+					display: none;
+				}
+			}
+
+			&:after {
+				content: '\003e';
+				display: inline;
+				padding: 0 0.3em;
+			}
+
+			&:last-child:after {
+				display: none;
+			}
+		}
+	}
+
+	a {
+		background: transparent;
+	}
+}
+
+
+.js.touch {
+	.site-nav {
+		display: none;
+	}
+
+	// .site-header .language-switcher {
+	// 	right: 4.186em;
+	// }
+
+	.mobile-menu {
+		display: block;
+		width: 21px;
+		height: 17px;
+		background: transparent url('../images/menu_icon.png') no-repeat center center;
+		padding: 1.5em;
+		position: absolute;
+		top: -0.8em;
+		right: 0.5em;
+
+		&:hover {
+			padding-bottom: 1.5em;
+			border-bottom: none;
+		}
+	}
+
+	&.backgroundsize .mobile-menu {
+		background-image: url('../images/menu_icon@2x.png');
+		background-size: 21px 17px;
+	}
+
+	@include at-breakpoint($bp-desktop) {
+		.mobile-menu {
+			display: none;
+		}
+	}
+}
+
+// JS styling of the header
+.js {
+
+	.site-header {
+		min-height: 3em;
+	}
+
+	.header-span {
+		height: 2.7em;
+		@include transition (height 0.3s ease-out);
+	}
+
+	.open .header-span {
+		height: 36em;
+	}
+
+	.site-nav {
+		height: 1.5em;
+		overflow: hidden;
+		@include transition (height 0.3s ease-out);
+	}
+
+	.open .site-nav {
+		height: 13em;
+	}
+
+	.site-title {
+		@include transition (opacity 0.3s linear);
+	}
+
+	.open .site-title {
+		opacity: 0;
+	}
+
+	.site-title {
+		opacity: 1;
+	}
+
+	.logo-container .logo {
+		top: -17.5em;
+		@include transition (top 0.3s ease-out);
+	}
+
+	.logo-container .image-logo {
+		width: 80%;
+  		margin: 0 auto;
+	}
+
+	.open .logo-container .image-logo {
+		top: -1.5em;
+	}
+
+	.open .logo-container .video-logo {
+		top: -2.5em;
+	}
+
+	.region-header-search {
+		display: none;
+	}
+
+	// JS form styling
+	.site-header {
+		.block-search .container-inline div {
+      		float: none;
+		}
+
+		.block-search form {
+			.form-type-textfield {
+				float: none;
+				input[type="text"] {
+					min-width: 20em;
+				}
+			}
+
+			input[type="submit"] {
+				float: none;
+			}
+
+			// only do this on the desktop for now
+			@include at-breakpoint($bp-desktop) {
+
+				.form-type-textfield {
+					float: left;
+
+					input[type="text"] {
+						float: right;
+						min-width: 0;
+						width: 0;
+						padding: 0.5em 0;
+					}
+
+				}
+
+			}
+		}
+
+	}
+
+}
+
+// I know but I need to override the .js class above, it's a lot cleaner to have this desktop layout separate
+#page-wrapper {
+	.site-header {
+		@include at-breakpoint($bp-desktop) {
+
+		}
+	}
+
+	.header-span {
+		@include at-breakpoint($bp-desktop) {
+			height: auto;
+			overflow: visible;
+		}
+	}
+
+	.site-nav {
+		@include at-breakpoint($bp-desktop) {
+			display: block;
+			height: auto;
+			overflow: visible;
+		}
+	}
+
+	.logo-container .image-logo {
+		@include at-breakpoint($bp-desktop) {
+			width: 100%;
+			margin: 0;
+			top: 0;
+			position: static;
+
+		}
+	}
+
+	.region-header-search {
+		@include at-breakpoint($bp-desktop) {
+			display: block;
+		}
+	}
+}

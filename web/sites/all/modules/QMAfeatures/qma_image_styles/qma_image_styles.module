@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA image styles feature.
+ */
+
+include_once 'qma_image_styles.features.inc';

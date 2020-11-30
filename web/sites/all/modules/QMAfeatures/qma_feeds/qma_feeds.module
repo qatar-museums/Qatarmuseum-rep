@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA Feeds feature.
+ */
+
+include_once 'qma_feeds.features.inc';

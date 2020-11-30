@@ -1,0 +1,669 @@
+// news hub styles
+
+.not-logged-in .node-news-hub {
+	margin-top: -3em;
+}
+
+.featured-news {
+
+	.views-list {
+		margin: 0;
+	}
+
+	.views-row {
+		width: 100%;
+		margin: 0;
+		background-color: $grey-bg;
+		&:before {
+			content: '';
+			padding: 0;
+		}
+	}
+
+	@include at-breakpoint($bp-tablet) {
+
+		.views-row {
+			width: 33.333333%;
+			// width: calc(100% / 3);
+			margin: 0;
+			float: left;
+			padding-bottom: 3.0em;
+
+			&.views-row-last {
+				float: right;
+			}
+		}
+	}
+
+}
+
+.ie8 .featured-news .view-news .views-row {
+	width: 33.33% !important; // Sorry, need to override another !important.
+}
+
+.ie8 .view-display-id-related_news_block .views-row.views-row-last {
+	float: right;
+	margin: 0;
+}
+
+.node-news-hub .header-section {
+
+	padding-bottom: 0;
+	padding-top: 0;
+	background-color: $grey-bg;
+
+	.left-col {
+		width: 100%;
+
+		h1 {
+			margin-bottom: 0;
+		}
+
+		.field-name-field-subtitle {
+			display: none;
+		}
+
+		@include at-breakpoint($bp-tablet) {
+
+			@include span-columns(9 alpha, 16);
+
+			.field-name-field-subtitle {
+				display: block;
+				@include adjust-font-size-to(56px);
+				@include din-bold;
+				text-transform: uppercase;
+				&:before {
+					content: '\2013';
+				}
+			}
+		}
+
+	}
+
+	.right-col {
+		display: none;
+	}
+
+	@include at-breakpoint($bp-tablet) {
+		.right-col {
+			display: block;
+			@include span-columns(7 omega, 16);
+			border-top: 2px solid black;
+	  		padding-top: 12px;
+		}
+	}
+
+
+	.header-top {
+		background-color: $blue;
+		padding-top: 3.0em;
+		padding-bottom: 4.444em;
+	}
+
+	.teaser-text  {
+		position: relative;
+		padding: $gutter-width;
+
+		.teaser-tags {
+			text-transform: uppercase;
+			color: #696969;
+			@include adjust-font-size-to(16px);
+			padding-bottom: 1.33333em;
+		}
+	}
+
+	.date {
+		background-color: $pink;
+		color: white;
+		position: absolute;
+		height: 34px;
+		top: -34px;
+		left: 0;
+		display :block;
+		text-transform: uppercase;
+		padding: 7px 1.2em;
+		margin-bottom: 0;
+		@include adjust-font-size-to(14px);
+	}
+
+	.dont-miss {
+		@include din-bold;
+		text-transform: uppercase;
+		color: $pink;
+		// font-weight: bold;
+		margin-bottom: 0;
+		@include adjust-font-size-to(22px);
+	}
+
+}
+
+// ensure that the blog post date is positioned correctly
+.node-news-hub .header-section {
+	.filter_image a {
+		float: none;
+		font-weight: normal;
+	}
+}
+
+// header for the blog tag listing pages
+.node-news-hub .header-section.blog-filter-list {
+	background-color: transparent;
+	@include at-breakpoint($bp-desktop) {
+	    .back-to-parent {
+	      @include pull(1);
+	      padding-left: 2.4em;
+	    }
+  	}
+}
+
+// top margin to this element is provided by the workbenk region when logged in
+.not-logged-in .node-news-hub .header-section.blog-filter-list {
+	margin-top: 3em;
+}
+
+.blog-teasers-section {
+
+	padding-top: 4em;
+
+	.dont-miss {
+		display: none;
+	}
+
+	h2 {
+		@include adjust-font-size-to(32px);
+		margin-bottom: 1.3em;
+	}
+
+	.view-blog-tags-list {
+		@include clearfix;
+
+		margin-bottom: 3em;
+
+		a {
+			text-transform: uppercase;
+		}
+	}
+}
+
+
+.more-news {
+
+	clear: left;
+
+    canvas {
+      width: 100%;
+    }
+
+	&.more-news {
+		margin-bottom: 2.1em;
+	}
+
+	.views-row {
+		clear: none;
+		width: 100%;
+		display: inline-block;
+		margin-bottom: 2em;
+		padding-bottom: 71px;
+
+		.filter_image, .teaser-image {
+			@include at-breakpoint($bp-small-desktop) {
+				@include span-columns(4, 8);
+				display: inline-block;
+				margin-bottom: 0;
+				height: auto;
+				overflow: hidden;
+			}
+		}
+
+		.teaser-text {
+			clear: left;
+			width: 100%;
+
+			h4 {
+				margin-bottom: 1.33333em;
+			}
+
+			@include at-breakpoint($bp-small-desktop) {
+				@include span-columns(4 omega, 8);
+				clear: none;
+			}
+
+		}
+
+		.blog-tags {
+			text-transform: uppercase;
+			color: #696969;
+			@include adjust-font-size-to(16px);
+		}
+	}
+
+    .view-news {
+      .views-row {
+        @include at-breakpoint($bp-small-desktop) {
+          margin-bottom: 4.5em;
+          @include span-columns(8, 16);
+          padding-bottom: 0;
+        }
+
+        &.views-row-odd {
+          @include at-breakpoint($bp-small-desktop) {
+            @include span-columns(8 alpha, 16);
+            clear: both;
+          }
+        }
+
+        &.views-row-even {
+          @include at-breakpoint($bp-small-desktop) {
+            @include span-columns(8 omega, 16);
+          }
+        }
+      }
+    }
+
+	// Pager
+	.item-list {
+
+		@include span-columns(14, 16);
+		@include pre(1);
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(10, 16);
+			@include pre(3);
+		}
+	}
+
+}
+
+// .js {
+
+// 	.featured-news {
+
+// 		.views-row {
+// 			clear: none;
+// 			float: left;
+// 			position: relative;
+// 			padding-right: 1em;
+// 			background-color: #FFFFFF;
+
+// 		}
+
+// 		&.three-items {
+// 		 yeah i'm using important. which i shouldn't, but the slider, when showing 3 items doesn't round
+// 		properly which means you end up seeing the edge of the next elements.
+// 		these styles force it to be wider than 300% so that you always see the whole element
+
+// 			.views-list {
+// 				width: 301% !important;
+// 			}
+
+// 			.views-row {
+// 				width: 33.333333333333333333% !important;
+// 			}
+
+// 		}
+
+// 	}
+
+// }
+
+.lt-ie9 {
+
+	.featured-news {
+
+		.views-list {
+			width: 100% !important;
+		}
+
+		.views-row {
+			width: 100% !important;
+			margin-left: 0;
+			padding-left: 0;
+		}
+
+	}
+}
+
+
+/** news article page **/
+
+.node-news-article {
+
+	.generic-center-column {
+		.field-collection-container {
+			margin-bottom: 2.5em;
+			display: inline-block;
+			width: 100%;
+		}
+	}
+
+	.image-gallery {
+		margin-bottom: 4.444em;
+	}
+
+}
+
+.node-news-article .share-links-wrapper {
+	@include clearfix;
+
+	width: 100%;
+	margin-bottom: 2.889em;
+
+	@include at-breakpoint($bp-tablet) {
+		width: 345px;
+		margin: 0 auto;
+	}
+
+	p {
+		display: inline-block;
+		margin-bottom: 6px;
+		margin-right: 5px;
+		line-height: 50px;
+		vertical-align: top;
+	}
+
+	ul.share-links {
+
+		display: inline-block;
+
+		margin: 0 auto;
+
+		li {
+			float: left;
+			margin-right: 20px;
+		}
+
+		li.facebook {
+			margin-right: 0;
+		}
+	}
+
+}
+
+/*** previous and next blog post links ***/
+.blog-pager {
+
+	height: 100%;
+	margin-bottom: 2.889em;
+
+	.pager-inner {
+		width: 100%;
+		float: left;
+		margin-bottom: 40px;
+
+		@include at-breakpoint($bp-tablet) {
+			margin-right: 0;
+			margin-bottom: 0;
+		}
+
+		@include at-breakpoint($bp-769) {
+			@include span-columns(14, 16);
+			@include pre(2);
+		}
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include pre(1);
+		}
+
+		@include at-breakpoint($bp-desktop) {
+			@include span-columns(12, 16);
+			@include pre(2);
+		}
+	}
+
+	.blog-pager-link {
+
+		width: 50%;
+
+		a {
+			background-repeat: no-repeat;
+			background-color: transparent;
+			display: inline-block;
+			font-weight: normal;
+
+			span {
+				border-bottom: 1px solid white;
+				background-color: $yellow;
+			}
+
+			&:hover {
+				background-position: 0 100%;
+			    border-bottom: none;
+                margin-bottom: 1px;
+
+			    span {
+			    	background-color: transparent;
+			    	border-bottom: 1px solid black;
+			    }
+			}
+		}
+
+		@include at-breakpoint($bp-tablet) {
+			@include span-columns(4, 10);
+		}
+
+	}
+
+	.prev-blog {
+		float : left;
+		a {
+			position: relative;
+			padding-left: 30px;
+
+			&:before {
+				content: " ";
+				position: absolute;
+				height: 41px;
+				// width: 22px;
+				left: 0;
+				top: 0;
+				width: columns(1, 5);
+				background-image: url('../images/left.gif');
+				background-position: 0 0;
+				background-repeat: no-repeat;
+			}
+
+			&:hover {
+				&:before {
+					background-position: 0 100%;
+				}
+			}
+		}
+
+ 		.backgroundsize & {
+ 			a:before {
+ 				background-image: url('../images/left@2x.gif');
+				background-size: 22px 82px;
+ 			}
+		}
+
+
+		@include at-breakpoint($bp-tablet) {
+			a {
+				padding-left: columns(1,4);
+			}
+		}
+	}
+
+	.next-blog {
+		float: right;
+		text-align: right;
+
+		margin-right: 0;
+
+		a {
+			position: relative;
+			padding-right: 30px;
+			font-weight: normal;
+
+			&:before {
+				content: " ";
+				position: absolute;
+				height: 41px;
+				right: 0;
+				top: 0;
+				width: columns(1, 5);
+				background-image: url('../images/right.gif');
+				background-position: 100% 0;
+				background-repeat: no-repeat;
+			}
+
+			&:hover {
+				&:before {
+					background-position: 100% 100%;
+				}
+			}
+		}
+
+ 		.backgroundsize & {
+ 			a:before {
+ 				background-image: url('../images/right@2x.gif');
+				background-size: 22px 82px;
+ 			}
+		}
+
+		@include at-breakpoint($bp-tablet) {
+			@include pre(1);
+
+			a {
+				padding-right: columns(1,4);
+			}
+		}
+
+	}
+}
+
+/*** blog tags on the news news page ***/
+.featured-news .hub-teaser .teaser-tags .tag-item,
+.blog-teasers-section .hub-teaser .teaser-tags .tag-item {
+	a {
+		@include adjust-font-size-to(18px);
+		@include din-light;
+		color: #696969;
+		background: transparent;
+		border: none;
+		font-weight: normal;
+		padding: 0;
+		margin: 0;
+		display: inline;
+	}
+	a:after {
+		content: ', ';
+	}
+}
+
+.featured-news .hub-teaser .teaser-tags .tag-item:last-child,
+.blog-teasers-section .hub-teaser .teaser-tags .tag-item:last-child {
+	a:after {
+		content: '';
+	}
+}
+
+.node-news-article .tag-item a {
+	text-transform: uppercase;
+}
+
+
+/*** news on project page ***/
+
+.project-news-list {
+
+	.node-news-article {
+		width: 100%;
+		margin-bottom: 3em;
+		border-top: 2px solid #000000;
+		padding-top: 0.3em;
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(5, 16);
+			margin-bottom: 0;
+		}
+
+		@include at-breakpoint($bp-desktop) {
+			@include span-columns(4, 16);
+		}
+
+		h4 {
+			margin-bottom: 1.5em;
+		}
+
+	}
+}
+
+/*** related news on a blog page ***/
+.view-display-id-related_news_block {
+
+	@include at-breakpoint($bp-tablet) {
+		@include with-grid-settings(12, 2.778em, 1.000em, 0) {
+		   	.view-content {
+	 			@include container;
+	 		}
+		}
+
+	 	.views-row {
+	 		clear: none;
+	 		@include span-columns(4, 12);
+	 	}
+
+	 	.views-row-first {
+	 		@include span-columns(4 alpha, 12);
+	 	}
+
+	 	.views-row:nth-child(3n) {
+	 		@include span-columns(4 omega, 12);
+	 	}
+	}
+
+	@include at-breakpoint($bp-769) {
+		@include with-grid-settings(20,2.778em,1.000em,0) {
+		   	.view-content {
+	 			@include container;
+	 		}
+		}
+
+	 	.views-row {
+	 		clear: none;
+	 		@include span-columns(4, 20);
+	 	}
+
+	 	.views-row-first {
+	 		@include span-columns(4 alpha, 20);
+	 	}
+
+	 	.views-row:nth-child(3n) {
+	 		@include span-columns(4, 20);
+	 	}
+
+	 	.views-row:nth-child(5n) {
+	 		@include span-columns(4 omega, 20);
+	 	}
+	}
+}
+
+ .view-display-id-related_news_block {
+
+ 	.views-row {
+ 		padding-bottom: 0;
+ 	}
+
+ 	.views-row .filter_image, .views-row .teaser-image {
+ 		width: 100%;
+ 		display: block;
+ 	}
+
+ 	.views-row .teaser-text {
+ 		width: 100%;
+ 		float: left;
+ 	}
+ }
+
+ .view-display-id-related_news_block .views-row .teaser-text {
+
+ 	margin-top: 1.1em;
+
+ 	h4 {
+ 		text-transform: none;
+ 		font-weight: normal;
+ 		@include din-light;
+ 		@include adjust-font-size-to(18px)
+ 	}
+ }

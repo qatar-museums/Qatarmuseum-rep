@@ -1,0 +1,57 @@
+<?php
+
+/**
+ * @file
+ * qma_education.theme
+ */
+
+
+/**
+ * Theme function to return a basic date range. This doesn't use the date module
+ * theming functions because these return HTML formatted dates.
+ *
+ * @todo Configurable date formats?
+ *
+ * @param $variables
+ * @return string
+ *   If the dates are on different days, the output will be in the format;
+ *     Jan 1 10:00 - Jan 2 13:00
+ *   If the dates are on the same days, the output will be in the format;
+ *     Jan 1 10:00 - 13:00
+ */
+function theme_qma_education_date_range($variables) {
+  $date_format_time = 'G:i';
+  $date_format_full = 'M d, G:i';
+
+  $startdate = DateTime::createFromFormat('U', $variables['startdate']);
+  $enddate = DateTime::createFromFormat('U', $variables['enddate']);
+
+  // We always set the timezone to local time, since the events are always
+  // happening in Qatar. This ignores the user's timezone preference, but seems
+  // like it would be least surprising behaviour.
+  $user_timezone = new DateTimeZone('Asia/Qatar');
+  $startdate->setTimezone($user_timezone);
+  $enddate->setTimezone($user_timezone);
+
+  $startstr = $startdate->format($date_format_full);
+
+  // If the days are the same, use a shortened date format.
+  if ($startdate->diff($enddate)->d === 0) {
+    $endstr = $enddate->format($date_format_time);
+  }
+  else {
+    $endstr = $enddate->format($date_format_full);
+  }
+
+  $datestr = "{$startstr} {$variables['join']} {$endstr}";
+
+  if ($variables['prefix']) {
+    $datestr = "{$variables['prefix']} $datestr";
+  }
+
+  if ($variables['suffix']) {
+    $datestr = "$datestr {$variables['suffix']}";
+  }
+
+  return $datestr;
+}

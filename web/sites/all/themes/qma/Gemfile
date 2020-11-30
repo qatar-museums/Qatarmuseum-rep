@@ -1,0 +1,9 @@
+# A sample Gemfile
+source "https://rubygems.org"
+
+gem 'thor', '0.18.1'
+gem 'bourbon', '3.1.8'
+gem 'compass', '0.13.alpha.4'
+gem 'sass', '3.2.14'
+gem 'sass-globbing', '1.1.0'
+gem 'susy', '1.0.9'

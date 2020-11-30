@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA project feature.
+ */
+
+include_once 'qma_project.features.inc';

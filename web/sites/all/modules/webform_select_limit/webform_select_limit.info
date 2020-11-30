@@ -1,0 +1,13 @@
+name = Webform Select Limit
+description = Provides a webform validation component to limit the amount of times users can submit select option values.
+core = 7.x
+package = Webform
+
+dependencies[] = webform_validation
+
+; Information added by Drupal.org packaging script on 2017-02-14
+version = "7.x-1.1"
+core = "7.x"
+project = "webform_select_limit"
+datestamp = "1487103188"
+

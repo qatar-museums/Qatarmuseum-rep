@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the qma_email_setup feature.
+ */
+
+include_once 'qma_email_setup.features.inc';

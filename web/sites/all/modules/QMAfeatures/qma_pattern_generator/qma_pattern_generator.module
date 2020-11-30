@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA Pattern Generator feature.
+ */
+
+include_once 'qma_pattern_generator.features.inc';

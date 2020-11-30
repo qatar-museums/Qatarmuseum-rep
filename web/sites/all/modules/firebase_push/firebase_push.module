@@ -1,0 +1,279 @@
+<?php
+
+/**
+ * @file
+ * Module to Implement firebase push web push notification.
+ */
+
+/**
+ * Constants Definition.
+ */
+define('FIREBASE_PUSH_NOTIFICATIONS_POST_URL', variable_get('firebase_push_notifications_post_url', 'https://fcm.googleapis.com/fcm/send'));
+
+// Device Types.
+define('FIREBASE_PUSH_TYPE_WEB', variable_get('firebase_push_type_web', 'web'));
+define('FIREBASE_PUSH_NOTIFICATIONS_TYPE_IOS', variable_get('firebase_push_notifications_type_ios', 'ios'));
+define('FIREBASE_PUSH_NOTIFICATIONS_TYPE_ANDROID', variable_get('firebase_push_notifications_type_anroid', 'anroid'));
+
+/**
+ * Implements hook_menu().
+ */
+function firebase_push_menu() {
+  $items = array();
+
+  $items['admin/config/services/firebase_push'] = array(
+    'type' => MENU_NORMAL_ITEM,
+    'title' => 'Firebase Push Notifications',
+    'access arguments' => array('administer site configuration'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('firebase_push_admin_overview_form'),
+    'description' => 'Firebase Push Notificaiton Settings.',
+    'file' => 'firebase_push.admin.inc',
+    'file path' => drupal_get_path('module', 'firebase_push') . '/includes',
+  );
+
+  $items['admin/config/services/firebase_push/overview'] = array(
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'title' => 'Overview',
+    'weight' => -50,
+    'access arguments' => array('administer site configuration'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('firebase_push_admin_overview_form'),
+    'description' => 'Firebase Push Notificaiton Settings.',
+    'file' => 'firebase_push.admin.inc',
+    'file path' => drupal_get_path('module', 'firebase_push') . '/includes',
+  );
+
+  $items['admin/config/services/firebase_push/configure'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Configuration',
+    'access arguments' => array('administer site configuration'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('firebase_push_admin_form'),
+    'description' => 'Firebase Push Notifications Settings.',
+    'file' => 'firebase_push.admin.inc',
+    'file path' => drupal_get_path('module', 'firebase_push') . '/includes',
+  );
+
+  $items['firebase_push/subscription'] = array(
+    'type' => MENU_CALLBACK,
+    'page callback' => 'firebase_push_subscription',
+    'access arguments' => array('access content'),
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function firebase_push_block_info() {
+  $blocks = array();
+  $blocks['firebase_push_notification_js'] = array(
+    'info' => t('Firebase Push Notification JS'),
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function firebase_push_block_view($delta = '') {
+  $block = array();
+
+  switch ($delta) {
+    case 'firebase_push_notification_js':
+
+     $service_sorker = file_create_url(variable_get('firebase_push_sw_url'));
+      // Copy perst from firebase and wrapre key in double quote like "apiKey".
+      $sw_config = variable_get('sw_config', '');
+
+      if ($service_sorker && $sw_config) {
+        drupal_add_js(variable_get('firebase_lib', 'https://www.gstatic.com/firebasejs/4.1.3/firebase.js'), 'external');
+        drupal_add_js(array('service_worker' => $service_sorker, 'sw_config' => $sw_config), 'setting');
+        drupal_add_js(drupal_get_path('module', 'firebase_push') . '/js/main.js');
+      }
+      break;
+  }
+  return $block;
+}
+
+/**
+ * To save subscription details of users.
+ */
+function firebase_push_subscription() {
+  global $user;
+  $subscription = json_decode(file_get_contents('php://input'), TRUE);
+  if (!isset($subscription['registration_id']) && !isset($subscription['type'])) {
+    // Error: Invalid subscription.
+    return FALSE;
+  }
+
+  // Append user id if user is loggedin. 0 will be added for anonymous user.
+  $subscription['uid'] = $user->uid;
+
+  switch ($_SERVER['REQUEST_METHOD']) {
+    case 'POST':
+      // Create a new subscription entry in your database (endpoint is unique).
+      firebase_push_register_webpush($subscription);
+      break;
+
+    case 'PUT':
+      firebase_push_register_webpush($subscription);
+      break;
+
+    case 'DELETE':
+      firebase_push_delete_webpush($subscription);
+      break;
+
+    default:
+      // Error: method not handled.
+      return FALSE;
+  }
+}
+
+/**
+ * Insert webpush subscribtion token details.
+ *
+ * @param array $subscription
+ *   The token to send message.
+ */
+function firebase_push_register_webpush(array $subscription) {
+  // Change arra in to multidimantional array.
+  if (count($subscription) == count($subscription, COUNT_RECURSIVE)) {
+    $subscription = array($subscription['registration_id'] => $subscription);
+  }
+
+  if (!empty($subscription)) {
+    // Udpate refreshed tokens.
+    foreach ($subscription as $token => $refreshed) {
+      $query = db_merge('firebase_push_tokens');
+      if ($refreshed['uid']) {
+        $query->key(array('uid' => $refreshed['uid']));
+      }
+      else {
+        $query->key(array('token' => $token))
+          ->key(array('type' => $refreshed['type']));
+      }
+      $query->fields(array(
+        'token' => $refreshed['registration_id'],
+        'type' => $refreshed['type'],
+        'uid' => $refreshed['uid'],
+        'timestamp' => time(),
+      ))
+        ->execute();
+    }
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+/**
+ * Delete webpush subscribtion token details.
+ *
+ * @param array $subscription
+ *   The token to send message.
+ */
+function firebase_push_delete_webpush(array $subscription) {
+  if (!empty($subscription)) {
+    db_delete('firebase_push_tokens')
+      ->condition('token', $subscription['token'], '=')
+      ->execute();
+  }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function firebase_push_permission() {
+  return array(
+    'register device token' => array(
+      'title' => t('Register Device Token'),
+      'description' => t('Allows users to register a device token.'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_services_resources().
+ */
+function firebase_push_services_resources() {
+  return array(
+    'firebase_push_notifications' => array(
+      'create' => array(
+        'help' => 'Registers a device token. For type, pass \'ios\' for iOS devices and \'android\' for Android devices.',
+        'callback' => 'firebase_push_service_set_device_token',
+        'file' => array(
+          'type' => 'inc',
+          'module' => 'firebase_push',
+          'name' => 'includes/firebase_push.service',
+        ),
+        'access arguments' => array('register device token'),
+        'access arguments append' => FALSE,
+        'args' => array(
+          array(
+            'name' => 'token',
+            'type' => 'string',
+            'description' => 'Device Token',
+            'optional' => FALSE,
+            'source' => 'data',
+          ),
+          array(
+            'name' => 'type',
+            'type' => 'string',
+            'description' => 'Device Type',
+            'optional' => FALSE,
+            'source' => 'data',
+          ),
+          array(
+            'name' => 'uid',
+            'type' => 'int',
+            'description' => 'User Id',
+            'optional' => FALSE,
+            'source' => 'data',
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+/**
+ * Fetch all endpoints in database.
+ *
+ * @return array
+ *   Nested array of web push notification endpoints.
+ */
+function firebase_push_check_duplicate_tokens($subscription) {
+  // Select all tokens for this user.
+  $result = db_select('firebase_push_tokens', 'c')
+    ->condition('token', $subscription['registration_id'])
+    ->fields('c')
+    ->execute();
+
+  return $result->rowCount() ? TRUE : FALSE;
+}
+
+/**
+ * Delete the tokens.
+ *
+ * @param array $tokens
+ *   The message to sent.
+ */
+function firebase_push_purge_token(array $tokens) {
+  if (!empty($tokens)) {
+    // array_keys contain token value.
+    $tokens = array_keys($tokens);
+    // Delete broken tokens in chunk of 10 each.
+    $chunk = array_chunk($tokens, 10);
+    if (is_array($chunk)) {
+      foreach ($chunk as $token) {
+        db_delete('firebase_push_tokens')
+          ->condition('token', $token, 'IN')
+          ->execute();
+      }
+    }
+  }
+}

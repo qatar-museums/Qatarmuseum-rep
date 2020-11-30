@@ -1,0 +1,57 @@
+/* find out more links */
+.find-out-more {
+
+	.field-item {
+		margin-bottom: 0.6em;
+	}
+
+	a {
+		display: inline;
+		@include din-bold;
+		@include adjust-font-size-to(22px);
+    @include adjust-leading-to(6, 22px);
+    font-weight: normal;
+
+		&:hover {
+			border-bottom: 1px solid #000000;
+			padding-bottom: 0;
+			display: inline;
+		}
+	}
+
+	.sm-link a {
+		margin-bottom: 0;
+	}
+
+}
+
+footer {
+  background: #000;
+  clear: both;
+  padding-top: 2.222em;
+  padding-bottom: 3.056em;
+  width: 100%;
+
+  section {
+    width: 100%;
+  }
+
+  @include at-breakpoint($bp-small-desktop) {
+    section {
+      @include span-columns(4, 16);
+      @include suffix(0.5);
+
+      &:last-child {
+        @include omega;
+      }
+    }
+  }
+}
+ .copyright {
+	margin-left: auto;
+	margin-right: auto;
+	max-width: 60.448em;
+	padding-left: 2.888em;
+	padding-right: 2.888em;
+	width: auto;
+}

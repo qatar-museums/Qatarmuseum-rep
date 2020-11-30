@@ -1,0 +1,148 @@
+<?php
+/**
+ * @file
+ * Code for the Webform Helptext module.
+ */
+
+/**
+ * Implements hook_permission().
+ */
+function webform_helptext_permission() {
+  $perms = array();
+
+  $perms['administer helptext'] = array(
+    'title' => t('Administer Webform Help text'),
+    'restrict access' => TRUE,
+    'description' => t('Grants access to administer the webform fiels helptext.'),
+  );
+
+  return $perms;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function webform_helptext_menu() {
+  $items['node/%/webform/helptext'] = array(
+    'title' => 'Help text configuration',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('webform_helptext_config', 1),
+    'access arguments' => array('administer helptext'),
+    'weight' => 100,
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  return $items;
+}
+
+/**
+ * Webform Help text configuration page.
+ */
+function webform_helptext_config($form, &$form_state, $webform_nid) {
+  $node = node_load($webform_nid);
+  $form_state['storage']['node'] = $node;
+
+  if ($node) {
+    $fields = $node->webform['components'];
+
+    $form['fields'] = array(
+      '#type' => 'fieldset',
+      '#title' => $node->title . ' help text configuration',
+      '#collapsible' => TRUE,
+      '#tree' => TRUE,
+      '#collapsed' => FALSE,
+    );
+
+    foreach ($fields as $field) {
+      // Exclude hidden fields.
+      if ($field['type'] === 'fieldset' || $field['type'] === 'hidden') {
+        continue;
+      }
+
+      $form['fields'][$field['form_key']]['field'] = array(
+        '#type' => 'hidden',
+        '#default_value' => $field['form_key'],
+      );
+
+      $form['fields'][$field['form_key']]['value'] = array(
+        '#type' => 'textfield',
+        '#title' => $field['name'],
+        '#default_value' => !empty($field['extra']['attributes']) ?
+          $field['extra']['attributes']["data-help-text-{$field['form_key']}"] : '',
+        '#description' => t('Enter help text for ' . $field['name'] . ' field.')
+      );
+
+      $form['fields'][$field['form_key']]['parent'] = array(
+        '#type' => 'hidden',
+      );
+
+      $pid = $field['pid'];
+      if (!empty($pid)) {
+        $form['fields'][$field['form_key']]['parent']['#default_value'] = !empty($fields[$pid]['form_key']) ? $fields[$pid]['form_key'] : '';
+      }
+    }
+
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save'),
+    );
+  }
+
+  return $form;
+}
+
+/**
+ * Custom submit handler for help text configurations.
+ */
+function webform_helptext_config_submit($form, &$form_state) {
+  if ($form['#form_id'] === 'webform_helptext_config') {
+    if (!empty($form_state['values']['fields'])) {
+      // This argument is the Webform NID.
+      $node = $form_state['storage']['node'];
+
+      foreach ($node->webform['components'] as $key => $component) {
+        // Add help text as data attribute on the Webform component.
+        $component['extra']['attributes'] = array(
+          'data-info-icon' => 'info-icon-' . $component['form_key'],
+          "data-help-text-{$component['form_key']}" => $form_state['values']['fields'][$component['form_key']]['value'],
+        );
+        webform_component_update($component);
+      }
+
+      drupal_set_message('Help text configuration is saved.', 'status');
+    }
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function webform_helptext_form_alter(&$form, &$form_state, $form_id) {
+
+  if (isset($form['#node']) && isset($form['#node']->nid)
+    && ($form['#form_id'] === 'webform_client_form_' . $form['#node']->nid)
+    && ($form['#node']->type === 'webform')) {
+    // Add Webform Help Text CSS file to the webform.
+    $form['#attached']['css'][] = drupal_get_path('module', 'webform_helptext') . '/css/webform_helptext.css';
+
+    $node = $form['#node'];
+
+    $form_fields = array();
+    foreach ($node->webform['components'] as $key => $component) {
+      if (!empty($component['extra']['attributes'])
+        && !empty($component['extra']['attributes']["data-help-text-{$component['form_key']}"])) {
+        $form_fields[$component['form_key']] = $component['form_key'];
+      }
+    }
+
+    if (!empty($form_fields)) {
+      drupal_add_js(drupal_get_path('module', 'webform_helptext') . '/js/webform_helptext.js');
+      drupal_add_js(array(
+        'webformHelptext' => array(
+          'formFields' => $form_fields,
+          'nid' => $node->nid,
+        ),
+      ), 'setting');
+    }
+  }
+}

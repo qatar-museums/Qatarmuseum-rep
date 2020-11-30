@@ -1,0 +1,432 @@
+<?php
+
+
+/**
+ * @file
+ * MIGS Merchant hosted payment method for Drupal Commerce.
+ *
+ * Based heavily on grobot's uc_migs module for ubercart
+ * and mattq1982's merchant hosted version of the above
+ * ( see http://drupal.org/node/704140 )
+ */
+
+/*********************************************
+ * Implements hook_help().
+ *********************************************/
+ 
+function commerce_migs_hosted_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#commerce_migs_hosted':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t("A payment method for bank hosted payments using the MIGS payment system") . '<p>';
+      return $output;
+  }
+}
+
+/*************************************************
+ * Implements hook_commerce_payment_method_info().
+ *************************************************/
+ 
+function commerce_migs_hosted_commerce_payment_method_info() {
+  $payment_methods = array();
+
+  $payment_methods['commerce_migs_hosted'] = array(
+    'title' => t('MIGS credit card - 3rd party hosted'),
+    'short_title' => t('MIGS Merchant 3rd party'),
+    'display_title' => t('Credit card'),
+    'description' => t('Integrates MIGS 3rd party Payment gateway'),
+    'terminal' => FALSE,
+  	'offsite' => TRUE,
+  	'active' => TRUE,
+  );
+
+  return $payment_methods;
+}
+
+/* * *****************************************************
+ * Payment method callback: settings form.
+* ********************************************************/
+
+function commerce_migs_hosted_settings_form($settings = NULL) {
+  $form = array();
+
+  $settings = (array) $settings + array(
+    'commerce_migs_mid' => '',
+    'commerce_migs_access_code' => '',
+    'commerce_migs_secure_hash' => '',
+    'commerce_migs_version' => '1',
+    'commerce_migs_locale' => 'en',
+    'commerce_migs_method_title' => 'Credit card',
+    //'commerce_migs_card_type' => array (),
+
+  );
+
+  $form['commerce_migs_mid'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Merchant Id'),
+    '#description' => t('Your MIGS merchant id.'),
+    '#required' => TRUE,
+    '#default_value' => $settings['commerce_migs_mid'],
+    '#size' => 16,
+  );
+
+  $form['commerce_migs_access_code'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Access code'),
+    '#description' => t('The access code is provided to you when you registered
+      your merchant profile.'),
+    '#default_value' => $settings['commerce_migs_access_code'],
+    '#size' => 16,
+  );
+  
+  $form['commerce_migs_secure_hash'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Secure Hash Secret'),
+    '#description' => t('The Secure Hash is available in your merchant profile.'),
+    '#default_value' => $settings['commerce_migs_secure_hash'],
+    '#size' => 30,
+  );
+
+  $form['commerce_migs_version'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Version number'),
+    '#description' => t('The version number of the API being used. 
+      Currently developed for version 1. Most likely do not change this.'),
+    '#default_value' => $settings['commerce_migs_version'],
+    '#size' => 5,
+  );
+  
+  $form['commerce_migs_locale'] = array(
+    '#type' => 'select',
+    '#title' => t('Language preference'),
+    '#description' => t('Adjust language on MIGS pages.'),
+    '#options' => array(
+      'en' => t('English'),
+    ),
+    '#default_value' => $settings['commerce_migs_locale'],
+  );
+  $form['commerce_migs_method_title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Payment method title'),
+    '#default_value' => $settings['commerce_migs_method_title'],
+  );
+
+  $form['commerce_migs_hosted_payment_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Payment Url'),
+    '#description' => t(
+        'Enter a the URL where this payment request will be sent.'),
+    '#default_value' => variable_get('uc_migs_merchant_payment_url',
+        'https://migs.mastercard.com.au/vpcpay'),
+  );
+  /* Selecting CC type for selection in "Checkout/Review",
+   * External Payment Select bypass CC Select when redirecting to MIGS Gateway.
+   * Will take user straight to the CC section for payment processing.
+  
+   $form['commerce_migs_card_type'] = array(
+    '#title' => t('Select Your Credit Card Type. e.g VISA, Still in Development'),
+    '#type' => 'checkboxes',
+    '#description' => t('This Function is yet to be developed, no card type sent to the gateway..'),
+    '#options' =>array (
+	'Visa' => t('Visa'), 
+	'Diners Club' => t('Diners Club'),
+	'Amex' => t('Amex'),
+	'JCB' => t('JCB'),
+	'Mastercard' => t('Mastercard')),
+	'#default_value' => $settings['commerce_migs_card_type'],
+    '#required' => FALSE,	
+	);
+*/
+  return $form;
+}
+
+/****************************************************
+ * Payment method callback: checkout form.
+ * 
+ * @param array $payment_method 
+ *   The payment method.
+ * 
+ * @param array $pane_values 
+ *   Values from the pane.
+ * 
+ * @param array $checkout_pane
+ *   The checkout pane.
+ * 
+ * @param object $order 
+ *   The order.
+ * 
+ * @return array
+ *   Drupal FAPI form array.
+ *******************************************************/
+ 
+function commerce_migs_hosted_submit_form($payment_method, $pane_values, $checkout_pane, $order) {
+$settings = $payment_method['settings'];
+  $form['commerce_migs_hosted_eGate_logo'] = array(
+    '#markup' => theme_image(array(
+      'path' => drupal_get_path('module', 'commerce_migs_hosted') . '/images/anz_eGate.jpg',
+      'alt' => t('Anz eGate'),
+      'title' => t('Anz eGate'),
+      'attributes' => array('style' => 'float: left; margin: 1em 1em 1em 1.5em;'),
+    )),
+  );
+  $form['commerce_migs_hosted_visa_securedby_logo'] = array(
+    '#markup' => theme_image(array(
+      'path' => drupal_get_path('module', 'commerce_migs_hosted') . '/images/verified_by_visa.gif',
+      'alt' => t('Anz eGate'),
+      'title' => t('Anz eGate'),
+      'attributes' => array('style' => 'float: left; margin: 1em 1em 1em 1.5em;'),
+    )),
+  );
+  $form['commerce_migs_hosted_mastercard_securecode_logo'] = array(
+    '#markup' => theme_image(array(
+      'path' => drupal_get_path('module', 'commerce_migs_hosted') . '/images/mastercard_securecode.gif',
+      'alt' => t('Anz eGate'),
+      'title' => t('Anz eGate'),
+      'attributes' => array('style' => 'float: left; margin: 1em 1em 1em 1.5em;'),
+    )),
+  );
+  /* External Payment Select, not sending vpc_Card to MIGS.
+   * Need more resources from the bank.
+  $form ['card_type'] = array (
+  '#title' => t('Select your Credit Card Type'),
+  '#type' => 'select',
+  '#options' =>$settings['commerce_migs_card_type'],
+  );
+  */
+  return $form ;
+  
+}
+
+/*****************************************
+ *
+ * Implements hook_redirect_form().
+ *
+ ******************************************/
+ 
+function commerce_migs_hosted_redirect_form($form, &$form_state, $order, $payment_method) {
+
+  // Return error if MIGS payment gateway Secure Hash & Access Code unconfigured.
+  if (empty($payment_method['settings']['commerce_migs_secure_hash']) ||
+      empty($payment_method['settings']['commerce_migs_access_code'])
+) 
+  {
+    drupal_set_message(t('The MIGS payment gateway cannot be used at this time'), 'error');
+    return array();
+  }
+  $settings = array(
+      
+      // Return to the payment redirect page for processing successful payments.
+      'return' => url('checkout/' . $order->order_id . '/payment/return/' . $order->data['payment_redirect_key'], array('absolute' => TRUE)),
+  );
+  return commerce_migs_hosted_order_form($form, $form_state, $order, $payment_method['settings'] + $settings);
+}
+
+/**************************************************
+ * Called from commerce_migs_hosted_redirect_form().
+ **************************************************/
+ 
+function commerce_migs_hosted_order_form($form, &$form_state, $order, $settings) {
+  module_load_include('inc', 'commerce_migs_hosted', 'commerce_migs_hosted');
+ 
+
+ 
+  $transaction = array(
+    'secure_secret' => $settings['commerce_migs_secure_hash'],
+    'access_code' => $settings['commerce_migs_access_code'],
+    'version' => $settings['commerce_migs_version'],
+    'amount' => $order->commerce_order_total['und'][0]['amount'],
+    'locale' => $settings['commerce_migs_locale'],
+    'merchant_reference' => substr(uniqid($order->order_number . '-'), 0, 16),
+    'merchant_id' => $settings['commerce_migs_mid'] ,
+    'order_info' => '#' . $order->order_number,
+	//'card_Type' => $settings['commerce_migs_card_type'], //needs investigation, incomplete.
+    'return_url' => $settings['return'],
+    
+  );  
+  if ($url = commerce_migs_hosted_build_url($transaction, $settings)) {
+    
+    drupal_goto($url);
+   
+  }else 
+  {  
+    watchdog('commerce_migs_hosted', 'Unable to generate Migs request with settings: @settings', array('@settings' => print_r($settings, 1)), WATCHDOG_DEBUG);
+  }
+}
+
+/*******************************************
+ *
+ * Implements hook_redirect_form_validate().
+ *
+ ********************************************/
+
+function commerce_migs_hosted_redirect_form_validate($order, $payment_method ) {
+
+  module_load_include('inc', 'commerce_migs_hosted', 'commerce_migs_hosted');
+  
+  $settings = $payment_method['settings'];
+
+  // ensure that MIGS is configured before processing
+  $secure_hash   = $settings['commerce_migs_secure_hash'];
+
+  if ( empty($secure_hash) ) {
+    // Secure Hash was not validated, none there to validate
+    watchdog( 'commerce_migs_hosted', 'Unable to process response from MIGS gateway, as MIGS Secure Hash Secret is not configured. Please correct your settings.','', WATCHDOG_WARNING);
+    drupal_goto('cart');
+  }
+  $response = commerce_migs_hosted_validate_transaction($secure_hash);
+  
+  switch($response){
+    case 'TRANSACTION_BADHASH':
+      watchdog( 'commerce_migs_hosted', 'MIGS gateway rejected payment due to validation failure. $_GET was: <pre>@get</pre>', array('@get' => print_r($_GET,1)), WATCHDOG_WARNING );
+      commerce_migs_hosted_form_transaction($payment_method, $order, COMMERCE_PAYMENT_STATUS_FAILURE);
+		commerce_payment_redirect_pane_previous_page($order);
+	   break;
+    case 'TRANSACTION_NOHASH':
+      watchdog( 'commerce_migs_hosted', 'MIGS gateway rejected payment, and returned data did not contain a secure hash. $_GET was: <pre>@get</pre>', array('@get' => print_r($_GET,1)), WATCHDOG_WARNING );
+      commerce_migs_hosted_form_transaction($payment_method, $order, COMMERCE_PAYMENT_STATUS_FAILURE);
+		commerce_payment_redirect_pane_previous_page($order);
+	  break;
+    case 'TRANSACTION_NOORDER':
+      watchdog( 'commerce_migs_hosted', 'MIGS gateway unable to find order to process. The Order ID returned from MIGS was @order_id, and $_GET was <pre>@get</pre>', array('@order_id' => print_r($order,1), '@get' => print_r($_GET,1)), WATCHDOG_WARNING);
+      commerce_migs_hosted_form_transaction($payment_method, $order, COMMERCE_PAYMENT_STATUS_FAILURE);
+	  commerce_payment_redirect_pane_previous_page($order);
+      break;
+/************************************************************************      
+//Will return user to the "checkout/review"  on failled/cancelled/incomplete transaction.
+//A transaction message return for the transaction.
+************************************************************************/
+    case 'TRANSACTION_PAYMENTERROR':
+      watchdog( 'commerce_migs_hosted', 'A payment via MIGS failed. <hr />$_GET was: <pre>@get</pre><hr />$order was: <pre>@order</pre>', array('@get' => print_r($_GET,1), '@order' => print_r($order,1)), WATCHDOG_WARNING );
+      commerce_migs_hosted_form_transaction($payment_method, $order, COMMERCE_PAYMENT_STATUS_FAILURE);
+		commerce_payment_redirect_pane_previous_page($order);
+		drupal_set_message (t('Transaction Failed, Try again or contact us, <br>Transaction =<strong> @incomplete</strong></br>',
+		array('@incomplete' => 
+		commerce_migs_hosted_response_description(check_plain((isset($_GET['vpc_TxnResponseCode'])) ? $_GET['vpc_TxnResponseCode'] : NULL)),)
+		)); 
+      break;
+    case 'TRANSACTION_SUCCESS':
+      watchdog( 'commerce_migs_hosted', 'Migs transaction succeeded. Cart order ID: @cart_order', array('@cart_order' => $order->order_number), WATCHDOG_NOTICE);
+      drupal_set_message(t('Transaction succeeded. Reference Order Id: @orderid', array('@orderid' => $order->order_number)));
+      commerce_migs_hosted_form_transaction($payment_method, $order, COMMERCE_PAYMENT_STATUS_SUCCESS);
+		commerce_payment_redirect_pane_next_page($order);
+      break;
+  
+  }
+  return TRUE;
+}
+/*************************************************
+// Log the Transaction against the order payment.
+*************************************************/
+
+function commerce_migs_hosted_form_transaction($payment_method, $order, $transaction_status){
+  $settings = $payment_method['settings'];
+
+  $transaction = commerce_payment_transaction_new('commerce_migs_hosted', $order->order_id);
+  $transaction->instance_id = $payment_method['instance_id'];
+  $transaction->amount = (isset($_GET['vpc_Amount'])) ? $_GET['vpc_Amount'] : NULL;
+  $transaction->currency_code = variable_get('commerce_default_currency', '');  //this needs to be better intergrated
+  $transaction->remote_id = (isset($_GET['vpc_MerchTxnRef'])) ? $_GET['vpc_MerchTxnRef'] : NULL;
+
+  $transaction->status = $transaction_status;
+  $transaction->message = 'Status @status, @statusdetail.';
+  $transaction -> receipt = 'receipt';
+  $transaction->message_variables = array(
+    '@status' => commerce_migs_hosted_response_description(check_plain((isset($_GET['vpc_TxnResponseCode'])) ? $_GET['vpc_TxnResponseCode'] : NULL)),
+    '@statusdetail' => check_plain((isset($_GET['vpc_Message'])) ? $_GET['vpc_Message'] : NULL),
+	'receipt' => check_plain ((isset($_GET['vpc_ReceiptNo'])) ? $_GET['vpc_ReceiptNo'] : NULL),
+  );
+
+  commerce_payment_transaction_save($transaction);
+
+}
+
+
+/***************************************************************
+ * Returns error messages for Transaction Respose Codes.
+ *
+ *   @param string $response_code
+ *   Txn response code returned by the bank.
+ *
+ *   @return string
+ *   The readable error message.
+ ****************************************************************/
+ 
+function commerce_migs_hosted_response_description($response_code) {
+  $response_string = array(
+    '0' => t('Transaction Successful'),
+    '1' => t('Transaction could not be processed'),
+    '2' => t('Bank Declined Transaction - contact issuing bank'),
+    '3' => t('No Reply from Bank'),
+    '4' => t('Expired Card'),
+    '5' => t('Insufficient funds'),
+    '6' => t('Error Communicating with Bank'),
+    '7' => t('Payment Server System Error'),
+    '8' => t('Transaction Type Not Supported'),
+    '9' => t('Bank declined transaction (Do not contact Bank)'),
+    'A' => t('Transaction Aborted'),
+    'C' => t('Transaction Cancelled'),
+    'D' => t('Deferred transaction has been received and is awaiting processing'),
+    'F' => t('3D Secure Authentication failed'),
+    'I' => t('Card Security Code verification failed'),
+    'L' => t('Shopping Transaction Locked (Please try the transaction again later)'),
+    'N' => t('Cardholder is not enrolled in Authentication scheme'),
+    'P' => t('Transaction has been received by the Payment Adaptor and is being processed'),
+    'R' => t('Transaction was not processed - Reached limit of retry attempts allowed'),
+    'S' => t('Duplicate SessionID (OrderInfo)'),
+    'T' => t('Address Verification Failed'),
+    'U' => t('Card Security Code Failed'),
+    'V' => t('Address Verification and Card Security Code Failed'),
+  );
+  if (isset($response_string[$response_code])) {
+    $response = $response_string[$response_code];
+  }
+  else {
+    $response = t('Unable to be determined');
+  }
+  return $response;
+}
+
+/**********************************************************
+ * Return a keyed string from an array.
+ *
+ *   @param array $map
+ *   array to search
+ *   @param string $key
+ *   array key
+ *
+ *   @return string
+ *   return value, or "No Value Returned"
+ *************************************************************/
+ 
+function commerce_migs_hosted_null2unknown($map, $key) {
+  if (array_key_exists($key, $map)) {
+    if (!is_null($map[$key])) {
+      return $map[$key];
+    }
+  }
+  return "No Value Returned";
+}
+
+/***************************************************************
+ * Implements hook_form_alter().
+ ***************************************************************/
+ 
+function commerce_migs_hosted_form_alter(&$form, &$form_state, $form_id) {
+  // Change the payment method title in the checkout form
+  // to the user configured title.
+  if ($form_id == 'commerce_checkout_form_review') {
+    if (isset($form['commerce_payment']['payment_method']['#options'])) {
+      $new_options = array();
+      foreach ($form['commerce_payment']['payment_method']['#options'] as $key => $option) {
+        if ($key == 'migs_merchant|commerce_payment_migs_merchant') {
+          // Load the payment method instance to find the user set title.
+          $payment_method = commerce_payment_method_instance_load('migs_merchant|commerce_payment_migs_merchant');
+          $option = t($payment_method['settings']['commerce_migs_method_title']);
+        }
+        $new_options[$key] = $option;
+      }
+      $form['commerce_payment']['payment_method']['#options'] = $new_options;
+    }
+  }
+}

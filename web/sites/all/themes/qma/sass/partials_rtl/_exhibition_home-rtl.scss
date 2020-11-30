@@ -1,0 +1,32 @@
+$from-direction: right;
+$omega-float: opposite-position($from-direction);
+
+.exhibition-item {
+  @include span-columns(16, 16);
+
+  @include at-breakpoint($bp-tablet) {
+    // Reset margins from LTR stylesheet
+    &.views-row-odd,
+    &.views-row-even {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    &.views-row-odd {
+      @include span-columns(8, 16);
+      clear: left;
+    }
+
+    &.views-row-even {
+      @include span-columns(8 omega, 16);
+    }
+  }
+
+  .status {
+    right: auto;
+    left: 0;
+  }
+}
+
+$from-direction: left;
+$omega-float: opposite-position($from-direction);

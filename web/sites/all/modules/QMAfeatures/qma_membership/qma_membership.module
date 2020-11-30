@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA membership feature.
+ */
+
+include_once 'qma_membership.features.inc';

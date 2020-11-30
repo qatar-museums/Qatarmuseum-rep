@@ -1,0 +1,74 @@
+.exhibition-items {
+  overflow: hidden;
+}
+
+.view-past-exhibitions {
+  h3 {
+    clear: both;
+  }
+}
+
+.exhibition-item {
+  @include span-columns(16, 16);
+  margin-bottom: 40px;
+
+  @include at-breakpoint($bp-tablet) {
+    &.views-row-odd {
+      @include span-columns(8, 16);
+      clear: right;
+    }
+
+    &.views-row-even {
+      @include span-columns(8 omega, 16);
+    }
+  }
+
+  .img {
+    position: relative;
+
+    img {
+      float: none;
+      display: block;
+
+      a {
+        display: block;
+      }
+    }
+  }
+
+  .status {
+    @extend h4;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 5px 13px;
+    background: $yellow;
+  }
+
+  .title {
+    margin-top: 41px;
+    @include adjust-leading-to(10, 32px);
+  }
+
+  .read-more {
+    display: inline-block;
+    margin-top: 25px;
+    padding: 2px 4px;
+    font-weight: normal;
+
+    &:hover {
+      margin-bottom: -1px
+    }
+  }
+}
+
+.exhibition-item {
+  .date, .venue-name {
+    margin-bottom: 0;
+  }
+
+  .field-name-field-teaser-text {
+    margin-top: rhythm(6, 18px);
+  }
+}

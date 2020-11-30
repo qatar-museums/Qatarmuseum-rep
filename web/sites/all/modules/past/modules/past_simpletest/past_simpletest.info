@@ -1,0 +1,15 @@
+name=Past Simpletest Backend
+description=Provides a simpletest implementation of the past event API to show debug messages while running simpletest.
+package = Logging
+core=7.x
+
+dependencies[] = past
+
+files[] = past_simpletest.entity.inc
+
+; Information added by Drupal.org packaging script on 2016-04-02
+version = "7.x-1.0-alpha3"
+core = "7.x"
+project = "past"
+datestamp = "1459591740"
+

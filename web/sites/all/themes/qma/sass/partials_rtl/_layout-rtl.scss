@@ -1,0 +1,60 @@
+$from-direction: right;
+$omega-float: opposite-position($from-direction);
+
+.full-width {
+
+    clear: both;
+
+    .column, section {
+
+        @include at-breakpoint($bp-small-desktop) {
+            margin-bottom: 0;
+            @include span-columns(5, 16);
+            margin-right: 0;
+
+            &.first {
+                @include span-columns(6, 16);
+                @include suffix(1);
+                @include prefix(0);
+                margin-right: 0;
+                margin-left: 0;
+            }
+
+            &:last-child {
+                @include span-columns(5, 16);
+                margin-left: 0;
+            }
+
+            &#block-menu-menu-using-this-website {
+                @include span-columns(5, 16);
+                margin-left: 0;
+            }
+        }
+
+    }
+
+}
+
+.half-width {
+  float: right;
+
+  @include at-breakpoint($bp-small-desktop) {
+    @include span-columns(8, 16);
+    @include pre(8);
+  }
+}
+
+.half-width-left {
+    @include clearfix;
+
+    margin-bottom: 2.222em;
+    width: 100%;
+
+    @include at-breakpoint($bp-small-desktop) {
+        @include span-columns(8, 16);
+        @include pre(8);
+    }
+}
+
+$from-direction: left;
+$omega-float: opposite-position($from-direction);

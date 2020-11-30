@@ -1,0 +1,95 @@
+// Convo article styles
+.node-interview {
+
+	.node-hero-wrapper {
+
+		.header-area {
+
+			.intro-text {
+				
+				margin-right: -1em;
+				margin-left: 0;
+
+				@include at-breakpoint($bp-tablet) {
+					margin-right: 0;
+				}
+			}
+
+		}
+
+	}
+
+}
+
+/** repeating field interview elements **/
+.field-name-field-interview-question-answer {
+
+	& .question {
+
+		@include at-breakpoint($bp-tablet) {
+			@include span-columns(8 omega, 16);
+			clear: right;
+		}
+
+		&:nth-child(2n) {
+			@include at-breakpoint($bp-tablet) {
+				@include span-columns(7, 16);
+				clear: left;
+			}
+
+		}
+
+		.lt-ie9 &:nth-child(2n) {
+			@include span-columns(7, 16);
+			clear: left;
+		} 
+
+	}
+
+}
+
+// Convo hub header styles
+.convo-header {
+
+	p {
+		width: 100%;
+		float: right;		
+	}
+
+}
+
+.featured-conversation {
+
+	.title-container {
+		float: right;
+
+		$from-direction: right;
+		$omega-float: opposite-position($from-direction);
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(9, 16);
+		}
+
+		p {
+			// @include din-arabic-bold;
+
+		}
+
+	}
+
+	.filter_image {
+		
+		float: right;
+
+		@include at-breakpoint($bp-small-desktop) {
+			right: auto;
+			left: $column-percentage#{"%"};
+			
+		}
+
+	}
+
+	$from-direction: left;
+	$omega-float: opposite-position($from-direction);
+
+}

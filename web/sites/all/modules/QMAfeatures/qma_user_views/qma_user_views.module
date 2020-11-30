@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA user views feature.
+ */
+
+include_once 'qma_user_views.features.inc';

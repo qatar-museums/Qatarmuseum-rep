@@ -1,0 +1,37 @@
+form {
+  label {
+    &.option {
+      padding-left: 0;
+      padding-right: 2.5em;
+      text-transform: none;
+    }
+  }
+
+  .form-type-radio,
+  .form-type-checkbox {
+    input {
+      margin: 0.5em 1em 0.5em -2.5em;
+    }
+  }
+
+  .field-type-datetime {
+    .form-item .form-item {
+      float: right;
+      margin-left: 5%;
+      margin-right: 0;
+
+      &:last-child {
+          margin-left: 0;
+      }
+    }
+  }
+
+  .mollom-captcha-content.mollom-image-captcha {
+    float: right;
+  }
+
+  .mollom-captcha-content.mollom-audio-captcha {
+    padding-left: 0;
+    padding-right: 20px;
+  }
+}

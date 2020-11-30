@@ -1,0 +1,59 @@
+$from-direction: right;
+$omega-float: opposite-position($from-direction);
+
+.form-left-col {
+	@include at-breakpoint($bp-tablet) {
+		@include span-columns(5, 16);
+	}
+}
+
+.field-wrappers-col {
+
+	.full-width-form & {
+
+		@include at-breakpoint($bp-tablet) {
+			@include span-columns(10 omega, 16);
+		}
+
+	}	
+
+	.fields-left-col {
+
+		@include at-breakpoint($bp-desktop) {
+			@include span-columns(5, 10);
+			margin-right: 0;
+		}
+
+	}
+
+	.fields-right-col {
+		
+		@include at-breakpoint($bp-desktop) {
+			@include span-columns(5 omega, 10);
+		}
+
+	}
+
+}
+
+.generic-center-column.content-form {
+
+	.form-checkboxes {
+
+		label {
+			float: right;
+			margin-right: 0.5em;
+		}
+
+		.form-item,
+		input {
+			float: right;
+			margin-right: 0;
+		}
+
+	}
+
+}
+
+$from-direction: left;
+$omega-float: opposite-position($from-direction);

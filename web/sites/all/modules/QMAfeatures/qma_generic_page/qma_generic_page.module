@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA Generic Page feature.
+ */
+
+include_once 'qma_generic_page.features.inc';

@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the firebase module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function firebase_push_schema() {
+  $schema['firebase_push_tokens'] = array(
+    'description' => 'Table to store firebase tokens',
+    'fields' => array(
+      'token_id' => array(
+        'description' => 'Auto increment key for index only.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'type' => array(
+        'description' => 'Token type web, iOs or Android.',
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+      ),
+      'token' => array(
+        'description' => 'The endpoint token for firebase notification subscription',
+        'type' => 'text',
+        'length' => 500,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'User id of token. can be 0 for anonymous user token registrations.',
+      ),
+      'timestamp' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'The unix timestamp of when token in added updatred',
+      ),
+    ),
+    'indexes' => array(
+      'tokens' => array('token_id', array('token', '200')),
+      'push_token' => array(array('token', '200')),
+      'uid' => array('uid'),
+    ),
+    'unique keys' => array(
+      'token' => array(array('token', '200')),
+    ),
+    'primary key' => array('token_id'),
+  );
+  return $schema;
+}

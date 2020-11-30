@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA https handling feature.
+ */
+
+include_once 'qma_https_handling.features.inc';

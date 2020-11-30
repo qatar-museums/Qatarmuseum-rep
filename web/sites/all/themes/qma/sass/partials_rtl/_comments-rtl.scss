@@ -1,0 +1,50 @@
+// RTL overrides
+
+.node-news-article {
+  @include at-breakpoint($bp-desktop) {
+    .back-to-parent {
+      margin-left: 0;
+      margin-right: -1 * columns(1);
+      padding-left: 0;
+      padding-right: 2.4em;
+    }
+  }
+
+}
+
+// header for the blog tag listing pages
+.node-news-hub .header-section.blog-filter-list {
+  background-color: transparent;
+   @include at-breakpoint($bp-desktop) {
+      .back-to-parent {
+        margin-left: 0;
+        margin-right: -1 * columns(1);
+        padding-left: 0;
+        padding-right: 2.4em;
+      }
+    }
+}
+
+.comment-wrapper {
+  .comment-posted-wrapper, .comment-post-form {
+    @include clearfix;
+    margin-top: 5em;
+  }
+
+  .left-col {
+    width: 100%;
+
+    @include at-breakpoint($bp-small-desktop) {
+      @include span-columns(6 omega, 16);
+    }
+  }
+
+  .right-col {
+    width: 100%;
+
+    @include at-breakpoint($bp-small-desktop) {
+      @include span-columns(10 alpha, 16);
+    }
+  }
+
+}

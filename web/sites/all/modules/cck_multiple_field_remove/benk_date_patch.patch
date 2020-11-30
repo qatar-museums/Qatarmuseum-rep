@@ -1,0 +1,10 @@
+Index: cck_multiple_field_remove.module
+===================================================================
+57c57
+<   $acceptable_fields = array("number_decimal","number_float","number_integer","text_long","text_with_summary","taxonomy_term_reference","text");
+---
+>   $acceptable_fields = array("number_decimal","number_float","number_integer","text_long","text_with_summary","taxonomy_term_reference","text","datetime","datestamp");
+115c115
+< 	if($found && in_array($details['#field_name'],$cck_multiple_field_remove_fields) && ($element['value']['#type'] == "textarea" || $element['value']['#type'] == "textfield" || $element['#type']=="text_format" || $element['#type']=="textfield"))
+---
+> 	if($found && in_array($details['#field_name'],$cck_multiple_field_remove_fields) && ($element['value']['#type'] == "textarea" || $element['value']['#type'] == "textfield" || $element['#type']=="text_format" || $element['#type']=="textfield" || $element['#type']=="date_combo"))

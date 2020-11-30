@@ -1,0 +1,57 @@
+<?php
+
+/**
+ * @file qma_view_modes.module
+ * TODO: Enter file description here.
+ */
+
+/**
+ * Implements hook_entity_info_alter().
+ */
+function qma_view_modes_entity_info_alter(&$entity_info) {
+  $entity_info['node']['view modes']['generic_hub_teaser'] = array(
+    'label' => t('Generic Hub Teaser (new and popular)', array(), array('context' => 'QMA')),
+    'custom settings' => TRUE,
+  );
+
+  $entity_info['node']['view modes']['featured_conversation'] = array(
+    'label' => t('Featured Conversation', array(), array('context' => 'QMA')),
+    'custom settings' => TRUE,
+  );
+
+   $entity_info['node']['view modes']['experience_teaser'] = array(
+    'label' => t('Experience Teaser', array(), array('context' => 'QMA')),
+    'custom settings' => TRUE,
+  );
+
+  $entity_info['node']['view modes']['text_inline_teaser'] = array(
+    'label' => t('Text Inline Teaser', array(), array('context' => 'QMA')),
+    'custom settings' => TRUE,
+  );
+
+  $entity_info['node']['view modes']['no_image_teaser'] = array(
+    'label' => t('No Image Teaser', array(), array('context' => 'QMA')),
+    'custom settings' => TRUE,
+  );
+
+  $entity_info['node']['view modes']['full_width_teaser'] = array(
+    'label' => t('Full Width Teaser', array(), array('context' => 'QMA')),
+    'custom settings' => TRUE,
+  );
+
+  $entity_info['node']['view modes']['gmaps_popup'] = array(
+    'label' => t('GMaps Popup', array(), array('context' => 'QMA')),
+    'custom settings' => TRUE,
+  );
+
+  $entity_info['node']['view modes']['related_item_teaser'] = array(
+    'label' => t('Related item teaser', array(), array('context' => 'QMA')),
+    'custom settings' => TRUE,
+  );
+
+  $entity_info['node']['view modes']['featured_blog_teaser'] = array(
+    'label' => t('Featured blog teaser', array(), array('context' => 'QMA')),
+    'custom settings' => TRUE,
+  );
+
+}

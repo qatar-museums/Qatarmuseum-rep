@@ -1,0 +1,250 @@
+/**
+ * Comments related scss rules.
+ */
+
+/* Comment wrappers and layout */
+.comment-center-column {
+  width: 100%;
+}
+
+.comment-wrapper {
+  .comment-posted-wrapper, .comment-post-form {
+    @include clearfix;
+  }
+
+  .comment-post-form {
+    margin-top: 5em;
+  }
+
+  .left-col {
+    width: 100%;
+
+    @include at-breakpoint($bp-small-desktop) {
+      @include span-columns(6 alpha, 16);
+    }
+  }
+
+  .right-col {
+    width: 100%;
+
+    @include at-breakpoint($bp-small-desktop) {
+      @include span-columns(10 omega, 16);
+    }
+  }
+
+}
+
+// Ensure that there are
+.comment-wrapper {
+  &.no-comments {
+    margin-top: 0 !important; // comment.css uses an id.
+  }
+
+  &.no-comments .comment-posted-wrapper {
+    margin-top: 0;
+  }
+
+  &.no-comments .comment-post-form {
+    margin-top: 0;
+  }
+}
+
+.comment-wrapper h2 {
+  @include adjust-font-size-to(36px);
+
+  @include at-breakpoint($bp-desktop) {
+    @include adjust-font-size-to(56px);
+    @include adjust-leading-to(7, 40px);
+    margin-bottom: rhythm(10, 56px);
+  }
+}
+
+.comment-wrapper h3 {
+  @include adjust-font-size-to(23px);
+}
+
+.node-news-article {
+  @include at-breakpoint($bp-desktop) {
+    .back-to-parent {
+      @include pull(1);
+      padding-left: 2.4em;
+    }
+  }
+
+  .intro-text .news-meta {
+    margin-bottom: 4em;
+
+    // Position the comments link adjacent to the date
+    .field-name-field-news-date {
+      display: inline-block;
+    }
+
+    .comment-jump-link {
+      background-color: transparent;
+      border-bottom: 1px solid #ed3c8a;
+
+      &:hover {
+        border-bottom: 1px solid #000000;
+      }
+    }
+  }
+}
+
+
+/* Individual comments */
+
+.comment {
+  border-top: 3px solid #000000;
+  @include adjust-font-size-to(16px);
+
+  .submitted {
+    margin-top: 0.75em;
+
+  }
+
+  .user-name {
+    font-weight: bold;
+  }
+
+  .content {
+    margin-top: 0.75em;
+
+    p {
+      margin-bottom: 0.7em;
+    }
+  }
+
+  .content a {
+    word-wrap: break-word;
+    font-weight: normal;
+  }
+}
+
+.comment .submitted .permalink {
+  display: none;
+}
+
+.comments ul.links {
+  margin-bottom: 2em;
+  margin-top: 1em;
+}
+
+.comments ul.links li {
+  display: inline;
+  list-style-type: none;
+  margin-left: 15px;
+
+  &.first {
+    margin-left: 0;
+  }
+
+  &:before {
+    content: '';
+    padding: 0;
+  }
+
+  a {
+    background: #ffffff;
+    padding: 2px;
+    text-transform: capitalize;
+  }
+}
+
+.comment-form a {
+    background: #ffffff;
+    padding: 2px;
+}
+
+.comment-form .form-type-textarea {
+  margin-bottom: 10px;
+}
+
+/**
+ * Comment form
+ */
+.comment-form {
+  .filter-wrapper {
+    padding: 0;
+  }
+
+  .form-item-membership .option {
+    text-transform: none;
+  }
+}
+
+.comment-form fieldset.filter-wrapper {
+  display: none;
+}
+
+.comment-form {
+
+  .form-type-checkbox {
+
+    margin-top: 1.5em;
+
+    input {margin: 0.5em -2.5em 0.5em 0em;}
+    label {display: initial;}
+  }
+
+  .form-item-mail {
+    input {
+      margin-bottom: 0.3em;
+    }
+  }
+
+}
+
+.comment-form {
+  p.review-text {
+    display: inline-block;
+    font-size: 0.833em;
+    line-height: 1.3;
+    width: 100%;
+    margin-top: 1.5em;
+  }
+}
+
+
+
+
+/**
+ * Tags related scss rules.
+ */
+
+.teaser-tags {
+  clear:both;
+  padding-top: 1.33333em;
+}
+
+.news-tags {
+  padding-bottom: 0;
+  h2 {
+    @include adjust-font-size-to(32px);
+  }
+}
+
+/**
+ * Related blog posts
+ */
+
+.news-view-list {
+  h2 {
+    @include adjust-font-size-to(32px);
+  }
+
+  .node-type-whats-on & .views-row {
+    .filter_image,
+    .teaser-image {
+      display: none;
+
+      @include at-breakpoint($bp-small-desktop) {
+        display: block;
+      }
+    }
+  }
+}
+
+.node-news-article .news-view-list {
+  padding-top: 4.44em;
+}
+

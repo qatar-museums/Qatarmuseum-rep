@@ -1,0 +1,274 @@
+<?php
+
+/**
+ * @file
+ * qma_forms.install
+ */
+
+
+/**
+ * Implements hook_schema().
+ */
+function qma_forms_schema() {
+  $schema['qma_forms_question'] = array(
+    'description' => 'A table to contain interview questions',
+    'fields' => array(
+      'qid' => array(
+        'description' => 'The primary key',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'language' => array(
+        'description' => 'The {languages}.language of this question.',
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the question was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'question' => array(
+        'description' => 'The question text.',
+        'type' => 'varchar',
+        'length' => 1000,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'name' => array(
+        'description' => 'The questioner\'s name.',
+        'type' => 'varchar',
+        'length' => 200,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'interviewee' => array(
+        'description' => 'The interviewee\'s name.',
+        'type' => 'varchar',
+        'length' => 200,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'location' => array(
+        'description' => 'The question\'s location.',
+        'type' => 'varchar',
+        'length' => 200,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'email' => array(
+        'description' => 'The question\'s email address.',
+        'type' => 'varchar',
+        'length' => 200,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'indexes' => array(
+      'created' => array('created'),
+      'language' => array('language'),
+    ),
+    'primary key' => array('qid'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Adds new table to store press questions.
+ */
+function qma_forms_update_7002() {
+  $schema['qma_forms_press_question'] = array(
+    'description' => 'A table to contain press room questions',
+    'fields' => array(
+      'qid' => array(
+        'description' => 'The primary key',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'language' => array(
+        'description' => 'The {languages}.language of this question.',
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the question was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'question' => array(
+        'description' => 'The question text.',
+        'type' => 'varchar',
+        'length' => 1000,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'name' => array(
+        'description' => 'The questioner\'s name.',
+        'type' => 'varchar',
+        'length' => 200,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'organisation' => array(
+        'description' => 'The questioner\'s organisation.',
+        'type' => 'varchar',
+        'length' => 200,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'request_type' => array(
+        'description' => 'Request type picked from available options',
+        'type' => 'varchar',
+        'length' => 200,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'email' => array(
+        'description' => 'The question\'s email address.',
+        'type' => 'varchar',
+        'length' => 200,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'indexes' => array(
+      'created' => array('created'),
+      'language' => array('language'),
+    ),
+    'primary key' => array('qid'),
+  );
+  
+  db_create_table('qma_forms_press_question', $schema['qma_forms_press_question']);
+}
+
+/**
+ * Adds new table to store press questions.
+ */
+function qma_forms_update_7003() {
+  $schema['qma_forms_resource_question'] = array(
+    'description' => 'A table to contain creative resource questions',
+    'fields' => array(
+      'qid' => array(
+        'description' => 'The primary key',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'language' => array(
+        'description' => 'The {languages}.language of this question.',
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the question was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'question' => array(
+        'description' => 'The question text.',
+        'type' => 'varchar',
+        'length' => 1000,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'name' => array(
+        'description' => 'The questioner\'s name.',
+        'type' => 'varchar',
+        'length' => 200,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'email' => array(
+        'description' => 'The question\'s email address.',
+        'type' => 'varchar',
+        'length' => 200,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'indexes' => array(
+      'created' => array('created'),
+      'language' => array('language'),
+    ),
+    'primary key' => array('qid'),
+  );
+  
+  db_create_table('qma_forms_resource_question', $schema['qma_forms_resource_question']);
+}
+
+/**
+ * Adds new table to store education questions.
+ */
+function qma_forms_update_7004() {
+  $schema['qma_forms_education_question'] = array(
+    'description' => 'A table to contain education resource questions',
+    'fields' => array(
+      'qid' => array(
+        'description' => 'The primary key',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'language' => array(
+        'description' => 'The {languages}.language of this question.',
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the question was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'suggestion' => array(
+        'description' => 'The suggestion text.',
+        'type' => 'varchar',
+        'length' => 1000,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'name' => array(
+        'description' => 'The questioner\'s name.',
+        'type' => 'varchar',
+        'length' => 200,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'company' => array(
+        'description' => 'The question\'s company address.',
+        'type' => 'varchar',
+        'length' => 200,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'email' => array(
+        'description' => 'The question\'s email address.',
+        'type' => 'varchar',
+        'length' => 200,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'indexes' => array(
+      'created' => array('created'),
+      'language' => array('language'),
+    ),
+    'primary key' => array('qid'),
+  );
+
+  db_create_table('qma_forms_education_question', $schema['qma_forms_education_question']);
+}

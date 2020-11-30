@@ -1,0 +1,69 @@
+
+.form-left-col {
+	width: 100%;
+	margin-bottom: 2em;
+
+	@include at-breakpoint($bp-tablet) {
+		@include span-columns(5, 16);
+	}
+}
+
+.field-wrappers-col {
+	
+	width: 100%;
+	clear: left;
+
+	.form-item {
+		margin-bottom: 0;
+	}
+
+	.full-width-form & {
+
+		@include at-breakpoint($bp-tablet) {
+			@include span-columns(10 omega, 16);
+			clear: none;
+		}
+
+	}
+
+	.fields-left-col {
+		width: 100%;
+		margin-bottom: 1em;
+		display: inline-block;
+
+		@include at-breakpoint($bp-desktop) {
+			@include span-columns(5, 10);
+			margin-bottom: 0;
+		}
+
+	}
+
+	.fields-right-col {
+		
+		width: 100%;
+
+		@include at-breakpoint($bp-desktop) {
+			@include span-columns(5 omega, 10);
+		}
+
+	}
+
+}
+
+.generic-center-column.content-form {
+
+	.form-checkboxes {
+
+		.form-item {
+			width: 50%;
+			float: left;
+			clear: none;
+
+			input {
+				margin-left: 0;
+			}
+		}
+
+	}
+
+}

@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA Education Views feature.
+ */
+
+include_once 'qma_education_views.features.inc';

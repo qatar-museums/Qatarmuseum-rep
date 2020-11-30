@@ -1,0 +1,14 @@
+name = Synchronize node references
+description = Synchronizes node reference fields accross translations of the same content.
+dependencies[] = i18n_sync
+dependencies[] = translation
+dependencies[] = node_reference
+package = Multilingual - Internationalization
+core = 7.x
+
+; Information added by drupal.org packaging script on 2013-07-09
+version = "7.x-1.0-alpha2"
+core = "7.x"
+project = "i18n_contrib"
+datestamp = "1373385357"
+

@@ -1,0 +1,6 @@
+name = QMA view modes
+description = Additional view modes for use on the front end of the QMA site.
+package = QMA
+core = 7.x
+files[] = qma_view_modes.module
+

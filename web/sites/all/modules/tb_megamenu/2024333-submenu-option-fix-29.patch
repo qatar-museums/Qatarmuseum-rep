@@ -1,0 +1,13 @@
+diff --git a/js/tb-megamenu-object.js b/js/tb-megamenu-object.js
+index d1b8029..c5b6666 100644
+--- a/js/tb-megamenu-object.js
++++ b/js/tb-megamenu-object.js
+@@ -109,7 +109,7 @@ var TBMegamenuAdmin = window.TBMegamenuAdmin || {};
+     }
+     else {
+       unbindEvents(sub);
+-      if (liitem.find('ul.level'+liitem.attr('data-level')).length > 0) {
++      if (liitem.find('ul.level-'+liitem.attr('data-level')).length > 0) {
+         sub.css('display','none');
+         liitem.attr('data-hidesub', 1);
+       }

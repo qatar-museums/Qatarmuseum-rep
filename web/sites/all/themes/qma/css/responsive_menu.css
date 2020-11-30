@@ -1,0 +1,121 @@
+.sidr{
+  display: block;
+  position: fixed;
+  top: 0;
+  height: 100%;
+  z-index: 999999;
+  width: 260px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  font-size: 14px;
+  background: #263238;
+  color: rgba(38, 50, 56, 0.87);
+  box-shadow: 0 0 5px 5px #263238 inset;
+}
+.sidr.right {
+    left: auto;
+    right: -260px;
+}
+.sidr.left {
+    left: -260px;
+    right: auto;
+  }
+
+.sidr .block h2, .sidr .panel-pane  h2 {
+    margin: 0;
+    padding: 1rem;
+    font-size: .8rem;
+    text-transform: uppercase;
+}
+
+.sidr .menu {
+  background: #263238;
+}
+.sidr .menu a, .sidr .menu .nolink {
+    display: block;
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(176, 190, 197, 0.2);
+    color: #FFFFFF;
+    font-weight: bold;
+    text-decoration: none;
+    text-transform: uppercase;
+    position: relative;
+    cursor: pointer;
+    background: #263238;
+}
+.sidr .menu li.expanded > a:before, .sidr .menu li.expanded > .nolink:before {
+    display: inline-block;
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin-top: -6px;
+    font-size: .6rem;
+    line-height: .6rem;
+    position: absolute;
+    right: 0px !important;
+    top: 58%;
+    color:#FFFFFF;
+    margin-right:10px;
+}
+.sidr .menu li.expanded > a:before, .sidr .menu li.expanded > .nolink:before {
+    content: "";
+}
+.sidr .menu li.expanded > ul {
+    max-height: 0;
+    overflow-y: hidden;
+    transition: max-height .5s ease-in-out;
+    background: #FFF;
+}
+.sidr .menu li.expanded > ul.open {
+    max-height: 800px;
+}
+.sidr .menu li.expanded li.expanded>a:before, .sidr .menu li.expanded li.expanded>.nolink:before{
+	    color: #263238;
+}
+.sidr .menu li.expanded ul a, .sidr .menu li.expanded ul nolink{
+    padding: 10px 20px 10px 40px;
+    border-bottom: 1px solid #cfd8dc;
+    color: #263238;
+    font-weight: normal;
+    text-transform: none;
+    background: #fff;
+}
+.sidr .menu li.expanded li.expanded ul a {
+    color: #263238;
+    padding-left: 60px;
+}
+.sidr .menu li.expanded li.expanded > ul {
+max-height: 0;
+    overflow-y: hidden;
+    transition: max-height .5s ease-in-out;	
+}
+.sidr .menu li.expanded li.expanded > ul .open {
+      max-height: 800px;
+    }
+
+.sidr .social-menu {
+  display: block;
+  padding: 20px;
+  text-align: center;
+}
+.sidr .social-menu li {
+    display: inline-block;
+  }
+
+.responsive-menu-overlay {
+  background: #000;
+  opacity: 0;
+  transition: opacity 1s ease;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 100%;
+  z-index: 100;
+}
+.responsive-menu-overlay.active {
+    right: 0;
+    opacity: .5;
+}

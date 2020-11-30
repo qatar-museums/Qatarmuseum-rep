@@ -1,0 +1,9 @@
+MIGS providers have indicated that they prefer sites to not reveal detailed information to end users about error codes, system messages etc.
+
+For this reason the error messages displayed to customers are intentionally vague if the error does not relate specifically to the customer.
+
+So, a transaction which fails due to insufficient credit will be reported as such to the end user, but a transaction which fails due to the site not having its secure hash correctly configured will simply be reported as a "transaction error".
+
+Full details of each transaction failure are recorded to the <a href="&base_url&admin/reports&">system logs via watchdog</a>, so you will need to inspect the values recorded there.
+
+If you choose to override the default theme implementation of the order failure page, you can choose to provide more detailed error messages. This may assist you in testing and debugging transactions.

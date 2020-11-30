@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA What's On feature.
+ */
+
+include_once 'qma_whats_on.features.inc';

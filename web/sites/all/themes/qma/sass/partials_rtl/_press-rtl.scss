@@ -1,0 +1,39 @@
+.node-press-room {
+	.view-press {
+		direction: ltr;
+		text-align: left;
+
+		.views-exposed-form .views-exposed-widget {
+			float: left;
+			padding: .5em 1em 0 0;
+		}
+
+		.view-content {
+			h4 {
+				text-transform: uppercase;
+			}
+		}
+
+		.pager li {
+			float: left;
+		}
+
+		.pager .pager-next a {
+			background-position: right top;
+			margin: 0 0 0 1em;
+
+			&:hover {
+				background-position: right bottom;
+			}
+		}
+
+		.pager .pager-previous a {
+			background-position: left top;
+			margin: 0 1em 0 0;
+
+			&:hover {
+				background-position: left bottom;
+			}
+		}
+	}
+}

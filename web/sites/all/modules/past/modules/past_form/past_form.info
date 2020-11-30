@@ -1,0 +1,21 @@
+name=Past Form
+description=Captures form submissions and logs them.
+package = Logging
+core=7.x
+
+dependencies[] = past
+
+files[]=past_form.test
+
+; Views integration and handlers
+files[] = views/past_form.views.inc
+files[] = views/handlers/past_form_form_handler_field_form_id.inc
+files[] = views/handlers/past_form_form_handler_field_operation.inc
+files[] = views/filters/past_form_filter_event_data_value.inc
+
+; Information added by Drupal.org packaging script on 2016-04-02
+version = "7.x-1.0-alpha3"
+core = "7.x"
+project = "past"
+datestamp = "1459591740"
+

@@ -1,0 +1,134 @@
+.node-interview {
+	h1 {
+		margin-bottom: 0.35em;
+	}
+
+	.subheading { 
+		margin-bottom: 1.5em;
+		@include at-breakpoint($bp-tablet) {
+			margin-bottom: 0;
+		}		
+	}
+
+	.node-hero-wrapper {
+		
+		.header-area {
+
+			padding-bottom: 0;
+
+			@include at-breakpoint($bp-tablet) {
+				padding-bottom: 4.444em;
+			}
+
+			.intro-text {
+				box-sizing: content-box;
+				margin-left: -1em;
+				padding: 2em 1em;
+				background-color: #FFFFFF;
+				border-top: none;
+
+				@include at-breakpoint($bp-tablet) {
+					box-sizing: border-box;
+					padding: 0;
+					padding-top: 0.2em;
+					background-color: transparent;
+					border-top: 2px solid #000000;
+					margin-left: 0;
+				}
+			}
+		}
+	}
+
+	.content.container {
+		padding-top: 0;
+
+		@include at-breakpoint($bp-tablet) {
+			padding-top: 3.444em;
+		}
+
+	}
+
+}
+
+.field-name-field-interview-video {
+	background-color: $grey-bg;
+	width: 100%;
+	display: inline-block;
+	margin-bottom: 2em;
+	
+	@include at-breakpoint($bp-tablet) {
+		margin-bottom: 4.167em;
+	}
+
+	.field-item {
+		@include span-columns(16, 16);
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(12, 16);
+			@include pre(2);
+		}
+
+	}
+
+}
+
+/** repeating field interview elements **/
+.field-name-field-interview-question-answer {
+
+	// we only want the top level field item
+	& .question {
+
+		width: 100%;
+
+		@include at-breakpoint($bp-tablet) {
+			@include span-columns(8, 16);
+			clear: left;
+		}
+
+		margin-bottom: 2.889em;
+
+		&:nth-child(2n) {
+			@include at-breakpoint($bp-tablet) {
+				@include span-columns(7 omega, 16);
+				clear: right;
+			}
+
+		}
+
+		&:nth-child(2) {
+				margin-top: 4em;
+		}
+
+		.lt-ie9 &:nth-child(2n) {
+			@include span-columns(7 omega, 16);
+			clear: right;
+		} 
+
+		.field-label {
+			font-weight: normal;
+		}
+
+	}
+
+	.field-name-field-interview-question {
+		padding-bottom: rhythm(4, 22px);
+		margin-bottom: 0.3em;
+		border-bottom: 2px solid #000000;
+	}
+
+	.number {
+		color: $pink;
+	}
+
+}
+
+.user-submitted {
+	background-color: $blue;
+	padding: 1em;
+
+	@include bottom-arrow($blue, 2.222em, 2em);
+
+	.number {
+		color: #FFFFFF;
+	}
+}

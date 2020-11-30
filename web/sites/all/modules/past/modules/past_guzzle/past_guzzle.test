@@ -1,0 +1,313 @@
+<?php
+
+/**
+ * @file
+ * Past Guzzle tests.
+ */
+
+use Guzzle\Http\Client;
+use Guzzle\Http\Message\Response;
+use Guzzle\Plugin\Log\LogPlugin;
+use Guzzle\Plugin\Mock\MockPlugin;
+
+/**
+ * Tests the Past Guzzle log plugin adapter.
+ */
+class PastGuzzleTest extends DrupalWebTestCase {
+
+  protected static $responseHeaders = array(
+    'Content-Type' => 'text/plain',
+    'Content-Length' => 38,
+  );
+
+  protected static $responseBody = 'Cum sociis natoque penatibus et magnis';
+
+  /**
+   * @var Guzzle\Plugin\Mock\MockPlugin
+   */
+  protected $httpMock;
+
+  /**
+   * @var Guzzle\Http\Client
+   */
+  protected $client;
+
+  /**
+   * {@inheritdoc}
+   */
+  static function getInfo() {
+    return array(
+      'name' => 'Past Guzzle tests',
+      'description' => 'Tests logging of Guzzle http requests of the Past Guzzle module.',
+      'group' => 'Past',
+      'dependencies' => array('composer_manager'),
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  function setUp() {
+    parent::setUp(array('past_db', 'past_guzzle', 'composer_manager'));
+    composer_manager_register_autoloader();
+
+    $this->httpMock = new MockPlugin();
+    $this->client = new Client('http://example.com/api/v1/');
+    $this->client->addSubscriber($this->httpMock);
+  }
+
+  /**
+   * Tests past_guzzle_plugin()
+   */
+  function testPluginGetter() {
+    $plugin = past_guzzle_plugin();
+    $this->assertTrue($plugin instanceof LogPlugin, 'past_guzzle_plugin() returns an instance of LogPlugin');
+    $plugin_again = past_guzzle_plugin();
+    $this->assertIdentical($plugin, $plugin_again, 'past_guzzle_plugin() returns a singleton');
+
+    $plugin_simple = past_guzzle_plugin(PAST_GUZZLE_SIMPLE_CLASS);
+    $this->assertIdentical($plugin, $plugin_simple, 'The simple adapter matches the default one');
+
+    $plugin_compact = past_guzzle_plugin(PAST_GUZZLE_COMPACT_CLASS);
+    $this->assertNotIdentical($plugin, $plugin_compact, 'The compact adapter adapter differs from the default one');
+  }
+
+  /**
+   * Tests the simple log adapter.
+   */
+  function testSimpleAdapter() {
+    // Prepare the log plugin.
+    $plugin = past_guzzle_plugin();
+    $this->client->addSubscriber($plugin);
+
+    $this->triggerRequest();
+    $this->assertPastEventCount(1);
+
+    // Assert event message.
+    $event = $this->getLastPastEvent();
+    $message = $event->getMessage();
+    $expected = 'GET http://example.com/api/v1/foo 200 OK 0.44994s';
+    $this->assertEqual($message, $expected, 'Event message matches expectation');
+
+    $this->assertTrue($request_argument = $event->getArgument('request'), 'Event has a request argument');
+    $this->assertTrue($response_argument = $event->getArgument('response'), 'Event has a response argument');
+    $this->assertTrue($event->getArgument('stats'), 'Event has a stats argument');
+
+    $request = $request_argument->getData();
+    $response = $response_argument->getData();
+    $request_attributes = array(
+      'curl_options',
+      'headers',
+      'method',
+      'params',
+      'port',
+      'protocol',
+      'url',
+    );
+    foreach ($request_attributes as $attribute) {
+      $this->assertTrue(array_key_exists($attribute, $request), "The request argument contains key '$attribute'");
+    }
+    $response_attributes = array(
+      'effective_url',
+      'freshness',
+      'headers',
+      'protocol',
+      'reason_phrase',
+      'redirect_count',
+      'status_code',
+      'body'
+    );
+    foreach ($response_attributes as $attribute) {
+      $this->assertTrue(array_key_exists($attribute, $response), "The response argument contains key '$attribute'");
+    }
+
+    // A second request adds another past event.
+    $this->triggerRequest();
+    $this->assertPastEventCount(2);
+  }
+
+  /**
+   * Tests the compact adapter with a single request.
+   */
+  function testCompactAdapterSingleRequest() {
+    $plugin = past_guzzle_plugin(PAST_GUZZLE_COMPACT_CLASS);
+    $this->client->addSubscriber($plugin);
+
+    $this->triggerRequest();
+    $this->assertPastEventCount(0);
+    $this->triggerCommit();
+    $this->assertPastEventCount(1);
+
+    // Assert event message.
+    $event = $this->getLastPastEvent();
+    $message = $event->getMessage();
+    $expected = 'Tracked one Guzzle request with a severity of Debug';
+    $this->assertEqual($expected, $message, 'Event message matches expectation');
+
+    $this->assertTrue($request_argument = $event->getArgument('request:0'), 'Event has a request argument');
+    // There is one request entry plus the stats argument.
+    $this->assertEqual(count($event->getArguments()), 2, 'The requests argument has one entry');
+
+    $request = $request_argument->getData();
+    $request_attributes = array(
+      'response',
+      'request',
+      'message',
+      'severity',
+    );
+    foreach ($request_attributes as $attribute) {
+      $this->assertTrue(array_key_exists($attribute, $request), "The request argument contains key '$attribute'");
+    }
+  }
+
+  /**
+   * Tests the compact adapter with multiple requests.
+   */
+  function testCompactAdapterMultipleRequests() {
+    $plugin = past_guzzle_plugin(PAST_GUZZLE_COMPACT_CLASS);
+    $this->client->addSubscriber($plugin);
+
+    $this->triggerRequest();
+    $this->assertPastEventCount(0);
+    $this->triggerRequest();
+    $this->assertPastEventCount(0);
+    $this->triggerCommit();
+    $this->assertPastEventCount(1);
+
+    // Assert event message.
+    $event = $this->getLastPastEvent();
+    $message = $event->getMessage();
+    $expected = 'Tracked 2 Guzzle requests with the highest severity of Debug';
+    $this->assertEqual($expected, $message, 'Event message matches expectation');
+    $this->assertTrue($request_argument = $event->getArgument('request:0'), 'Event has a first request argument');
+    $this->assertTrue($request_argument = $event->getArgument('request:1'), 'Event has a second request argument');
+  }
+
+  /**
+   * Test the aggregation of request stats in the compact log adapter.
+   */
+  function testRequestStats() {
+    $plugin = past_guzzle_plugin(PAST_GUZZLE_COMPACT_CLASS);
+    $this->client->addSubscriber($plugin);
+
+    $this->triggerRequest(array(
+      'speed_download' => '28743',
+      'speed_upload' => '14423',
+    ));
+    $this->triggerRequest(array(
+      'speed_download' => '28561',
+      'speed_upload' => '14241',
+    ));
+    $this->triggerRequest(array(
+      'speed_download' => '28834',
+      'speed_upload' => '14514',
+    ));
+
+    $this->triggerCommit();
+    $this->assertPastEventCount(1);
+
+    $expected = array(
+      'total_time' => '1.34982',
+      'namelookup_time' => '0.023058',
+      'connect_time' => '0.343242',
+      'pretransfer_time' => '0.343809',
+      'size_upload' => '114',
+      'size_download' => '11430',
+      'speed_download' => '28712.666667',
+      'speed_upload' => '14392.666667',
+      'download_content_length' => '11430',
+      'upload_content_length' => '114',
+      'starttransfer_time' => '1.328379',
+      'redirect_time' => '0.03',
+    );
+
+    $event = $this->getLastPastEvent();
+    $this->assertTrue($stats_argument = $event->getArgument('stats'), 'Event has a stats argument');
+    $stats = $stats_argument->getData();
+
+    $this->assertEqual(array_keys($expected), array_keys($stats), 'Stats has expected metrics');
+    foreach (array_keys($expected) as $stat) {
+      // Using round here to prevent random test fails due to calculation
+      // differences.
+      $this->assertEqual(round($expected[$stat], 6), round($stats[$stat], 6), "Found expected value for metric '$stat'");
+    }
+  }
+
+  /**
+   * Triggers a http request.
+   *
+   * @param array $info
+   *   (optional) Info array part of the response containing e.g. requests
+   *   statistics. Defaults to empty array. Some hardcoded stats will be added
+   *   if not set in the array.
+   */
+  protected function triggerRequest($info = array()) {
+    $response = new Response(200, self::$responseHeaders, self::$responseBody);
+    $info += array(
+      'total_time' => 0.44994,
+      'namelookup_time' => 0.007686,
+      'connect_time' => 0.114414,
+      'pretransfer_time' => 0.114603,
+      'size_upload' => 38,
+      'size_download' => 3810,
+      'speed_download' => 28652,
+      'speed_upload' => 14332,
+      'download_content_length' => 3810,
+      'upload_content_length' => 38,
+      'starttransfer_time' => 0.442793,
+      'redirect_time' => 0.01,
+    );
+
+    $response->setInfo($info);
+
+    $this->httpMock->addResponse($response);
+    $this->client->get('foo')->send();
+  }
+
+  /**
+   * Triggers a commit of the compact log adapter.
+   */
+  protected function triggerCommit() {
+    // Iterate through the registered shutdown functions to find the one
+    // registered in past_guzzle_plugin().
+    $shutdown_functions = drupal_register_shutdown_function();
+    foreach ($shutdown_functions as $shutdown_function) {
+      if (is_array($shutdown_function['callback'])
+        && ($callback = $shutdown_function['callback'])
+        && isset($callback[1])
+        && ($callback[1] == 'commit')
+        && ($callback[0] instanceof \CompactPastGuzzleLogAdapter)) {
+        call_user_func($callback);
+        break;
+      }
+    }
+  }
+
+  /**
+   * Asserts a number of Past events.
+   *
+   * @param int $count
+   *   The number of expected Past events.
+   */
+  public function assertPastEventCount($count = 0) {
+    $events = entity_load('past_event', FALSE, array(), TRUE);
+    if ($count > 0) {
+      $message = format_plural($count, 'Found one Past event', 'Found @count Past Events');
+    }
+    else {
+      $message = 'Found no Past events';
+    }
+    $this->assertEqual(count($events), $count, $message);
+  }
+
+  /**
+   * Gets the latest Past event.
+   *
+   * @return PastEvent
+   *   The latest Past event.
+   */
+  public function getLastPastEvent() {
+    $events = entity_load('past_event', FALSE, array(), TRUE);
+    return reset($events);
+  }
+}

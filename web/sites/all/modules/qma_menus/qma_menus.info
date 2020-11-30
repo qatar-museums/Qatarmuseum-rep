@@ -1,0 +1,11 @@
+name = qma_menus
+description = custom menu related functionality on the QMA site
+package = QMA
+core = 7.x
+
+files[] = qma_menus.module
+files[] = qma_menus.views.inc
+files[] = includes/qma_menus_argument_nid.inc
+
+dependencies[] = locale
+dependencies[] = menu_node_views

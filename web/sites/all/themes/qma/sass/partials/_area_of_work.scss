@@ -1,0 +1,86 @@
+.node-area-of-work {
+	
+	.block-views {
+		width: 100%; 
+	}
+}
+
+//handles layout styling for area of work, in convo hub and generic hub listing of children
+.grid-three {
+
+	width: 100%;
+
+	.views-row {
+		width: 100%;
+		margin-bottom: 3.311em;
+
+		@include at-breakpoint($bp-tablet) {
+			@include span-columns(8, 16);
+		}
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(5, 16);	
+		}
+
+		&.last {
+			margin-right: 0;
+		}
+
+		.field-name-field-teaser-text {
+			@include adjust-font-size-to(16px);
+  			@include adjust-leading-to(5, 16px);
+		}
+	}
+
+	//handle what breaks and clears where
+
+	.views-row {
+		clear: left;
+
+		@include at-breakpoint($bp-tablet) {
+
+			clear: none;
+
+			&:nth-child(2n + 1) {
+				clear: both;
+			}
+
+			&:nth-child(2n) {
+				margin-right: 0;
+			}
+
+		}
+
+		@include at-breakpoint($bp-small-desktop) {
+
+			&:nth-child(2n) {
+				margin-right: $gutter-percentage#{"%"};
+			}
+
+			&:nth-child(2n + 1) {
+				clear: none;
+			}
+
+			&:nth-child(3n) {
+				margin-right: 0;
+				clear: none;
+			}
+
+			&:nth-child(3n+1) {
+				clear: both;
+			}
+
+		}
+
+	}
+
+	.view-footer {
+		clear: left;
+		width: 100%;
+
+		p {
+			margin-bottom: 0;
+		}
+	}
+
+}

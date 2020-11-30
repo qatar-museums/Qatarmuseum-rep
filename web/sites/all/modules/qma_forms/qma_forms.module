@@ -1,0 +1,981 @@
+<?php
+
+/**
+ * @file
+ * qma_forms.module
+ */
+
+
+/**
+ * Implements hook_theme().
+ */
+function qma_forms_theme($existing, $type, $theme, $path) {
+  $hooks = array();
+
+  $hooks['question_form_mail'] = array(
+    'variables' => array('name' => NULL, 'email' => NULL, 'location' => NULL, 'question' => NULL),
+    'template' => 'question-form-mail',
+    'theme paths' => drupal_get_path('module', 'qma_forms') . '/templates',
+  );
+
+  return $hooks;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function qma_forms_permission() {
+  $permissions = array();
+
+  $permissions['administer qma forms'] = array(
+    'title' => t('Administer QMA Forms', array(), array('context' => 'QMA')),
+    'description' => t('Alter settings for the QMA Forms module', array(), array('context' => 'QMA')),
+  );
+
+  return $permissions;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function qma_forms_menu() {
+  $items = array();
+
+  $items['admin/QMA/qma_forms'] = array(
+    'title' => 'QMA Forms Settings',
+    'description' => 'Configure notification settings for QMA forms.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('qma_forms_email_admin_form'),
+    'access arguments' => array('administer qma forms'),
+    'file' => 'qma_forms.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function qma_forms_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'qma_forms') . '/views',
+    'template path' => drupal_get_path('module', 'qma_forms') . '/templates',
+  );
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function qma_forms_block_info() {
+  $blocks = array();
+
+  $blocks['qma_forms_pattern_mail'] = array(
+    'info' => t('QMA Forms Pattern Mail Test', array(), array('context' => 'QMA')),
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function qma_forms_block_view($delta = '') {
+  $block = array();
+
+  if ($delta === 'qma_forms_pattern_mail') {
+    $block['subject'] = t('QMA Forms Pattern Mail Test', array(), array('context' => 'QMA'));
+    $block['content'] = drupal_get_form('qma_forms_pattern_mail_form');
+  }
+
+  return $block;
+}
+
+/**
+ * Implements hook_node_view().
+ *
+ * The form is attached here so that any form errors are processed before the
+ * page is rendered, so appear on the next refresh. Adding this in a preprocess
+ * function calls the form hook too late in the rendering process.
+ */
+function qma_forms_node_view($node, $view_mode) {
+  
+  $content_types = array(
+    'interview', 
+    'interview_hub',
+    'press_room',
+    'creative_resource_hub',
+    'education_resource_hub',
+    'education_hub',
+    'education_institution',
+  );
+
+  if (!in_array($node->type, $content_types) || $view_mode != 'full') {
+    return;
+  }
+
+  // We use the content language here rather than the interface language, since
+  // they may be different.
+  $langcode = $node->language;
+  if ($node->type == 'press_room') {
+    $node->content['press_question_form'] = drupal_get_form('qma_forms_press_question_form', $langcode);
+  } else if (in_array($node->type, array('education_hub', 'education_institution', 'education_resource_hub'))) {
+    $node->content['education_question_form'] = drupal_get_form('qma_forms_education_question_form', $langcode);
+  } else if ($node->type == 'creative_resource_hub') {
+    $node->content['resource_question_form'] = drupal_get_form('qma_forms_resource_question_form', $langcode);
+  } else {
+    $node->content['interview_question_form'] = NULL;
+  
+    $query = new EntityFieldQuery();
+  
+    // This assumes there will only be a single conversation hub.
+    $query->entityCondition('entity_type', 'node')
+      ->propertyCondition('language', $langcode)
+      ->propertyCondition('type', 'interview_hub')
+      ->propertyCondition('status', 1)
+      ->range(0, 1);
+  
+    $result = $query->execute();
+  
+    if (!empty($result['node'])) {
+    $hub_node = array_shift($result['node']);
+  
+    $hub_node_wrapper = entity_metadata_wrapper('node', node_load($hub_node->nid));
+    $role = $hub_node_wrapper->field_next_interviewee_role->value();
+    $interviewee = $hub_node_wrapper->field_next_interviewee_name->value();
+  
+    $node->content['interview_question_form'] = drupal_get_form('qma_forms_interview_question_form', $interviewee, $role, $langcode);
+    }
+  }
+  return $node;
+}
+
+/**
+ * Form definition for interview question form.
+ *
+ * @todo Add front-end character limiting for 'question' textarea.
+ */
+function qma_forms_interview_question_form($form, &$form_state, $interviewee = '', $role = '', $langcode = 'en') {
+  $form = array();
+
+  honeypot_add_form_protection($form, $form_state, array('honeypot', 'time_restriction'));
+
+  $safe_role = check_plain($role);
+  $safe_interviewee = check_plain($interviewee);
+
+  $form['left_col'] = array(
+    '#prefix' => '<div class="form-left-col">',
+    '#suffix' => '</div>',
+  );
+
+  $form['field_wrappers_col'] = array(
+    '#prefix' => '<div class="field-wrappers-col">',
+    '#suffix' => '</div>',
+  );
+
+  $form['field_wrappers_col']['fields_left_col'] = array(
+    '#prefix' => '<div class="fields-left-col">',
+    '#suffix' => '</div>',
+  );
+
+  $form['field_wrappers_col']['fields_right_col'] = array(
+    '#prefix' => '<div class="fields-right-col">',
+    '#suffix' => '</div>',
+  );
+
+  $form['left_col']['title'] = array(
+    '#prefix' => '<h2>',
+    '#markup' => t('What would you ask', array(), array('context' => 'QMA')),
+    '#suffix' => '</h2>',
+  );
+
+  if (!empty($safe_interviewee) && !empty($safe_role)) {
+    $text_first = t('Put a question to @i, @r.', array('@i' => $safe_interviewee, '@r' => $safe_role), array('context' => 'QMA'));
+  }
+  elseif (!empty($safe_interviewee)) {
+    $text_first = t('Put a question to @i.', array('@i' => $safe_interviewee), array('context' => 'QMA'));
+  }
+  else {
+    $text_first = t('Put a question to an interviewee.', array(), array('context' => 'QMA'));
+  }
+
+  $form['left_col']['text_first'] = array(
+    '#prefix' => '<p>',
+    '#markup' => $text_first,
+    '#suffix' => '</p>',
+  );
+
+  $form['left_col']['text_second'] = array(
+    '#prefix' => '<p>',
+    '#markup' => t('We will use your ideas in our upcoming conversations', array(), array('context' => 'QMA')),
+    '#suffix' => '</p>',
+  );
+
+  $form['field_wrappers_col']['fields_left_col']['question'] = array(
+    '#type' => 'textarea',
+    '#title' => t('My question for @i is', array('@i' => $safe_interviewee), array('context' => 'QMA')),
+    '#required' => TRUE,
+  );
+
+  $form['field_wrappers_col']['fields_right_col']['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('My name is', array(), array('context' => 'QMA')),
+    '#maxlength' => 200,
+    '#required' => TRUE,
+  );
+
+  $form['field_wrappers_col']['fields_right_col']['location'] = array(
+    '#type' => 'textfield',
+    '#title' => t('I live in', array(), array('context' => 'QMA')),
+    '#maxlength' => 200,
+    '#required' => TRUE,
+  );
+
+  $form['field_wrappers_col']['fields_right_col']['email'] = array(
+    '#type' => 'textfield',
+    '#title' => t('My email is', array(), array('context' => 'QMA')),
+    '#maxlength' => 200,
+    '#required' => TRUE,
+  );
+
+  $form['langcode'] = array(
+    '#type' => 'value',
+    '#value' => $langcode,
+  );
+  
+   $form['interviewee'] = array(
+    '#type' => 'value',
+    '#value' => $safe_interviewee,
+  );
+
+  $form['field_wrappers_col']['fields_right_col']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Send my question', array(), array('context' => 'QMA')),
+  );
+
+  return $form;
+}
+
+
+/**
+ * Validation handler for interview question form.
+ *
+ * Validates inputs with with check_plain to prevent sloppy outputting causing
+ * issues or vulnerabilities.
+ */
+function qma_forms_interview_question_form_validate($form, &$form_state) {
+  $inputs = array(
+    'name',
+    'interviewee',
+    'location',
+    'email',
+    'langcode',
+    'question',
+  );
+  
+  qma_forms_global_form_validate($form, $form_state, $inputs);
+}
+
+/**
+ * Submission handler for interview question form.
+ */
+function qma_forms_interview_question_form_submit($form, &$form_state) {
+  $fields = array('question','name','interviewee','location','email');
+  $options = array(
+    'tableName'=>'qma_forms_question',
+    'recipient'=>variable_get('qma_forms_admin_email', ''),
+    'successMsg'=>t('Thanks for your question. Check back to see if it\'s selected.', array(), array('context' => 'QMA')),
+    'failureMsg'=>t('There was a problem submitting your question. Please try again.', array(), array('context' => 'QMA')),
+  );
+  
+  qma_forms_global_form_submit($form, $form_state, $fields, $options);
+}
+
+
+
+
+
+/**
+ * Form definition for press question form.
+ *
+ * @todo Add front-end character limiting for 'question' textarea.
+ */
+function qma_forms_press_question_form($form, &$form_state, $langcode = 'en') {
+  $form = array();
+
+  honeypot_add_form_protection($form, $form_state, array('honeypot', 'time_restriction'));
+
+  $form['field_wrappers_col'] = array(
+    '#prefix' => '<div class="field-wrappers-col">',
+    '#suffix' => '</div>',
+  );
+
+  $form['field_wrappers_col']['title'] = array(
+    '#prefix' => '<h3>',
+    '#markup' => t('Ask a question', array(), array('context' => 'QMA')),
+    '#suffix' => '</h3>',
+  );
+
+  $form['field_wrappers_col']['fields_left_col'] = array(
+    '#prefix' => '<div class="fields-left-col">',
+    '#suffix' => '</div>',
+  );
+
+  $form['field_wrappers_col']['fields_right_col'] = array(
+    '#prefix' => '<div class="fields-right-col">',
+    '#suffix' => '</div>',
+  );
+
+  $form['field_wrappers_col']['fields_right_col']['question'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Notes', array(), array('context' => 'QMA')),
+    '#required' => TRUE,
+  );
+
+  $form['field_wrappers_col']['fields_left_col']['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name', array(), array('context' => 'QMA')),
+    '#maxlength' => 200,
+    '#required' => TRUE,
+  );
+
+  $form['field_wrappers_col']['fields_left_col']['organisation'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Company', array(), array('context' => 'QMA')),
+    '#maxlength' => 200,
+    '#required' => FALSE,
+  );
+
+  $form['field_wrappers_col']['fields_left_col']['email'] = array(
+    '#type' => 'textfield',
+    '#title' => t('My email is', array(), array('context' => 'QMA')),
+    '#maxlength' => 200,
+    '#required' => TRUE,
+  );
+  
+  $request_types = array(
+    t('Press Release', array(), array('context' => 'QMA')),
+    t('Images', array(), array('context' => 'QMA')),
+    t('Fact sheet', array(), array('context' => 'QMA')),
+    t('Interview', array(), array('context' => 'QMA')),
+    t('Filming and photography ', array(), array('context' => 'QMA')),
+    t('Other', array(), array('context' => 'QMA')),
+  );
+
+  $form['field_wrappers_col']['fields_left_col']['request_type'] = array(
+    '#type' => 'checkboxes',
+    '#options' => drupal_map_assoc($request_types),
+    '#title' => t('Request', array(), array('context' => 'QMA')),
+    '#maxlength' => 200,
+    '#required' => TRUE,
+  );
+
+  $form['langcode'] = array(
+    '#type' => 'value',
+    '#value' => $langcode,
+  );
+
+  $form['field_wrappers_col']['fields_right_col']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Send your request', array(), array('context' => 'QMA')),
+  );
+
+  return $form;
+}
+
+/**
+ * Validation handler for press question form.
+ *
+ * Validates inputs with with check_plain to prevent sloppy outputting causing
+ * issues or vulnerabilities.
+ */
+function qma_forms_press_question_form_validate($form, &$form_state) {
+  $inputs = array(
+    'name',
+    'organisation',
+    'email',
+    'langcode',
+    'request_type',
+    'question',
+  );
+  
+  qma_forms_global_form_validate($form, $form_state, $inputs);
+}
+
+/**
+ * Submission handler for press question form.
+ */
+function qma_forms_press_question_form_submit($form, &$form_state) {
+  $fields = array('question','name','organisation','request_type','email');
+  $options = array(
+    'tableName'=>'qma_forms_press_question',
+    'recipient'=>variable_get('qma_forms_admin_press_email', ''),
+    'successMsg'=>t('Thanks for your question. We will respond via e-mail.', array(), array('context' => 'QMA')),
+    'failureMsg'=>t('There was a problem submitting your question. Please try again.', array(), array('context' => 'QMA')),
+  );
+  
+  qma_forms_global_form_submit($form, $form_state, $fields, $options);
+}
+
+
+/**
+ * Form definition for creative resource question form.
+ */
+function qma_forms_education_question_form($form, &$form_state, $langcode = 'en') {
+  $form = array();
+
+  honeypot_add_form_protection($form, $form_state, array('honeypot', 'time_restriction'));
+
+  $form['left_col'] = array(
+    '#prefix' => '<div class="form-left-col">',
+    '#suffix' => '</div>',
+  );
+
+  $form['field_wrappers_col'] = array(
+    '#prefix' => '<div class="field-wrappers-col">',
+    '#suffix' => '</div>',
+  );
+
+  $form['field_wrappers_col']['fields_left_col'] = array(
+    '#prefix' => '<div class="fields-left-col">',
+    '#suffix' => '</div>',
+  );
+
+  $form['field_wrappers_col']['fields_right_col'] = array(
+    '#prefix' => '<div class="fields-right-col">',
+    '#suffix' => '</div>',
+  );
+
+  $form['left_col']['title'] = array(
+    '#prefix' => '<h2>',
+    '#markup' => t('Tell us what you think', array(), array('context' => 'QMA')),
+    '#suffix' => '</h2>',
+  );
+
+  $form['left_col']['text_first'] = array(
+    '#prefix' => '<p>',
+    '#markup' => t('What sort of educational programmes and resources would you like to see?', array(), array('context' => 'QMA')),
+    '#suffix' => '</p>',
+  );
+
+  $form['field_wrappers_col']['fields_left_col']['suggestion'] = array(
+    '#type' => 'textarea',
+    '#title' => t('My suggestion is', array(), array('context' => 'QMA')),
+    '#required' => TRUE,
+  );
+
+  $form['field_wrappers_col']['fields_right_col']['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('My name is', array(), array('context' => 'QMA')),
+    '#maxlength' => 200,
+    '#required' => TRUE,
+  );
+
+  $form['field_wrappers_col']['fields_right_col']['company'] = array(
+    '#type' => 'textfield',
+    '#title' => t('I work for', array(), array('context' => 'QMA')),
+    '#maxlength' => 200,
+    '#required' => TRUE,
+  );
+
+  $form['field_wrappers_col']['fields_right_col']['email'] = array(
+    '#type' => 'textfield',
+    '#title' => t('My email is', array(), array('context' => 'QMA')),
+    '#maxlength' => 200,
+    '#required' => TRUE,
+  );
+
+  $form['langcode'] = array(
+    '#type' => 'value',
+    '#value' => $langcode,
+  );
+
+  $form['field_wrappers_col']['fields_right_col']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Send my suggestion', array(), array('context' => 'QMA')),
+  );
+
+  return $form;
+}
+
+/**
+ * Validation handler for resource question form.
+ *
+ * Validates inputs with with check_plain to prevent sloppy outputting causing
+ * issues or vulnerabilities.
+ */
+function qma_forms_education_question_form_validate($form, &$form_state) {
+  $inputs = array(
+    'name',
+    'company',
+    'email',
+    'suggestion',
+    'langcode',
+  );
+
+  qma_forms_global_form_validate($form, $form_state, $inputs);
+}
+
+/**
+ * Submission handler for resource question form.
+ */
+function qma_forms_education_question_form_submit($form, &$form_state) {
+  $fields = array('name', 'company', 'email', 'suggestion');
+
+  $options = array(
+    'tableName' => 'qma_forms_education_question',
+    'recipient' => variable_get('qma_forms_admin_resource_email', ''),
+    'successMsg' => t('Thanks for your suggestion.', array(), array('context' => 'QMA')),
+    'failureMsg' => t('There was a problem submitting your suggestion. Please try again.', array(), array('context' => 'QMA')),
+  );
+
+  qma_forms_global_form_submit($form, $form_state, $fields, $options);
+}
+
+
+/**
+ * Form definition for creative resource question form.
+ *
+ * @todo Add front-end character limiting for 'question' textarea.
+ */
+function qma_forms_resource_question_form($form, &$form_state, $langcode = 'en') {
+  $form = array();
+
+  honeypot_add_form_protection($form, $form_state, array('honeypot', 'time_restriction'));
+
+  $form['left_col'] = array(
+    '#prefix' => '<div class="form-left-col">',
+    '#suffix' => '</div>',
+  );
+
+  $form['left_col']['title'] = array(
+    '#prefix' => '<h3>',
+    '#markup' => t('Tell us what you think we should add as a creative resource', array(), array('context' => 'QMA')),
+    '#suffix' => '</h3>',
+  );
+
+  $form['field_wrappers_col'] = array(
+    '#prefix' => '<div class="field-wrappers-col">',
+    '#suffix' => '</div>',
+  );
+
+  $form['field_wrappers_col']['fields_left_col'] = array(
+    '#prefix' => '<div class="fields-left-col">',
+    '#suffix' => '</div>',
+  );
+
+  $form['field_wrappers_col']['fields_right_col'] = array(
+    '#prefix' => '<div class="fields-right-col">',
+    '#suffix' => '</div>',
+  );
+
+  $form['field_wrappers_col']['fields_right_col']['question'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Your Suggestion -', array(), array('context' => 'QMA')),
+    '#required' => TRUE,
+  );
+
+  $form['field_wrappers_col']['fields_left_col']['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Your name -', array(), array('context' => 'QMA')),
+    '#maxlength' => 200,
+    '#required' => TRUE,
+  );
+
+
+  $form['field_wrappers_col']['fields_left_col']['email'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Your contact email -', array(), array('context' => 'QMA')),
+    '#maxlength' => 200,
+    '#required' => TRUE,
+  );
+  
+
+  $form['langcode'] = array(
+    '#type' => 'value',
+    '#value' => $langcode,
+  );
+
+  $form['field_wrappers_col']['fields_right_col']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Send us your thoughts', array(), array('context' => 'QMA')),
+  );
+
+  return $form;
+}
+
+/**
+ * Validation handler for resource question form.
+ *
+ * Validates inputs with with check_plain to prevent sloppy outputting causing
+ * issues or vulnerabilities.
+ */
+function qma_forms_resource_question_form_validate($form, &$form_state) {
+  $inputs = array(
+    'name',
+    'email',
+    'langcode',
+    'question',
+  );
+  
+  qma_forms_global_form_validate($form, $form_state, $inputs);
+}
+
+/**
+ * Submission handler for resource question form.
+ */
+function qma_forms_resource_question_form_submit($form, &$form_state) {
+  $fields = array('question','name','email');
+  $options = array(
+    'tableName'=>'qma_forms_resource_question',
+    'recipient'=>variable_get('qma_forms_admin_resource_email', ''),
+    'successMsg'=>t('Thanks for your suggestion.', array(), array('context' => 'QMA')),
+    'failureMsg'=>t('There was a problem submitting your suggestion. Please try again.', array(), array('context' => 'QMA')),
+  );
+  
+  qma_forms_global_form_submit($form, $form_state, $fields, $options);
+}
+
+
+/**
+ * Validation handler for all user question forms.
+ *
+ * Validates inputs with with check_plain to prevent sloppy outputting causing
+ * issues or vulnerabilities.
+ * param $inputs is an array of field names to be sanatised
+ */
+function qma_forms_global_form_validate($form, &$form_state, $inputs = array()) {
+  foreach ($inputs as $input) {
+    if ($input ==='question') {
+      // Don't want to strip characters here, but this should be encoded when output.
+      $form_state['storage']['clean_values']['question'] = $form_state['values']['question'];
+    } else {
+      $form_state['storage']['clean_values'][$input] = filter_xss($form_state['values'][$input]);
+    }
+  }
+
+
+  if (!preg_match('/.+@.+/', $form_state['storage']['clean_values']['email'])) {
+    form_set_error('email', t('Please enter a valid email address.', array(), array('context' => 'QMA')));
+  }
+}
+
+
+/**
+ * Submission handler for all question forms.
+ *
+ * @todo Set some nicer messages.
+ * @todo Add notification emails and config variable for address.
+ */
+function qma_forms_global_form_submit($form, &$form_state, $fields = array(), $options = array()) {
+  $txn = db_transaction();
+  
+  $storageArr = array();
+  foreach($fields as $input_field) {
+    if (is_array($form_state['storage']['clean_values'][$input_field])) { //multi-valued fields
+      //we could just serialize this data for storage but then we'd need to process it each time
+      //it's retrieved. n.b this makes an assumption that a 0 or empty value should be omitted
+      //as we are dealing with unset options here (e.g checkboxes).
+      $outputArr = array();
+      foreach($form_state['storage']['clean_values'][$input_field] as $inputVal) {
+        if($inputVal) {
+          $outputArr[] = $inputVal;
+        }
+      }
+      $storageArr[$input_field] =implode('; ', $outputArr);
+    } else {
+      $storageArr[$input_field] = $form_state['storage']['clean_values'][$input_field];
+    }
+  }
+  
+  $storageArr = array_merge(
+    array(
+        'language' => $form_state['storage']['clean_values']['langcode'],
+        'created' => REQUEST_TIME,
+    ),$storageArr);
+
+  try {
+    db_insert($options['tableName'])
+      ->fields($storageArr)
+      ->execute();
+
+    drupal_set_message($options['successMsg']);
+
+    $email = $options['recipient'];
+
+    if (!empty($email)) {
+      drupal_mail('qma_forms', $options['tableName'], $email, 'en', $storageArr);
+    }
+  }
+  catch (Exception $e) {
+    $txn->rollback();
+    watchdog('qma_forms', 'Error inserting new question: ' . $e);
+    drupal_set_message($options['failureMsg'], 'error');
+  }
+}
+
+
+/**
+ * Implements hook_mail().
+ *
+ * Builds the question notification e-mail.
+ *
+ * @todo Clean up the text in this e-mail.
+ */
+function qma_forms_mail($key, &$message, $params) {
+  $question_email_keys = array(
+    'qma_forms_question',
+    'qma_forms_press_question',
+    'qma_forms_resource_question',
+    'qma_forms_education_question',
+  );
+
+  if (in_array($key, $question_email_keys)) {
+    $message['headers']['Content-Type'] = 'text/html; charset=UTF-8; format=flowed';
+
+    $message['subject'] = 'Question submitted';
+
+    if ($key === 'qma_forms_press_question') {
+      $content = array(
+        'intro' => array(
+          '#markup' => 'A question has been submitted',
+        ),
+        'info' => array(
+          '#theme' => 'item_list',
+          '#items' => array(
+            'Submitted: ' . date('Y-m-d H:i', REQUEST_TIME),
+            'Name : ' . check_plain($params['name']),
+            'Company: ' . check_plain($params['organisation']),
+            'Request: ' . check_plain($params['request_type']),
+            'Email: ' . check_plain($params['email']),
+            'Question: ' . check_plain($params['question']),
+          ),
+        ),
+      );
+    } else if($key === 'qma_forms_resource_question') {
+      $content = array(
+        'intro' => array(
+          '#markup' => 'A sugguestion has been submitted',
+        ),
+        'info' => array(
+          '#theme' => 'item_list',
+          '#items' => array(
+            'Submitted: ' . date('Y-m-d H:i', REQUEST_TIME),
+            'Name : ' . check_plain($params['name']),
+            'Email: ' . check_plain($params['email']),
+            'Suggestion: ' . check_plain($params['question']),
+          ),
+        ),
+      );
+    } else if ($key === 'qma_forms_education_question') {
+      $content = array(
+        'intro' => array(
+          '#markup' => 'An education suggestion has been submitted',
+        ),
+        'info' => array(
+          '#theme' => 'item_list',
+          '#items' => array(
+            'Submitted: ' . date('Y-m-d H:i', REQUEST_TIME),
+            'Name : ' . check_plain($params['name']),
+            'Email: ' . check_plain($params['email']),
+            'Company: ' . check_plain($params['company']),
+            'Suggestion: ' . check_plain($params['suggestion']),
+          ),
+        ),
+      );
+    } else {
+      $content = array(
+        'intro' => array(
+          '#markup' => 'A question has been submitted',
+        ),
+        'info' => array(
+          '#theme' => 'item_list',
+          '#items' => array(
+            'Submitted: ' . date('Y-m-d H:i', REQUEST_TIME),
+            'Interviewee: ' . check_plain($params['interviewee']),
+            'Name : ' . check_plain($params['name']),
+            'Question: ' . check_plain($params['question']),
+            'Location: ' . check_plain($params['location']),
+            'Email: ' . check_plain($params['email']),
+          ),
+        ),
+      );
+    }
+    $message['body'][] = render($content);
+  }
+  elseif ($key === 'qma_forms_pattern_mail') {
+    $message['subject'] = 'I\'ve made a pattern';
+    $message['headers']['Return-Path'] = $message['headers']['Sender'] = $message['headers']['From'];
+    $message['headers']['Bcc'] = 'patterns@cogapp.com,mypattern@qm.org.qa';
+    $message['body'][] = $params['content'];
+    $message['body'][] = "\n";
+
+    if (isset($params['attachment'])) {
+      $message['params']['attachments'][] = $params['attachment'];
+    }
+  }
+}
+
+/**
+ * Retrieve all interviewee names from the database. Used for IN views filter.
+ *
+ * @see views_handler_filter_qma_forms_interviewee.inc
+ */
+function qma_forms_get_interviewees() {
+  $result = db_query('SELECT interviewee FROM {qma_forms_question}');
+
+  $interviewees = array();
+
+  if ($result) {
+    while ($row = $result->fetchAssoc()) {
+      $interviewees[] = $row['interviewee'];
+    }
+  }
+
+  return $interviewees;
+}
+
+/**
+ * QMA pattern generator sharing form.
+ */
+function qma_forms_pattern_mail_form($form, &$form_state) {
+  $form = array();
+
+  honeypot_add_form_protection($form, $form_state, array('honeypot', 'time_restriction'));
+
+  $wrapper_id = 'qma-forms-pattern-mail-form-wrapper';
+  $current_url = url(current_path(), array('absolute' => TRUE));
+  $message_text = "I made this pattern on the Qatar Museums website - $current_url";
+
+  $form['#attached']['js'][] = array(
+    'data' => array(
+      'qmaForms' => array(
+        'messageText' => $message_text,
+      ),
+    ),
+    'type' => 'setting',
+  );
+
+  $form['#prefix'] = '<div id="' . $wrapper_id . '">';
+  $form['#suffix'] = '</div>';
+
+
+  $form['mail']['from_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('My name', array(), array('context', 'QMA')),
+  );
+
+  $form['mail']['from'] = array(
+    '#type' => 'textfield',
+    '#title' => t('My email', array(), array('context', 'QMA')),
+  );
+
+  $form['mail']['to'] = array(
+    '#type' => 'textfield',
+    '#title' => t('My friend\'s email', array(), array('context', 'QMA')),
+  );
+
+  $disclaimer = t('Qatar Museums will not share or store your email address, and are not responsible for the email\'s content.', array(), array('context' => 'QMA'));
+
+  $form['mail']['message'] = array(
+    '#type' => 'textarea',
+    '#title' => t('My message', array(), array('context', 'QMA')),
+    '#default_value' => $message_text,
+    '#description' => $disclaimer,
+  );
+
+  // This isn't a hidden field because hidden field values don't submit properly
+  // when altered - they appear as input not values, and don't play nicely with ajax.
+  $form['image']['image_data'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Image data',
+    '#maxlength' => '9999999', // What is a reasonable max length?
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Share my pattern', array(), array('context' => 'QMA')),
+    '#ajax' => array(
+      'callback' => 'qma_forms_pattern_mail_form_callback',
+      'wrapper' => $wrapper_id,
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+  );
+
+  $form['close'] = array(
+    '#markup' => '<a href="#" class="close">Close</a>',
+  );
+
+  return $form;
+}
+
+/**
+ * QMA pattern generator sharing form validation.
+ */
+function qma_forms_pattern_mail_form_validate($form, &$form_state) {
+  $form_state['values']['message'] = filter_xss($form_state['values']['message']);
+
+  if (!preg_match('/.+@.+/', $form_state['values']['to'])) {
+    form_set_error('mail][to', t('Please enter a valid to address.', array(), array('context' => 'QMA')));
+  }
+
+  if (!preg_match('/.+@.+/', $form_state['values']['from'])) {
+    form_set_error('mail][from', t('Please enter a valid from address.', array(), array('context' => 'QMA')));
+  }
+
+  // Check that the image data looks valid. It should be a 650px square png. 
+  if (strlen($form_state['values']['image_data'])) {
+    $form_state['storage']['image_string'] = base64_decode(str_replace('data:image/png;base64,', '', $form_state['values']['image_data']));
+
+    $tmp_img = file_save_data($form_state['storage']['image_string'], 'temporary://tmp.png');
+
+    if (!$tmp_img) {
+      form_set_error('', t('Your pattern appears to be invalid. Please try again.', array(), array('context' => 'QMA')));
+    }
+    else {
+      $imageinfo = image_get_info($tmp_img->uri);
+      $valid_size = $imageinfo['width'] === 650 && $imageinfo['height'] === 650;
+      $valid_mime_type = $imageinfo['mime_type'] === 'image/png';
+      
+      if (!$valid_size || !$valid_mime_type) {
+        form_set_error('', t('Your pattern appears to be invalid. Please try again.', array(), array('context' => 'QMA')));
+      }
+
+      // Make sure the file is cleaned up regardless of errors.
+      file_delete($tmp_img);
+    }
+  }
+}
+
+/**
+ * QMA pattern generator sharing form submission.
+ */
+function qma_forms_pattern_mail_form_submit($form, &$form_state) {
+  $to = $form_state['values']['to'];
+  $from_name = $form_state['values']['from_name'];
+  $from_mail = $form_state['values']['from'];
+  $from = "\"$from_name\" <$from_mail>";
+
+  $params = array(
+    'content' => $form_state['values']['message'],
+  );
+
+  if (isset($form_state['storage']['image_string'])) {
+    $params['attachment'] = array(
+      'filecontent' => $form_state['storage']['image_string'],
+      'filename' => 'pattern.png',
+      'filemime' => 'image/png',
+    );
+  }
+
+  drupal_mail('qma_forms', 'qma_forms_pattern_mail', $to, 'en', $params, $from);
+  drupal_set_message(t('Congratulations, your pattern has been shared!', array(), array('context' => 'QMA')));
+}
+
+/**
+ * QMA pattern generator sharing form AJAX callback.
+ */
+function qma_forms_pattern_mail_form_callback($form, &$form_state) {
+  return $form;
+}

@@ -1,0 +1,21 @@
+diff --git a/linkchecker.module b/linkchecker.module
+index 128f0e1..340dedd 100644
+--- a/linkchecker.module
++++ b/linkchecker.module
+@@ -556,8 +556,14 @@ function _linkchecker_status_handling(&$response, $link) {
+   if (!isset($response->status_message)) {
+     $response->status_message = '';
+   }
+-  $response->error = trim(drupal_convert_to_utf8($response->error, 'ISO-8859-1'));
+-  $response->status_message = trim(drupal_convert_to_utf8($response->status_message, 'ISO-8859-1'));
++
++  $has_mbstring = function_exists('mb_detect_encoding');
++
++  $error_encoding = $has_mbstring ? mb_detect_encoding($response->error) : 'ISO-8859-1';
++  $response->error = trim(drupal_convert_to_utf8($response->error, $error_encoding));
++
++  $status_message_encoding = $has_mbstring ? mb_detect_encoding($response->status_message) : 'ISO-8859-1';
++  $response->status_message = trim(drupal_convert_to_utf8($response->status_message, $status_message_encoding));
+ 
+   // Destination anchors in HTML documents may be specified either by the A
+   // element (naming it with the name attribute), or by any other element

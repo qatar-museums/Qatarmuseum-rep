@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA Instagram feature.
+ */
+
+include_once 'qma_instagram.features.inc';

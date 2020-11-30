@@ -1,0 +1,835 @@
+<?php
+
+/**
+ * @file
+ * qma_education.module
+ */
+
+define('QMA_EDUCATION_PROGRAMME', 'education_prog');
+
+module_load_include('inc', 'qma_education', 'includes/qma_education.tokens');
+module_load_include('inc', 'qma_education', 'includes/qma_education.forms');
+module_load_include('inc', 'qma_education', 'includes/qma_education.pages');
+
+/**
+ * Implements hook_theme().
+ */
+function qma_education_theme() {
+  $hooks = array();
+
+  $hooks['qma_education_date_range'] = array(
+    'variables' => array(
+      'startdate' => NULL,
+      'enddate' => NULL,
+      'join' => NULL,
+      'prefix' => NULL,
+      'suffix' => NULL,
+    ),
+    'file' => 'qma_education.theme',
+  );
+
+  return $hooks;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function qma_education_permission() {
+  return array(
+    'education data access' => array(
+      'title' => t('Education data access'),
+      'description' => t('View registration listings'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_admin_paths().
+ */
+function qma_education_admin_paths() {
+  $paths = array();
+
+  foreach (registration_get_registration_instances() as $instance) {
+    $type = $instance['entity_type'];
+
+    if (!in_array($type, array('registration', 'registration_type'))) {
+      $paths[] = $type . '/%entity_object/registrations';
+      $paths[] = $type . '/%entity_object/registrations/*';
+    }
+  }
+
+  return $paths;
+}
+
+/**
+ * Implements hook_menu_alter().
+ *
+ * Override the registration page callback for registration-enabled entities.
+ */
+function qma_education_menu_alter(&$items) {
+  foreach (registration_get_registration_instances() as $instance) {
+    $type = $instance['entity_type'];
+
+    if (!in_array($type, array('registration', 'registration_type'))) {
+      // Hide the menu tab
+      $items[$type . '/%entity_object/register']['type'] = MENU_CALLBACK;
+
+      // Disable the e-mail functionality
+      unset($items[$type . '/%entity_object/registrations/broadcast']);
+
+      // Set custom registration summary page
+      $items[$type . '/%entity_object/registrations']['page callback'] = 'qma_education_registration_registrations_page';
+
+      // Set up custom page handlers and themes
+      $items[$type . '/%entity_object/register']['page callback'] = 'qma_education_register_page';
+      $items[$type . '/%entity_object/registrations']['theme callback'] = 'qma_education_admin_theme';
+      $items[$type . '/%entity_object/registrations/list']['theme callback'] = 'qma_education_admin_theme';
+      $items[$type . '/%entity_object/registrations/settings']['theme callback'] = 'qma_education_admin_theme';
+      $items[$type . '/%entity_object/registrations/broadcast']['theme callback'] = 'qma_education_admin_theme';
+    }
+  }
+}
+
+/**
+ * Theme callback for admin pages.
+ */
+function qma_education_admin_theme() {
+  return variable_get('admin_theme', 'seven');
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function qma_education_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'qma_education') . '/views',
+    'template path' => drupal_get_path('module', 'qma_education') . '/views',
+  );
+}
+
+/**
+ * Implements hook_preprocess_node().
+ */
+function qma_education_preprocess_node(&$variables) {
+  $node = $variables['node'];
+  $view_mode = $variables['view_mode'];
+
+  if ($node->type === 'education_hub' && $view_mode === 'full') {
+    $variables['child_pages'] = views_embed_view('child_pages_by_menu', 'child_pages_block', $node->nid, $node->language);
+  }
+}
+
+/**
+ * Implements hook_preprocess_page().
+ *
+ * Add title and metadata to the registration page for a programme.
+ *
+ * @todo is there a better way to check the template?
+ * @todo make the node loading more robust
+ */
+function qma_education_preprocess_page(&$variables) {
+  if (in_array('page__node__register', $variables['theme_hook_suggestions'])) {
+    $nid = (int) arg(1);
+    $node = node_load($nid);
+    $variables['title'] = $node->title;
+    $wrapper = entity_metadata_wrapper('node', $node);
+
+    if (isset($wrapper->field_intro_text)) {
+      $intro = $wrapper->field_intro_text->value();
+      $variables['intro'] = $intro['safe_value'];
+    }
+    else {
+      $variables['intro'] = '';
+    }
+
+    $variables['subtitle'] = t('Application', array(), array('context' => 'QMA'));
+  }
+
+  if (in_array('page__registration', $variables['theme_hook_suggestions'])) {
+    $text = t('Your application to join this event has been received.  A summary of your application has been emailed to you.The Museum/Department concerned will be in touch with you shortly to notify you of the availability and spaces, if relevant. Thank you.', array(), array('context' => 'QMA'));
+    $variables['page']['content']['intro_text']['#markup'] = '<p>' . $text . '</p>';
+    $variables['page']['content']['intro_text']['#weight'] = -20;
+
+    $rid = (int) arg(1);
+    $registration = entity_load_single('registration', $rid);
+    $programme_node = entity_load_single($registration->entity_type, $registration->entity_id);
+
+    if ($programme_node) {
+      $programme_link_text = t('Return to @programme', array('@programme' => $programme_node->title), array('context' => 'QMA'));
+      $variables['page']['links']['return_to_programme'] = l($programme_link_text, 'node/' . $programme_node->nid);
+    }
+
+    global $language;
+    $langcode = $language->language;
+
+    $query = new EntityFieldQuery();
+
+    // This assumes there will only be a single education hub.
+    $query->entityCondition('entity_type', 'node')
+      ->propertyCondition('language', $langcode)
+      ->propertyCondition('type', 'education_hub')
+      ->propertyCondition('status', 1)
+      ->range(0, 1);
+
+    $result = $query->execute();
+
+    if (!empty($result['node'])) {
+      $hub_node = array_shift($result['node']);
+      $link_text = t('See more programmes', array(), array('context' => 'QMA'));
+      $variables['page']['links']['see_more_programmes'] = l($link_text, 'node/' . $hub_node->nid);
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocss_date_views_pager().
+ *
+ * Set custom labels for the next and previous buttons based on granularity.
+ *
+ * @param $variables
+ */
+function qma_education_preprocess_date_views_pager(&$variables) {
+  $plugin = $variables['plugin'];
+  $view = $plugin->view;
+
+  if (empty($view->date_info) || empty($view->date_info->min_date)) {
+    return;
+  }
+
+  $date_info = $view->date_info;
+
+  // Make sure we have some sort of granularity.
+  $granularity = !empty($date_info->granularity) ? $date_info->granularity : 'month';
+
+  // Build next/prev link titles.
+  switch ($granularity) {
+    case 'year':
+      $prev_label = t('Previous year');
+      $next_label = t('Next year');
+      break;
+    case 'month':
+      $prev_label = t('Previous month');
+      $next_label = t('Next month');
+      break;
+    case 'week':
+      $prev_label = t('Previous week');
+      $next_label = t('Next week');
+      break;
+    case 'day':
+      $prev_label = t('Previous day');
+      $next_label = t('Next day');
+      break;
+    default:
+       $prev_label = t('Previous');
+       $next_label = t('Next');
+  }
+
+  $variables['prev_label'] = $prev_label;
+  $variables['next_label'] = $next_label;
+}
+
+/**
+ * Re-implements registration_status() to take into account the date-based
+ * nature of education programme registrations.
+ *
+ * @param string $entity_type
+ *   The host entity type.
+ *
+ * @param int $entity_id
+ *   The host entity ID.
+ *
+ * @param int $startdate
+ *   Start date for registration as unix timestamp.
+ *
+ * @param int $enddate
+ *   End date for registration as unix timestamp.
+ *
+ * @param bool $reset
+ *
+ * @param int $spaces
+ *   (optional) The number of spaces to check that there is room for.
+ *
+ * @param int $registration_id
+ *   (optional) A registration id to exclude from the has room check.
+ *
+ * @param array $errors
+ *   (optional) An array of error message strings.
+ *
+ * @return bool
+ */
+function qma_education_registration_status($entity_type, $entity_id, $startdate, $enddate, $reset = FALSE, $spaces = 1, $registration_id = NULL, &$errors = array()) {
+  $checked = &drupal_static(__FUNCTION__, array());
+
+  if (!$reset && isset($checked[$entity_type][$entity_id])) {
+    $errors = is_array($errors) ? array_merge($errors, $checked[$entity_type][$entity_id]['errors']) : $checked[$entity_type][$entity_id]['errors'];
+    return $checked[$entity_type][$entity_id]['status'];
+  }
+
+  $entity = entity_load_single($entity_type, $entity_id);
+  $registration_type = registration_get_entity_registration_type($entity_type, $entity);
+
+  // The host entity does not have registrations enabled.
+  if (!$registration_type) {
+    return FALSE;
+  }
+
+  $settings = registration_entity_settings($entity_type, $entity_id, $reset);
+  $status = $settings['status'];
+  $open = isset($settings['open']) ? strtotime($settings['open']) : NULL;
+  $close = isset($settings['close']) ? strtotime($settings['close']) : NULL;
+  $now = REQUEST_TIME;
+
+  // only explore other settings if main status is enabled
+  if ($status) {
+    // check capacity
+    if (!qma_education_registration_has_room($entity_type, $entity_id, $spaces, $registration_id, $reset, $startdate, $enddate)) {
+      $status = FALSE;
+      $errors[] = t('insufficient spaces remaining');
+    }
+    // check open date range
+    if (isset($open) && ($now < $open)) {
+      $status = FALSE;
+      $errors[] = t('registration is not yet open');
+    }
+    // check close date range
+    if (isset($close) && ($now >= $close)) {
+      $status = FALSE;
+      $errors[] = t('registration is closed');
+    }
+  }
+  else {
+    $errors[] = t('registration is disabled');
+  }
+
+  // allow other mods to override status
+  $context = array(
+    'entity_type' => $entity_type,
+    'entity_id' => $entity_id,
+    'startdate' => $startdate,
+    'enddate' => $enddate,
+    'errors' => &$errors,
+  );
+
+  drupal_alter('qma_education_registration_status', $status, $context);
+
+  $checked[$entity_type][$entity_id] = array(
+    'status' => $status,
+    'errors' => $errors,
+  );
+
+  return $status;
+}
+
+/**
+ * A basic status check if registration is allowed for an entity. Does not check
+ * things like capacity and date slots, only that registration is enabled and
+ * valid for the entity queried.
+ *
+ * @param $entity_type
+ * @param $entity_id
+ * @return bool
+ */
+function qma_education_registration_status_basic($entity_type, $entity_id) {
+  $errors = array();
+  $checked = &drupal_static(__FUNCTION__, array());
+
+  if (isset($checked[$entity_type][$entity_id])) {
+    return $checked[$entity_type][$entity_id]['status'];
+  }
+
+  $entity = entity_load_single($entity_type, $entity_id);
+  $registration_type = registration_get_entity_registration_type($entity_type, $entity);
+
+  // The host entity does not have registrations enabled.
+  if (!$registration_type) {
+    return FALSE;
+  }
+
+  $settings = registration_entity_settings($entity_type, $entity_id);
+  $status = $settings['status'];
+  $open = isset($settings['open']) ? strtotime($settings['open']) : NULL;
+  $close = isset($settings['close']) ? strtotime($settings['close']) : NULL;
+  $now = REQUEST_TIME;
+
+  // only explore other settings if main status is enabled
+  if ($status) {
+    // check open date range
+    if (isset($open) && ($now < $open)) {
+      $status = FALSE;
+      $errors[] = t('registration is not yet open');
+    }
+    // check close date range
+    if (isset($close) && ($now >= $close)) {
+      $status = FALSE;
+      $errors[] = t('registration is closed');
+    }
+  }
+  else {
+    $errors[] = t('registration is disabled');
+  }
+
+  // allow other mods to override status
+  $context = array(
+    'entity_type' => $entity_type,
+    'entity_id' => $entity_id,
+    'errors' => &$errors,
+  );
+
+  drupal_alter('qma_education_registration_status_basic', $status, $context);
+
+  $checked[$entity_type][$entity_id] = array(
+    'status' => $status,
+    'errors' => $errors,
+  );
+
+  return $status;
+}
+
+/**
+ * Check if room is available for event registration given a number of spaces.
+ *
+ * This is a modified version of registration_has_room() which also takes into
+ * account the date slot being registered for.
+ *
+ * @param $entity_type
+ * @param $entity_id
+ * @param $spaces
+ * @param $registration_id
+ * @param $reset
+ * @param int $startdate
+ *   Unix timestamp for start date.
+ * @param int $enddate
+ *   Unix timestamp for end date.
+ * @return bool *
+ *   TRUE if spaces remain for registration, FALSE otherwise.
+ */
+function qma_education_registration_has_room($entity_type, $entity_id, $startdate, $enddate, $spaces = 1, $registration_id = NULL, $reset = FALSE) {
+  $settings = registration_entity_settings($entity_type, $entity_id, $reset);
+  $capacity = $settings['capacity'];
+
+  if ($capacity) {
+    $count = qma_education_registration_event_count($entity_type, $entity_id, $startdate, $enddate, $registration_id, $reset) + $spaces;
+    if (($capacity - $count) < 0) {
+      return FALSE;
+    }
+  }
+
+  return TRUE;
+}
+
+/**
+ * Reimplementation of registration_event_count().
+ *
+ * Counts the number of registrations for an event, with an added filter on the
+ * time slot being booked.
+ *
+ * @param $entity_type
+ * @param $entity_id
+ * @param $registration_id
+ * @param $reset
+ * @param int $startdate
+ *   Unix timestamp for start date.
+ * @param int $enddate
+ *   Unix timestamp for end date.
+ * @return int88
+ */
+function qma_education_registration_event_count($entity_type, $entity_id, $startdate, $enddate, $registration_id = NULL, $reset = FALSE) {
+  $count = &drupal_static(__FUNCTION__ . '_' . $entity_type . '_' . $entity_id . '_' . $registration_id . '_' . $startdate . '_' . $enddate, FALSE);
+
+  if (!$count || $reset) {
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'registration');
+    $query->propertyCondition('state', registration_get_active_states(), 'IN');
+    $query->propertyCondition('entity_id', $entity_id);
+    $query->propertyCondition('entity_type', $entity_type);
+    if ($registration_id != NULL) {
+      $query->propertyCondition('registration_id', $registration_id, '<>');
+    }
+    $query->fieldCondition('field_qma_edu_reg_date', 'value', $startdate);
+    $query->fieldCondition('field_qma_edu_reg_date', 'value2', $enddate);
+
+    $result = $query->execute();
+
+    $count = 0;
+
+    if (isset($result['registration'])) {
+      $registrations = entity_load('registration', array_keys($result['registration']));
+
+      foreach ($registrations as $registration) {
+        $count += $registration->count;
+      }
+    }
+  }
+
+  // Allow other mods to override count.
+  $settings = registration_entity_settings($entity_type, $entity_id);
+  $context = array(
+    'entity_type' => $entity_type,
+    'entity_id' => $entity_id,
+    'registration_id' => $registration_id,
+    'startdate' => $startdate,
+    'enddate' => $enddate,
+    'settings' => $settings,
+  );
+
+  drupal_alter('registration_event_count', $count, $context);
+
+  return $count;
+}
+
+/**
+ * Check if a $startdate/$enddate combination for a given entity is bookable.
+ * Bookable means that the slot is valid, and that it has capacity for one or
+ * more further bookings.
+ *
+ * @param string $entity_type
+ * @param int $entity_id
+ * @param int $startdate
+ * @param int $enddate
+ * @return bool
+ */
+function qma_education_is_bookable_date($entity_type, $entity_id, $startdate, $enddate) {
+  $bookable = &drupal_static(__FUNCTION__ . '_' . $entity_type . '_' . $entity_id . '_' . $startdate . '_' .$enddate);
+
+  if (!isset($bookable)) {
+    $dates = qma_education_host_dates($entity_id);
+    $valid = $has_room = FALSE;
+
+    foreach ($dates as $date) {
+      if ($date['bookable'] && $date['value'] == $startdate && $date['value2'] == $enddate) {
+        $valid = TRUE;
+        break;
+      }
+    }
+
+    $has_room = qma_education_registration_has_room($entity_type, $entity_id, $startdate, $enddate);
+    $bookable = $has_room && $valid;
+  }
+
+  return $bookable;
+}
+
+/**
+ * Get an array of bookable dates for an entity.
+ *
+ * @param $entity_id
+ * @param string $entity_type
+ * @return array
+ */
+function qma_education_bookable_dates($entity_id, $entity_type = 'node') {
+  $dates = qma_education_host_dates($entity_id, $entity_type);
+  return array_filter($dates, function($date) {return $date['bookable'];});
+}
+
+/**
+ * Load valid date slots from a host event node. These should be in the future,
+ * but may not all have bookable slots.
+ *
+ * @param int $entity_id
+ * @param string $entity_type
+ * @return array
+ *   An array containing date information, with additional bookable metadata
+ *   as 'booked_slots' for number of booked slots and 'bookable' for an
+ *   availability boolean.
+ */
+function qma_education_host_dates($entity_id, $entity_type = 'node', $vid = FALSE) {
+  $cid = __FUNCTION__ . '_' . $entity_type . '_' . $entity_id;
+
+  if ($vid) {
+    $cid .= '_' . $vid;
+  }
+
+  $dates = &drupal_static($cid);
+
+  if (isset($dates)) {
+    return $dates;
+  }
+  else {
+    $dates = array();
+  }
+
+  if ($vid) {
+    $node = entity_revision_load($entity_type, (int) $vid);
+  }
+  else {
+    $node = entity_load_single($entity_type, $entity_id);
+  }
+
+  if ($node) {
+    $field_collections = field_get_items($entity_type, $node, 'field_eduprog_repeat_date');
+
+    if (isset($node->field_eduprog_repeat_date) && count($field_collections)) {
+      foreach ($field_collections as $field_collection) {
+        $field_collection = entity_revision_load('field_collection_item', $field_collection['revision_id']);
+        $fc_dates = _qma_education_fc_host_dates($entity_id, $entity_type, $field_collection);
+        $dates = array_merge($dates, $fc_dates);
+      }
+    }
+  }
+
+  // Sort dates chronologically by start date, then end date.
+  usort($dates, function($a, $b) {
+    if ($a['value'] === $b['value']) {
+      if ($a['value2'] === $b['value2']) {
+        return 0;
+      }
+      else {
+        return ($a['value2'] > $b['value2']) ? 1: -1;
+      }
+    }
+    else {
+      return ($a['value'] > $b['value']) ? 1: -1;
+    }
+  });
+
+  return $dates;
+}
+
+/**
+ * Callback function for qma_education_host_dates().
+ *
+ * Retrieves date values from a repeating date field collection.
+ */
+function _qma_education_fc_host_dates($entity_id, $entity_type, $field_collection) {
+  $now = REQUEST_TIME;
+  $fc_dates = array();
+
+  if (isset($field_collection->field_eduprog_repeat_field_date)) {
+    $fc_dates = field_get_items('field_collection_item', $field_collection, 'field_eduprog_repeat_field_date');
+
+    // Unset any date slots which are in the past.
+    foreach ($fc_dates as $idx => $fc_date) {
+      if ($fc_date['value'] < $now) {
+        unset($fc_dates[$idx]);
+      }
+      else {
+        $fc_dates[$idx]['booked_slots'] = qma_education_registration_event_count($entity_type, $entity_id, $fc_date['value'], $fc_date['value2']);
+        $fc_dates[$idx]['bookable'] = qma_education_registration_has_room($entity_type, $entity_id, $fc_date['value'], $fc_date['value2']);
+      }
+    }
+  }
+
+  return $fc_dates;
+}
+
+/**
+ * Retrieve an array of dates for an entity formatted for use in a select field.
+ *
+ * @param $entity_id
+ * @param string $entity_type
+ * @return array
+ */
+function qma_education_host_dates_options($entity_id, $entity_type = 'node', $vid = FALSE) {
+  $options = array();
+  $date_field_values = qma_education_host_dates($entity_id, $entity_type, $vid);
+  $settings = registration_entity_settings($entity_type, $entity_id);
+
+  $sold_out = t('(Sold out)', array(), array('context' => 'QMA'));
+
+  foreach ($date_field_values as $idx => $date_value) {
+    if ($date_value['bookable'] && $settings['capacity']) {
+      // Prevent any less-than-zero numbers appearing in case of over-booking
+      $remaining = max(0, $settings['capacity'] - $date_value['booked_slots']);
+      $available = t('(@count Available)', array('@count' => $remaining), array('context' => 'QMA'));
+
+      // This is a bit odd but it works well enough - replace regular spaces
+      // with non-breaking spaces, using the utf-8 character instead of the html
+      // entity to allow it to pass through check_plain(). This is done to
+      // prevent the number and 'Available' appearing on separate lines.
+      $available = str_replace(' ', html_entity_decode('&nbsp;', 0, 'UTF-8'), $available);
+    }
+    else {
+      $available = t('(Available)', array(), array('context' => 'QMA'));
+    }
+
+    $variables = array(
+      'startdate' => $date_value['value'],
+      'enddate' => $date_value['value2'],
+      'join' => '-',
+      'suffix' => $date_value['bookable'] ? $available : $sold_out,
+    );
+
+    $options[$idx] = theme('qma_education_date_range', $variables);
+  }
+
+  return $options;
+}
+
+/**
+ * Implements hook_mail().
+ *
+ * @param $key
+ * @param $message
+ * @param $params
+ */
+function qma_education_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'confirmation':
+      $message['subject'] = 'Programme registration received';
+      $message['body'][] = drupal_html_to_text($params['body']);
+      $message['headers'] += $params['headers'];
+      break;
+  }
+}
+
+/**
+ * Country-specific map link function for location module. Swaps country for
+ * country_name as this seems to give a more accurate result, and filters out
+ * empty query parameters.
+ *
+ * @param $location
+ * @return mixed
+ *   Google maps link or NULL
+ * @see location_map_link()
+ */
+function location_map_link_qa_google($location) {
+  $query_params = array();
+
+  foreach (array('street', 'city', 'province', 'postal_code', 'country_name') as $field) {
+    if (isset($location[$field]) && strlen($location[$field])) {
+      $query_params[] = $location[$field];
+    }
+  }
+
+  if (count($query_params)) {
+    return ('http://maps.google.com?q=' . urlencode(implode(", ", $query_params)));
+  }
+  else {
+    return NULL;
+  }
+}
+
+/**
+ * Implements hook_preprocess_views_view().
+ *
+ * @param $variables
+ */
+function qma_education_preprocess_views_view(&$variables) {
+  $view = $variables['view'];
+
+  // @todo This is only broken on the institution block.
+  if ($view->name === 'qma_edu_repeat_calendar' && in_array($view->current_display, array('block_3', 'page_3'))) {
+    if (!strlen($variables['title'])) {
+      $variables['title'] = t('Find a Programme', array(), array('context' => 'QMA'));
+    }
+  }
+}
+
+/**
+ * Implements hook_views_post_execute().
+ *
+ * This de-duplicates events per day in the education month calendar block. Each
+ * day will retain all repeating events regardless of duplication, but single
+ * day events will be de-duplicated based on nid.
+ */
+function qma_education_views_post_execute(&$view) {
+  if ($view->name === 'qma_edu_repeat_calendar' && $view->current_display === 'block_3') {
+    $processed = array();
+
+    foreach ($view->result as $idx => $result) {
+      $date_start = $result->field_data_field_eduprog_repeat_field_date_field_eduprog_rep;
+      $date_end = $result->field_data_field_eduprog_repeat_field_date_field_eduprog_rep_1;
+
+      // Only process single day events so that styling isn't broken.
+      if ($date_end - $date_start < (24 * 60 * 60)) {
+        $day = date('j', $date_start);
+        $nid = $result->field_eduprog_repeat_date_field_collection_item_nid;
+
+        // If the nid or nid/day is not processed, record it as processed.
+        if (!isset($processed[$nid]) || !in_array($day, $processed[$nid])) {
+          $processed[$nid][] = $day;
+        }
+        // Otherwise, remove the date.
+        else {
+          unset($view->result[$idx]);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ *
+ * @param $entity
+ * @param $type
+ */
+function qma_education_entity_insert($entity, $type) {
+  if ($type === 'registration') {
+    $bin = 'cache_page';
+
+    $programme_url = url('node/' . $entity->entity_id, array('absolute' => TRUE));
+    cache_clear_all($programme_url, $bin);
+
+    $register_url = url('node/' . $entity->entity_id . '/register', array('absolute' => TRUE));
+    cache_clear_all($register_url, $bin, TRUE);
+  }
+}
+
+/**
+ * Implements hook_entity_view().
+ */
+function qma_education_entity_view($entity, $type, $view_mode) {
+  if ($type === 'node' && $view_mode === 'full') {
+    if ($entity->type === QMA_EDUCATION_PROGRAMME) {
+      $can_register = qma_education_registration_status_basic('node', $entity->nid);
+
+      // Check that we have valid date slots, and the event is open for registrations
+      if (!qma_education_host_dates($entity->nid, 'node', $entity->vid) || !$can_register) {
+        $entity->content['booking_form'] = t('', array(), array('context' => 'QMA'));
+      }
+      else {
+        $entity->content['booking_form'] = drupal_get_form('qma_education_booking_form', $entity);
+      }
+    }
+  }
+}
+
+/**
+ * Retrieve the BCC e-mail from an education programme.
+ *
+ * @param $programme_nid
+ * @return string
+ */
+function qma_education_get_bcc_from_programme($programme_nid) {
+  $bcc_mail = &drupal_static(__FUNCTION__ . ':' . $programme_nid);
+
+  if (!$bcc_mail) {
+    $bcc_mail = '';
+    $programme = entity_load_single('node', $programme_nid);
+    $institution_nids = field_get_items('node', $programme, 'field_eduprog_institution');
+
+    if ($institution_nids) {
+      $institution_nid = (int) $institution_nids[0]['target_id'];
+      $bcc_mail = qma_education_get_bcc_from_institution($institution_nid);
+    }
+  }
+
+  return $bcc_mail;
+}
+
+/**
+ * Retrieve the BCC e-mail from an education institution.
+ *
+ * @param $institution_nid
+ * @return string
+ */
+function qma_education_get_bcc_from_institution($institution_nid) {
+  $bcc_mail = &drupal_static(__FUNCTION__ . ':' . $institution_nid);
+
+  if (!$bcc_mail) {
+    $bcc_mail = '';
+    $institution = entity_load_single('node', $institution_nid);
+
+    if ($institution) {
+      $bcc_mails = field_get_items('node', $institution, 'field_registration_bcc');
+
+      if ($bcc_mails) {
+        $bcc_mail = trim($bcc_mails[0]['email']);
+      }
+    }
+  }
+
+  return $bcc_mail;
+}

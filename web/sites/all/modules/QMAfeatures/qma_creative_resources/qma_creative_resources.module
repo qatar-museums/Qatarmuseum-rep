@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA Creative Resources feature.
+ */
+
+include_once 'qma_creative_resources.features.inc';

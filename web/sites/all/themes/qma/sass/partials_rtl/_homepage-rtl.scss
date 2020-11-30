@@ -1,0 +1,146 @@
+$from-direction: right;
+$omega-float: opposite-position($from-direction);
+
+.homepage-collection {
+	.homepage-box {
+		
+		float: right;
+	
+		h2 {
+			left: auto;
+			right: -99999em;
+		}
+
+		.text-container {
+			clear: right;
+		}
+
+	}
+
+	.homepage-box-image {
+
+		&.front {
+			float: right;
+		}
+
+		.text-container {
+
+			text-align: right;
+		}
+	}
+}
+
+.primary-features__item {
+  margin-bottom: 2.222em;
+
+  @media (min-width: 569px) and (max-width: 767px) {
+    @include span-columns(8, 16);
+    margin-right: 0;
+
+    &:nth-child(2n) {
+      @include omega;
+    }
+  }
+
+  @media (min-width: 768px) {
+    @include span-columns(4, 16);
+    margin-right: 0;
+
+    &:nth-child(4n) {
+      @include omega;
+    }
+  }
+}
+
+.secondary-features__item {
+  @media (min-width: 569px) and (max-width: 767px) {
+    @include span-columns(8, 16);
+    margin-right: 0;
+
+    &:nth-child(2n) {
+      @include omega;
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 1023px) {
+    @include span-columns(4, 16);
+    margin-right: 0;
+
+    &:nth-child(4n) {
+      @include omega;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    @include span-columns(8, 16);
+    margin-right: 0;
+
+    &:nth-child(2n) {
+      @include omega;
+    }
+  }
+}
+
+.secondary-features__field {
+  @include at-breakpoint($bp-desktop) {
+    &.field-home-feature-thumbnail {
+      @include span-columns(4, 8);
+      margin-right: 0;
+    }
+
+    &:not(.field-home-feature-thumbnail) {
+      @include span-columns(4 omega, 8);
+      padding-left: ($gutter-percentage * 2)#{"%"};
+      padding-right: 0;
+      clear: left;
+    }
+  }
+
+  &.field-home-feature-category {
+    text-transform: none;
+  }
+}
+
+.homepage-slideshow {
+  .homepage-slideshow__controls {
+    float: left;
+  }
+
+  .homepage-slideshow__category {
+    text-transform: none;
+  }
+
+  .homepage-slideshow__next,
+  .homepage-slideshow__prev {
+    float: right;
+  }
+
+  .homepage-slideshow__next a {
+    @include chevron__left;
+  }
+
+  .homepage-slideshow__prev a {
+    @include chevron__right;
+  }
+
+  // On desktop, float the text to the right of the image
+  @include at-breakpoint($bp-desktop) {
+    .homepage-slideshow__text {
+      @include span-columns(5, 16);
+      margin-right: $grid-padding;
+      margin-left: 0;
+      right: 0;
+      left: auto;
+    }
+
+    .homepage-slideshow__controls {
+      margin-left: $grid-padding;
+      margin-right: 0;
+      left: 0;
+      right: auto;
+    }
+  }
+}
+
+$from-direction: left;
+$omega-float: opposite-position($from-direction);

@@ -1,0 +1,152 @@
+$from-direction: right;
+$omega-float: opposite-position($from-direction);
+
+.view-creative-resources {
+
+	.view-header {
+
+		.header-wrapper {
+
+			@include at-breakpoint($bp-860) {
+				float: right;
+			}
+
+			h2 {
+				float: right;
+			}
+
+			p {
+				float: right;
+				clear: right;
+
+				@include at-breakpoint($bp-860) {
+					float: left;
+					clear: none;
+				}
+			}
+
+		}
+
+		.view-filters {
+
+			float: right;
+			clear: right;
+
+			@include at-breakpoint($bp-860) {
+				float: left;
+				clear: none;
+			}
+
+			.views-exposed-widget {
+				float: left;
+			}
+
+		}
+
+		.reset {
+			float: right;
+
+			@include at-breakpoint($bp-desktop) {
+				margin-left: 0;
+				float: left;
+			}
+		}
+
+	}
+
+}
+
+.view-creative-resources {
+
+	.view-content {
+
+		th {
+			text-align: right;
+		}
+
+
+		td {
+			float: right;
+		}
+
+		.views-field-title {
+
+			@include at-breakpoint($bp-tablet) {
+				@include span-columns(6, 16);
+				margin-right: 0;
+			}
+		}
+
+
+		.views-field-address {
+
+			@include at-breakpoint($bp-tablet) {
+				@include span-columns(4, 16);
+				margin-right: 0;
+			}
+
+		}
+
+		.views-field-field-resource-opening-times {
+
+			@include at-breakpoint($bp-tablet) {
+				@include span-columns(3, 16);
+				margin-right: 0;
+			}
+		}
+
+		.views-field-field-resource-tags {
+
+			@include at-breakpoint($bp-tablet) {
+				@include span-columns(3 omega, 16);
+				padding-right: 0;
+			}
+
+
+			ul {
+
+				li {
+					margin-right: 0;
+
+				}
+
+			}
+		}
+
+	}
+
+}
+
+.field-name-field-featured-resource {
+
+	.filter_image {
+		float: right;
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(5, 16);
+			margin-right: 0;
+		}
+	}
+
+	.teaser-text {
+		float: right;
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(6, 16);
+			margin-right: 0;
+		}
+	}
+
+	.featured-quote {
+
+		float: right;
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(4 omega, 16);
+		}
+	}
+}
+
+
+$from-direction: left;
+$omega-float: opposite-position($from-direction);

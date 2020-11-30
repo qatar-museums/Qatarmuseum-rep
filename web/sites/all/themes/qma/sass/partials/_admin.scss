@@ -1,0 +1,115 @@
+.logged-in {
+
+  div.tabs {
+
+    & ul {
+      position: fixed;
+      right:3px;
+      background:white;
+      padding:20px;
+      border:1px dotted silver;
+      list-style:none;
+      z-index: 10;
+    }
+
+    li:last-of-type {
+      margin-bottom: 0;
+    }
+  }
+
+  #block-locale-language {
+    float: left;
+    margin-right: 2em;
+  }
+
+  .block-logintoboggan {
+    float: left;
+  }
+
+}
+
+.messages {
+  z-index: 99;
+  left: 20%;
+  right: 20%;
+  position: absolute;
+}
+
+/** translation styles **/
+.translation {
+
+  #l10n-client-form {
+
+    input[type="submit"] {
+      float: left;
+      width: auto;
+      margin-top: 10px;
+    }
+
+  }
+
+}
+
+#l10n-client #l10n-client-search-form {
+  background-color: transparent;
+}
+
+#l10n-client #l10n-client-search-form #l10n-client-search-filter-clear {
+  width: 55px;
+  margin: 0;
+  float: right;
+}
+
+#l10n-client #l10n-client-search-form input.form-text {
+  border: 1px solid #000;
+  padding: 1em;
+  width: 100%;
+}
+
+#l10n-client #l10n-client-search-form .form-item.form-type-textfield.form-item-search {
+  float: left;
+  width: 285px;
+}
+
+#block-workbench-block {
+  background-color: #FFFBD9;
+  float: left;
+  position: relative;
+  width: 100%;
+  z-index: 5; /* Between .container and .tabs */
+
+  .node-type-advpoll &,
+  .node-type-whats-on &,
+  .node-type-news-hub &,
+  .node-type-exhibition &,
+  .node-type-press-room &,
+  .node-type-news-article &,
+  .node-type-press-release &,
+  .node-type-interview-hub &,
+  .node-type-membership-page &,
+  .node-type-creative-resource &,
+  .node-type-education-resource &,
+  .node-type-education-resource-hub & {
+    margin-bottom: 3em;
+    margin-top: -3em;
+  }
+
+  .node-type-generic-page & {
+    margin-top: -3em;
+  }
+
+  .workbench-info-block {
+    padding-top: 2.222em;
+    padding-bottom: 2.222em;
+  }
+
+  .workbench-moderation-moderate-form {
+    display: block;
+    margin-top: 0.5em;
+
+    .form-item {
+      display: inline-block;
+      margin-bottom: 0;
+    }
+  }
+}

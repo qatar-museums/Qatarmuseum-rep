@@ -1,0 +1,39 @@
+<?php 
+
+/*
+* Implementation of hook_query_alter()
+* By Default search results return all languages and content types
+* we want to restrict this to current language and exclude non-page types
+* n.b not excluding press releases as there was a requirement to show these
+* in search results.
+*/
+function qma_search_mods_query_alter(&$query) {
+  $is_search = FALSE;
+  
+  //apply to any query that uses the search index table
+  //we could target more explicitly if this issue were resolved https://drupal.org/node/1435834
+  //targeted function commented out below
+  foreach ($query->getTables() as $table) {
+    if ($table['table'] == 'search_index') {
+      $is_search = TRUE;
+    }
+  }
+
+  if ($is_search) {
+    $curLang = i18n_language_interface();
+    $query->condition('n.type', 'advpoll', '<>');
+    $query->condition('n.type', 'creative_resource', '<>');
+    $query->condition('n.type', 'promo', '<>');
+    $query->condition('n.type', 'homepage', '<>'); //exclude homepage as the only content is references to other pages
+    $query->condition('n.language', $curLang->language, '=');
+  }
+}
+
+/*function qma_search_mods_query_search_node_alter(&$query) {
+    $curLang = i18n_language_interface();
+    $query->condition('n.type', 'advpoll', '<>');
+    $query->condition('n.type', 'creative_resource', '<>');
+    $query->condition('n.type', 'promo', '<>');
+    $query->condition('n.language', $curLang->language, '=');
+}*/
+?>

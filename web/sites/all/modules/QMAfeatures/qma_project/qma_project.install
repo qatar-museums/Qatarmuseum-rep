@@ -1,0 +1,13 @@
+<?php
+/**
+ * Change the option list avaialable to the status field. This entails mapping all the existing stored values to their new equivelents
+ */
+function qma_project_update_7001() {
+    db_query("update field_revision_field_project_status set field_project_status_value='now' where field_project_status_value ='Ongoing'");
+    db_query("update field_revision_field_project_status set field_project_status_value='future' where field_project_status_value ='In Development'");
+    db_query("update field_revision_field_project_status set field_project_status_value='past' where field_project_status_value ='Past'");
+    db_query("update field_data_field_project_status set field_project_status_value='now' where field_project_status_value ='Ongoing'");
+    db_query("update field_data_field_project_status set field_project_status_value='future' where field_project_status_value ='In Development'");
+    db_query("update field_data_field_project_status set field_project_status_value='past' where field_project_status_value ='Past'");
+}
+?>

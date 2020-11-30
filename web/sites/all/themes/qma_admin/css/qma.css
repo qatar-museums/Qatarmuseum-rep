@@ -1,0 +1,60 @@
+/* Hide unused write in option from advpoll form */
+.field-name-advpoll-choice .form-type-checkbox {
+  display:none;
+}
+
+/* Styling for the diff form at /node/%nid/moderation/diff */
+#diff-node-revisions tbody tr {
+  border-top: 1px #AAA solid
+}
+
+#diff-node-revisions th input {
+  margin: 0;
+}
+
+table.diff td {
+  padding: 5px;
+}
+
+table.diff td.diff-links {
+  padding: 5px 0 0;
+}
+
+.diff-links {
+  bottom: -1px;
+  left: 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.diff-links ul li {
+  background-color: #fafafa;
+  border: 1px #BBB solid;
+  display: inline-block;
+  padding: 5px 10px;
+}
+
+.diff-links ul li.active {
+  background-color: #f0f0ff;
+  border-bottom: 1px #f0f0ff solid;
+  font-weight: bold;
+}
+
+.diff-section-title {
+  border-top: 1px #BBB solid;
+}
+
+.page-node-revisions-view .node,
+.page-node-moderation-diff-view .node {
+  padding: 5px 20px;
+}
+
+.page-node-revisions-view .field-item,
+.page-node-moderation-diff-view .node .field-item {
+  padding: 5px;
+}
+
+.page-node-revisions-view .node img,
+.page-node-moderation-diff-view .node img {
+  max-width: 100%;
+}

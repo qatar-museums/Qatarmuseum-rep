@@ -1,0 +1,41 @@
+#user-register-form {
+  .password-strength,
+  div.password-confirm {
+    float: left;
+
+    @include at-breakpoint($bp-small-desktop) {
+      margin-top: 0;
+      position: absolute;
+      left: 0;
+      right: auto;
+      top: -6px;
+    }
+  }
+}
+
+#user-profile-form {
+  input[type="submit"] {
+    margin-right: 0;
+    margin-left: 0.5em;
+  }
+}
+
+.membership-half-width {
+  @include at-breakpoint($bp-desktop) {
+    @include pre(6);
+  }
+}
+
+#user-cancel-confirm-form {
+  input[type="submit"] {
+    margin: 0 0 0 1em;
+  }
+}
+
+.sponsor-logos {
+  .sponsor-logo,
+  .sponsor-logos-left,
+  .sponsor-logos-right {
+    float: right;
+  }
+}

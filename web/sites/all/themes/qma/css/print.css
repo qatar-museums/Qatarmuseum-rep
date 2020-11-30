@@ -1,0 +1,40 @@
+* {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.membership-card {
+  color: #231F20;
+  float: left;
+  font-family: Tahoma, sans-serif;
+  font-size: 0.4cm;
+  font-size-adjust: 0.5;
+  font-style: normal;
+  font-weight: bold;
+  position: relative;
+  width: 8.5cm;
+}
+
+.membership-card img {
+  width: 100%;
+}
+
+.membership-card-number,
+.membership-card-name {
+  left: 0.35cm;
+  padding: 0 0.25cm;
+  position: absolute;
+  width: 5.2cm;
+}
+
+.membership-card-name {
+  top: 6.87cm;
+}
+
+.membership-card-number {
+  top: 7.69cm;
+}

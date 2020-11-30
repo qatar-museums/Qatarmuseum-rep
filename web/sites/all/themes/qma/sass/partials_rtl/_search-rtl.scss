@@ -1,0 +1,40 @@
+.page-search-node .search-form {
+
+  .form-item-keys {
+    padding-left: 3.125em;
+    padding-right: 0;
+  }
+
+	.form-wrapper {
+
+		.form-item {
+			float: right;
+		}
+
+		label {
+			float: right;
+			width: 30%;
+		}
+
+    input#edit-keys {
+      border-left: 0;
+      border-right: 2px #000 solid;
+      float: right;
+    }
+
+    input[type=submit] {
+      left: 0;
+      right: auto;
+    }
+	}
+}
+
+.search-results-container {
+	.search-result {
+		margin-right: 0;
+
+		&:before {
+			display: none;
+		}
+	}
+}

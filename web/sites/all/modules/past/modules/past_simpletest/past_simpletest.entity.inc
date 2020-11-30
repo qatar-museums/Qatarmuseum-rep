@@ -1,0 +1,389 @@
+<?php
+
+/**
+ * @file
+ * Contains the entity classes for Past Simpletest backend.
+ */
+
+/**
+ * The main Event class for the Past Simpletest backend.
+ */
+class PastEventSimpletest implements PastEventInterface {
+  public $event_id;
+  public $module;
+  public $machine_name;
+  public $message;
+  public $severity;
+  public $timestamp;
+  public $uid;
+
+  protected $arguments;
+  protected $child_events = array();
+  protected $max_recursion;
+
+  protected static $event_id_counter = 1;
+
+  public function __construct(array $values = array()) {
+    $this->max_recursion = variable_get('past_max_recursion', 10);
+
+    foreach ($values as $key => $value) {
+      $this->$key = $value;
+    }
+  }
+
+  /**
+   * Outputs debugging information for saving the event.
+   */
+  public function save() {
+    // Prepare all arguments.
+    foreach ($this->getArguments() as $argument) {
+      $argument->ensureType();
+    }
+
+    // Create a pretty debug string to show on the Simpletest view
+    $out  = 'Module: ' . $this->getModule() . chr(10);
+    $out .= 'Machine name: ' . $this->getMachineName() . chr(10);
+    $out .= 'Message: ' . $this->getMessage() . chr(10);
+
+    // Attach all Arguments
+    $out .= 'Arguments: ' . chr(10);
+    foreach ($this->getArguments() as $name => $argument) {
+      $out .= $this->formatArgument($name, $argument);
+    }
+
+    // Assign an event id.
+    $this->event_id = self::$event_id_counter++;
+
+    // Debug outputs are shown on the Simpletest frontend.
+    debug($out);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function addArgument($key, $data, array $options = array()) {
+    if (!is_array($this->arguments)) {
+      $this->arguments = array();
+    }
+
+    // If it is an object, clone it to avoid changing the original and log it
+    // at the current state. Except when it can't, like e.g. exceptions.
+    if (is_object($data) && !($data instanceof Exception)) {
+      $data = clone $data;
+    }
+
+    // Special support for exceptions, convert them to something that can be
+    // stored.
+    if (isset($data) && $data instanceof Exception) {
+      $data = _drupal_decode_exception($data) + array('backtrace' => $data->getTraceAsString());
+    }
+
+    // Remove values which were explicitly added to the exclude filter.
+    if (!empty($options['exclude'])) {
+      foreach ($options['exclude'] as $exclude) {
+        if (is_array($data)) {
+          unset($data[$exclude]);
+        }
+        elseif (is_object($data)) {
+          unset($data->$exclude);
+        }
+      }
+      unset($options['exclude']);
+    }
+
+    $this->arguments[$key] = new PastEventSimpletestArgument(array('name' => $key, 'original_data' => $data) + $options);
+    return $this->arguments[$key];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function addArgumentArray($key_prefix, array $data, array $options = array()) {
+    $arguments = array();
+    foreach ($data as $key => $value) {
+      $arguments[$key] = $this->addArgument($key_prefix . ':' . $key, $value, $options);
+    }
+    return $arguments;
+  }
+
+  /**
+   * {@inheritdoc]}
+   */
+  protected function loadArguments() {
+    if (!is_array($this->arguments)) {
+      $this->arguments = array();
+    }
+  }
+
+  /**
+   * {@inheritdoc]}
+   */
+  public function getArgument($key) {
+    $this->loadArguments();
+    return isset($this->arguments[$key]) ? $this->arguments[$key] : NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getArguments() {
+    $this->loadArguments();
+    return $this->arguments;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function addException(Exception $exception, array $options = array()) {
+    $this->addArgument('exception', $exception, $options);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMachineName() {
+    return $this->machine_name;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getModule() {
+    return $this->module;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSeverity() {
+    return $this->severity;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMessage() {
+    return $this->message;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getTimestamp() {
+    return $this->timestamp;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function id() {
+    return $this->event_id;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setParentEventId($event_id) {
+    $this->parent_event_id = $event_id;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setSeverity($severity) {
+    $this->severity = $severity;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setMessage($message) {
+    $this->message = $message;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setTimestamp($timestamp) {
+    $this->timestamp = $timestamp;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUid($uid) {
+    $this->uid = $uid;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getUid() {
+    return $this->uid;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setMachineName($machine_name) {
+    $this->machine_name = $machine_name;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setModule($module) {
+    $this->module = $module;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function addChildEvent($event_id) {
+    $this->child_events[] = $event_id;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getChildEvents() {
+    return $this->child_events;
+  }
+
+  /**
+   * Formats an argument in HTML markup.
+   *
+   * @param string $name
+   *   Name of the argument.
+   * @param PastEventArgument $argument
+   *   Argument instance.
+   *
+   * @return string
+   *   A HTML div describing the argument and its data.
+   */
+  protected function formatArgument($name, $argument) {
+    $back = '';
+    $data = $argument->getData();
+    if (is_array($data) || is_object($data)) {
+      foreach ($data as $k => $v) {
+        $back .= '   [' . strip_tags($k) . '] => (' . gettype($v) . ') ' . $this->parseObject($v) . chr(10);
+      }
+      $back = chr(10) . $back;
+    }
+    else {
+      $back = (is_string($data) ? strip_tags($data) : $data) . chr(10);
+    }
+    $back = ' ' . strip_tags($name) . ' (' . gettype($data) . '): ' . $back;
+    return $back;
+  }
+
+  /**
+   * Formats an object in HTML markup.
+   *
+   * @param object $obj
+   *   The value to be formatted. Any type is accepted.
+   * @param int $recursive
+   *   (optional) Recursion counter to avoid long HTML for deep structures.
+   *   Should be unset for any calls from outside the function itself.
+   *
+   * @return string
+   *   A HTML div describing the value.
+   */
+  protected function parseObject($obj, $recursive = 0) {
+    if ($recursive > $this->max_recursion) {
+      return t('_Too many nested objects ( @recursion )_', array('@recursion' => $this->max_recursion));
+    }
+    if (is_scalar($obj) || is_null($obj)) {
+      return is_string($obj) ? trim(strip_tags($obj)) : $obj;
+    }
+
+    $back = '';
+    foreach ($obj as $k => $v) {
+      $back .= chr(10) . str_repeat(' ', $recursive * 2) . '     [' . strip_tags($k) . '] => (' . gettype($v) . ') ' . $this->parseObject($v, $recursive + 1);
+    }
+    return $back;
+  }
+}
+
+/**
+ * The Arguments Entity class for the Past Simpletest backend.
+ */
+class PastEventSimpletestArgument implements PastEventArgumentInterface {
+
+  public $argument_id;
+  public $event_id;
+  protected $original_data;
+  public $name;
+  public $type;
+  public $raw;
+
+  public function __construct(array $values = array()) {
+    foreach ($values as $key => $value) {
+      $this->$key = $value;
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getData() {
+    return $this->original_data;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getKey() {
+    return $this->name;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getRaw() {
+    return $this->raw;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getType() {
+    return $this->type;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setRaw($data, $json_encode = TRUE) {
+    $this->raw = $json_encode ? drupal_json_encode($data) : $data;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getOriginalData() {
+    return $this->original_data;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function ensureType() {
+    if (isset($this->original_data)) {
+      if (is_object($this->original_data)) {
+        $this->type = get_class($this->original_data);
+      }
+      else {
+        $this->type = gettype($this->original_data);
+      }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function defaultLabel() {
+    return $this->getKey();
+  }
+}

@@ -1,0 +1,686 @@
+#all-project-listing {
+	margin-bottom: 0;
+	background-color: #f5f5f5;
+}
+
+.view-display-id-all_projects_and_areas, .view-display-id-experience_map_block {
+	// header and filter styles
+	background-color: #f5f5f5;
+
+	.views-widget-filter-field_area_of_work_target_id {
+		display: none;
+	}
+
+	.views-exposed-widgets {
+		width: 100%;
+		margin-bottom: 0;
+
+		.form-radios {
+
+			margin: 0;
+
+			.form-item {
+				float: left;
+				clear: none;
+				width: 100%;
+				margin-right: 0;
+
+				@include at-breakpoint($bp-tablet) {
+					width: auto;
+					margin-right: $gutter-width;
+				}
+			}
+
+			label {
+				@include din-bold;
+				font-size: 1em;
+				text-transform: uppercase;
+				position: relative;
+				top: 2px;
+			}
+
+		}
+
+	}
+
+	.view-filters {
+		background-color: $grey-bg;
+		padding: 0.5em 1em;
+		width: 100%;
+		display: inline-block;
+		margin-bottom: -6px;
+
+		@include at-breakpoint($bp-tablet) {
+			padding: 0 1em;
+		}
+
+		form {
+			float: left;
+
+			.ajax-progress,
+			.ajax-progress-throbber {
+				display: none;
+			}
+
+		}
+
+		.views-widget-filter-field_area_of_work_target_id_entityreference_filter {
+			width: 100%;
+			padding: 0;
+			margin-top: 1em;
+
+			@include at-breakpoint($bp-small-desktop) {
+				@include span-columns(7, 16);
+			}
+
+			@include at-breakpoint($bp-desktop) {
+				@include span-columns(10, 16);
+			}
+		}
+
+		.views-widget-filter-tid_i18n {
+			margin-top: 1em;
+			width: 100%;
+			clear: left;
+
+			@include at-breakpoint($bp-small-desktop) {
+				float: left;
+				display: inline-block;
+				width: 262px;
+				margin-right: 0;
+				clear: none;
+				padding-right: 0;
+			}
+
+			label {
+				font-weight: normal;
+				float: left;
+			}
+
+			.views-widget {
+				float: left;
+				margin-left: 0.5em;
+			}
+
+		}
+
+		.views-submit-button {
+
+			margin-bottom: 0.5em;
+
+			.form-submit {
+				margin-top: 0;
+			}
+
+		}
+
+		.views-widget-filter-field_project_status_value {
+			display: none;
+		}
+
+	}
+
+	// actual item styling
+
+	.views-row .node {
+		width: 200px;
+		height: 200px;
+		float: left;
+		position: relative;
+
+		&.highlight,
+		&.area-of-work-experience {
+			width: 320px;
+			height: 320px;
+
+			@include at-breakpoint($bp-tablet) {
+				width: 400px;
+				height: 400px;
+			}
+		}
+
+		&.new-project {
+			width: 300px;
+			height: 300px;
+
+			.new-flag {
+				position: absolute;
+				top: 45%;
+				left: 41%;
+				z-index: 2;
+				background-color: $yellow;
+				color: #000000;
+				border: 2px solid #000000;
+				padding: 0.5em;
+				text-transform: uppercase;
+				@include din-bold;
+			}
+
+		}
+	}
+
+	.experience-view-header {
+		width: 320px;
+		height: 320px;
+		padding: 1em;
+		background-color: $pink;
+		float: right;
+
+		display: none;
+
+		@include at-breakpoint($bp-small-desktop) {
+			display: block;
+		}
+
+		color: #FFFFFF;
+		@include din-bold;
+
+		a {
+			@include din-light;
+			display: block;
+			background-color: transparent;
+			color: #FFFFFF;
+			font-weight: normal;
+
+			&:hover {
+				border-bottom: none;
+				text-decoration: underline;
+				padding-bottom: 1px;
+			}
+
+			&.activefilter {
+				@include din-bold;
+			}
+		}
+
+		p {
+			margin-top: 1.3em;
+			margin-bottom: 0;
+
+			a {
+				display: inline;
+			}
+		}
+
+		@include at-breakpoint($bp-tablet) {
+			width: 200px;
+			height: 200px;
+		}
+	}
+
+}
+
+.view-filters {
+
+	.reset {
+		@include button-style;
+		max-width: 6.4em;
+		float: left;
+		margin: 0.45em 0 0.45em 0;
+		text-align: center;
+		display: none;
+		clear: left;
+
+		@include at-breakpoint($bp-desktop) {
+			clear: none;
+			margin-top: 0.5em;
+			margin-left: 1em;
+		}
+
+	}
+
+}
+
+.project-experience-teaser,
+.area-of-work-experience {
+
+	overflow: hidden;
+
+	.hover-content {
+		background: transparent url('../images/trans_white.png') repeat top left;
+		display: none;
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		padding: 1em;
+		z-index: 3;
+
+		.field-name-field-teaser-text {
+			display: none;
+		}
+	}
+
+	.csstransitions & .hover-content {
+		display: block;
+		top: 200px;
+	}
+
+	.csstransitions.no-touch & .hover-content {
+		@include transition (top 0.2s linear);
+	}
+
+	&.highlight .hover-content {
+		right: 0;
+		top: 200px;
+	}
+
+	.csstransitions &.highlight .hover-content {
+		top: 400px;
+	}
+
+	&.highlight .hover-content .field-name-field-teaser-text,
+	&.new-project .hover-content .field-name-field-teaser-text,
+	&.area-of-work-experience .hover-content .field-name-field-teaser-text {
+		display: block;
+		margin-top: 1em;
+	}
+
+	&:hover .hover-content {
+		display: block;
+		border-bottom: none;
+	}
+
+	.csstransitions.no-touch &:hover .hover-content,
+	div.hovered & .hover-content {
+		top: 0;
+	}
+
+	.csstransitions.no-touch &.highlight:hover .hover-content,
+	.hovered &.highlight .hover-content {
+		top: 200px;
+	}
+
+	.no-touch &:hover .new-flag,
+	.hovered & .new-flag {
+		display: none;
+	}
+
+	.no-touch &:hover {
+		span.underline {
+			border-bottom: 1px solid #000000;
+		}
+	}
+
+}
+
+
+.area-of-work-experience {
+	padding: 1em;
+	background-color: $blue;
+	overflow: hidden;
+
+	.touch & *:hover,
+	.touch & *:active {
+		// -webkit-tap-highlight-color: rgba(0,0,0,0);
+		// -webkit-user-select: none;
+		// -webkit-touch-callout: none;
+	}
+
+	.hover-content {
+		background-color: #000000;
+		background-image: none;
+		top: 0 !important;
+		right: 33%;
+		color: $blue;
+	 	@include din-bold;
+
+		.csstransitions & {
+			left: -66%;
+			right: 100%;
+			display: block;
+		}
+
+		.csstransitions.no-touch & {
+			@include transition (left 0.25s, right 0.25s);
+		}
+	}
+
+	.csstransitions.no-touch &:hover .hover-content,
+	.hovered & .hover-content {
+		left: 0%;
+		right: 33%;
+	}
+
+	.center-text {
+		display: table-cell;
+		vertical-align: middle;
+		text-align: center;
+		width: 284px;
+		height: 284px;
+
+		@include at-breakpoint($bp-tablet) {
+			width: 364px;
+			height: 364px;
+			border: 10px solid #000000;
+			border-radius: 50%;
+		}
+	}
+
+	&.museums--galleries {
+		background-color: $yellow;
+		position: relative;
+
+		.center-text {
+			border-radius: 0;
+			border: none;
+			text-align: left;
+
+			h4 {
+				text-align: center;
+
+				@include at-breakpoint($bp-tablet) {
+					width: 50%;
+					margin-left: 2em;
+					text-align: left;
+					margin-top: 1em;
+
+					html[dir='rtl'] & {
+						text-align: right;
+					}
+				}
+			}
+		}
+
+		.hover-content {
+			color: $yellow;
+		}
+
+		.svg-triangle{
+		  margin: 0 auto;
+		  width: 400px;
+		  height: 400px;
+		  position: absolute;
+		  z-index: 1;
+		  top: 0;
+		  left: 0;
+		  display: none;
+
+		  @include at-breakpoint($bp-tablet) {
+		  	display: block;
+		  }
+		}
+
+		.svg-triangle polygon {
+		  fill: transparent;
+		  stroke: #000000;
+		  stroke-width: 10;
+		}
+	}
+
+	&.heritage-sites {
+		background-color: $pink;
+		padding: 2.2em;
+
+		@include at-breakpoint($bp-tablet) {
+			padding: 4em;
+		}
+
+		.hover-content {
+			color: $pink;
+		}
+
+		.center-text {
+			border-radius: 0;
+			width: 241px;
+			height: 241px;
+			@include transform(rotate(45deg));
+
+			@include at-breakpoint($bp-tablet) {
+				width: 256px;
+				height: 256px;
+			}
+
+			div {
+				@include transform(rotate(-45deg));
+				margin-left: 0.6em;
+				margin-top: 2em;
+			}
+		}
+
+	}
+
+}
+
+// js styles
+
+.js {
+	.views-widget-filter-tid_i18n,
+	.views-widget-filter-field_resource_tags_tid_i18n,
+	.views-widget-filter-field_press_tags_tid_i18n,
+	.views-widget-filter-field_press_news_type_tid_i18n {
+
+ 		label {
+			display: none;
+		}
+
+	}
+
+}
+
+.js {
+
+	.project-experience-teaser,
+	.area-of-work-experience {
+
+		&:hover {
+			cursor: pointer;
+			border-bottom: none;
+		}
+
+	}
+
+	.view-display-id-all_projects_and_areas, .view-display-id-experience_map_block {
+
+		.view-filters {
+
+			.views-widget-filter-field_area_of_work_target_id_entityreference_filter {
+				margin-top: 0;
+				margin-left: 0;
+
+				float: left;
+				width: auto;
+				margin-right: 0;
+			}
+
+			.views-widget-filter-tid_i18n {
+				margin-top: 0;
+
+				float: left;
+				clear: left;
+
+				@include at-breakpoint($bp-tablet) {
+					display: inline-block;
+				}
+
+				@include at-breakpoint($bp-small-desktop) {
+					width: 14em;
+					clear: none;
+				}
+
+				label {
+					display: none;
+				}
+
+				.views-widget {
+					float: left;
+					margin-bottom: 0.5em;
+					margin-left: 0;
+				}
+
+			}
+
+			.views-submit-button {
+				margin-bottom: 0;
+				display: none;
+			}
+
+			.bef-select-as-radios {
+
+				.form-item:first-child,
+				input {
+					display: none;
+				}
+
+				.form-item:last-child {
+					margin-right: 1em;
+				}
+
+				label {
+					background-color: #FFFFFF;
+					border: 2px solid #000000;
+					padding: 0.4em 1em;
+					display: block;
+					margin: 0.5em 0;
+					top: 0;
+
+					width: 100%;
+
+					@include at-breakpoint($bp-tablet) {
+						width: auto;
+					}
+
+					&:hover {
+						cursor: pointer;
+						border-color: $pink;
+					}
+
+					&.selected {
+						color: #FFFFFF;
+						background-color: #000000;
+
+						&:hover {
+							cursor: default;
+							border-color: #000000;
+						}
+					}
+				}
+			}
+
+			.views-widget-filter-tid_i18n {
+				padding-right: 0;
+
+				.views-widget {
+					width: 100%;
+				}
+			}
+
+			.select-target.select-theme-default {
+				width: 100%;
+
+				@include at-breakpoint($bp-tablet) {
+					width: 14em;
+				}
+			}
+
+			.reset {
+				width: 100%;
+				max-width: none;
+
+				@include at-breakpoint($bp-tablet) {
+					width: auto;
+					min-width: 9em;
+				}
+			}
+		}
+
+		.view-content {
+			position: relative;
+			width: 100%;
+
+			@include at-breakpoint($bp-small-desktop) {
+				width: 600px;
+				margin: 0 auto;
+			}
+
+			@include at-breakpoint($bp-769) {
+				width: 100%;
+				margin: 0 0;
+			}
+
+		}
+
+	}
+
+	.experience-view-header {
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
+}
+
+// map specific styles
+.view-display-id-experience_map_block {
+
+	.view-content {
+		position: relative;
+	}
+
+	.map-view-header {
+		right: 0;
+		left: auto;
+		z-index: 99999;
+	}
+
+	.gmap-map {
+		margin-bottom: -6px;
+	}
+
+}
+
+// default google style overrides
+
+
+
+.gm-style .gm-style-iw,
+.gm-style .gm-style-iw a,
+.gm-style .gm-style-iw span,
+.gm-style .gm-style-iw label,
+.gm-style .gm-style-iw div {
+	font-size: inherit;
+}
+
+.gmap-popup {
+
+	width: 180px;
+
+	@include at-breakpoint($bp-tablet) {
+		width: 300px;
+	}
+
+	article {
+		font-size: 1.5em;
+
+		h4,
+		.field-name-field-teaser-text {
+			margin-bottom: 1em;
+		}
+
+		.field-name-field-teaser-text,
+		a {
+			font-size: 0.95em !important;
+			@include din-light;
+			font-weight: normal;
+		}
+	}
+}
+
+// map on touch device specific styles
+.js.touch {
+
+	.view-display-id-experience_map_block {
+
+		.view-content {
+			width: 100%;
+			padding: 0 20px;
+			background-color: #333333;
+		}
+
+		.map-view-header {
+			right: 20px;
+		}
+
+	}
+
+}

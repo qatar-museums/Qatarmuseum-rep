@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA twitter handling feature.
+ */
+
+include_once 'qma_twitter_handling.features.inc';

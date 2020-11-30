@@ -1,0 +1,21 @@
+***************
+*** 73,81 ****
+  // FCM Variables
+  //
+  // FCM Cloud Messaging TokenSender ID
+- define('PUSH_NOTIFICATIONS_FCM_CLOUD_MESSAGING_TOKEN', variable_get('push_notifications_fcm_cloud_messaging_token', ''));
+- // FCM Cloud Messaging Server Key
+  define('PUSH_NOTIFICATIONS_FCM_SERVER_KEY', variable_get('push_notifications_fcm_server_key', ''));
+  // FCM Server Post URL
+  define('PUSH_NOTIFICATIONS_FCM_SERVER_POST_URL', variable_get('push_notifications_fcm_server_post_url', 'https://fcm.googleapis.com/fcm/send'));
+  
+--- 73,81 ----
+  // FCM Variables
+  //
+  // FCM Cloud Messaging TokenSender ID
+  define('PUSH_NOTIFICATIONS_FCM_SERVER_KEY', variable_get('push_notifications_fcm_server_key', ''));
++ // FCM Cloud Messaging Server Key
++ define('PUSH_NOTIFICATIONS_FCM_LEGACY_SERVER_KEY', variable_get('push_notifications_fcm_legacy_server_key', ''));
+  // FCM Server Post URL
+  define('PUSH_NOTIFICATIONS_FCM_SERVER_POST_URL', variable_get('push_notifications_fcm_server_post_url', 'https://fcm.googleapis.com/fcm/send'));
+  

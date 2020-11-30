@@ -1,0 +1,52 @@
+/* HEADER */
+
+.exhibition-details {
+  overflow: hidden;
+}
+
+.exhibition-details__date {
+  h4 {
+    margin: 0;
+    text-transform: none;
+  }
+  &:after {
+    display: block;
+    content: "\2014";
+  }
+}
+
+.exhibition-container {
+  overflow: hidden;
+}
+
+.exhibition-hero img {
+  display: block;
+  float: none;
+  margin: 0 auto;
+}
+
+.exhibitions-teaser-link {
+  display: block;
+  padding:0;
+
+  &:hover {
+    border: none;
+  }
+}
+
+.exhibition-label {
+  @include din-bold;
+}
+
+.exhibition-details__venue {
+  margin-bottom: 0.5em;
+}
+
+.exhibition-details__ticket {
+  margin-bottom: rhythm(6, 18px);
+}
+
+.container.exhibition-hero {
+  padding-left: 0;
+  padding-right: 0;
+}

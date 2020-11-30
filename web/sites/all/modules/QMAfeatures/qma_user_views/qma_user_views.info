@@ -1,0 +1,16 @@
+name = QMA User Views
+description = Overview and export view for user information
+core = 7.x
+package = QMAfeatures
+version = 7.x-1.6
+project = qma_user_views
+dependencies[] = better_exposed_filters
+dependencies[] = qma_custom
+dependencies[] = views
+dependencies[] = views_data_export
+features[ctools][] = views:views_default:3.0
+features[features_api][] = api:2
+features[views_view][] = user_search
+features[views_view][] = users
+mtime = 1423568020
+project path = sites/all/modules/QMAfeatures

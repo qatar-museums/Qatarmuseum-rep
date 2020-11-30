@@ -1,0 +1,17 @@
+***************
+*** 178,184 ****
+          // Create helper variables.
+          $output[$index]->$target_key = array();
+          if ($field->field_info['cardinality'] == 1) {
+-           $output[$index]->$target_key[] = '';
+          }
+          $obj = &$output[$index]->$target_key;
+          $format = ($field->options['type'] == 'services') ? 'raw' : 'rendered';
+--- 178,184 ----
+          // Create helper variables.
+          $output[$index]->$target_key = array();
+          if ($field->field_info['cardinality'] == 1) {
++           $output[$index]->{$target_key}[] = '';
+          }
+          $obj = &$output[$index]->$target_key;
+          $format = ($field->options['type'] == 'services') ? 'raw' : 'rendered';

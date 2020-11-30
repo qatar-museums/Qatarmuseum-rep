@@ -1,0 +1,17 @@
+name = Push Notifications
+description = "Push notification functionality for iPhone and Android"
+package = Other
+core = 7.x
+files[] = push_notifications.install
+files[] = push_notifications.module
+files[] = views/push_notifications_views_handler_field_push_notifications_type.inc
+files[] = views/push_notifications_views_handler_filter_push_notifications_type.inc
+configure = admin/config/services/push_notifications
+dependencies[] = services
+
+; Information added by Drupal.org packaging script on 2016-05-06
+version = "7.x-1.2"
+core = "7.x"
+project = "push_notifications"
+datestamp = "1462499942"
+

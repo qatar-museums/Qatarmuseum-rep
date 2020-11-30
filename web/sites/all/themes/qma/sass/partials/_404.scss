@@ -1,0 +1,28 @@
+.page-404 {
+
+	header {
+		margin-bottom: 0;
+	}
+
+	#main-wrapper {
+		margin-bottom: -6px;
+		background-color: $blue;
+	}
+
+	.special-container {
+		margin-top: 3em;
+		margin-bottom: 3em;
+	}
+
+	.fourohfour-container {
+		width: 100%;
+		padding-bottom: 3em;
+		background-color: #FFFFFF;
+		padding: 1em;
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(12, 16);
+		}
+	}
+
+}

@@ -1,0 +1,14 @@
+name = QMA Forms
+description = Form definitions for the QMA site
+package = QMA
+
+core = 7.x
+version = 7.x-0.3
+
+dependencies[] = honeypot
+dependencies[] = smtp
+
+files[] = qma_forms.install
+files[] = qma_forms.module
+files[] = views/qma_forms.views_default.inc
+files[] = views/views_handler_filter_qma_forms_interviewee.inc

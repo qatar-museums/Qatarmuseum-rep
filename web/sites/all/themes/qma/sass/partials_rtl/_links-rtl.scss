@@ -1,0 +1,96 @@
+// pagination
+.pager {
+
+  li {
+    float: right;
+  }
+
+  .pager-next,
+  .pager-previous {
+
+    a {
+      float: right;
+      background: url('../images/pagination-sprite.gif') no-repeat 100% 0;
+      margin-right: 0;
+      margin-left: 1em;
+
+      &:hover {
+        background-position: 100% 100%;
+      }
+
+    }
+
+  }
+
+  .pager-next {
+
+      a {
+        background-position: 0 0;
+        margin-right: 1em;
+        margin-left: 0;
+
+        &:hover {
+          background-position: 0 100%;
+        }
+
+      }
+
+  }
+
+}
+
+.back-to-parent {
+  background: transparent url('../images/right.gif') no-repeat 100% 0;
+  float: right;
+  padding: 0 2em 0 0;
+  height: 41px; //have to hardcode the height because Firefox was being funny about the sprit
+
+  @include at-breakpoint($bp-tablet) {
+    padding-right: 3em;
+    right: -8%;
+    left: auto;
+  }
+
+  .backgroundsize & {
+    background-image: url('../images/right@2x.gif');
+  }
+
+  &:hover {
+    background-position: 100% 100%;
+  }
+
+  span {
+    text-transform: lowercase;
+  }
+
+}
+
+// social media links
+.sm-link {
+  background: transparent url('../images/twitter.png') no-repeat top right;
+  padding: 13px 13px 9px 0;
+
+  .backgroundsize & {
+    background-image: url('../images/twitter@2x.png');
+    background-size: 47px 92px;
+  }
+
+  &.hover {
+    background-position: 100% 100%;
+  }
+
+  ul & {
+    background-position: top right;
+    padding: 10px 13px 11px 0;
+
+  }
+
+  a {
+    margin-left: 0;
+    margin-right: 45px;
+  }
+}
+
+.blog-tags a {
+  float: right;
+}

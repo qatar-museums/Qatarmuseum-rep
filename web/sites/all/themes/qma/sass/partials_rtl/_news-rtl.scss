@@ -1,0 +1,305 @@
+// news hub styles
+$from-direction: right;
+$omega-float: opposite-position($from-direction);
+
+.node-news-hub .header-section {
+
+	.left-col {
+		width: 100%;
+		@include at-breakpoint($bp-tablet) {
+			@include span-columns(9 alpha, 16);
+			margin-right: 0;
+		}
+	}
+
+	.right-col {
+		@include at-breakpoint($bp-tablet) {
+			@include span-columns(7 omega, 16);
+		}
+	}
+
+}
+
+.node-news-hub .blog-teasers-section {
+  padding-top: 4em;
+}
+
+.more-news {
+	clear: both;
+	.views-row {
+		clear: none;
+		width: 100%;
+		display: inline-block;
+
+		.filter_image, .teaser-image {
+
+			@include at-breakpoint($bp-small-desktop) {
+				@include span-columns(4, 8);
+				margin-right: 0;
+			}
+		}
+
+		.teaser-text {
+			clear: right;
+
+			@include at-breakpoint($bp-small-desktop) {
+				@include span-columns(4 omega, 8);
+				clear: none;
+			}
+		}
+	}
+
+    .view-news {
+      .views-row {
+        @include at-breakpoint($bp-small-desktop) {
+          @include span-columns(8, 16);
+        }
+
+        &.views-row-odd {
+          @include at-breakpoint($bp-small-desktop) {
+            @include span-columns(8 alpha, 16);
+            clear: both;
+            margin-right: 0;
+          }
+        }
+
+        &.views-row-even {
+          @include at-breakpoint($bp-small-desktop) {
+            @include span-columns(8 omega, 16);
+          }
+        }
+      }
+    }
+}
+
+.blog-pager {
+	.prev-blog {
+		float : right;
+		a {
+			position: relative;
+			padding-right: 30px;
+			padding-left: 0;
+
+			&:before {
+				content: " ";
+				position: absolute;
+				height: 41px;
+				// width: 22px;
+				right: 0;
+				top: 0;
+				width: columns(1, 5);
+				background-image: url('../images/right.gif');
+				background-position: 100% 0;
+				background-repeat: no-repeat;
+			}
+
+			&:hover {
+				&:before {
+					background-position: 100% 100%;
+				}
+			}
+		}
+
+ 		.backgroundsize & {
+ 			a:before {
+				background-image: url('../images/right@2x.gif');
+				background-size: 22px 82px;
+ 			}
+		}
+
+
+		@include at-breakpoint($bp-tablet) {
+			margin-right: 0;
+			a {
+				padding-left: 0;
+				padding-right: columns(1,4);
+			}
+		}
+	}
+
+	.next-blog {
+		float : left;
+		text-align: left;
+		margin-right: 0;
+
+		a {
+			position: relative;
+			padding-right: 0;
+			padding-left: 30px;
+
+			&:before {
+				content: " ";
+				position: absolute;
+				height: 41px;
+				left: 0;
+				right: auto;
+				top: 0;
+				width: columns(1, 5);
+				background-image: url('../images/left.gif');
+				background-position: 0 0;
+				background-repeat: no-repeat;
+			}
+
+			&:hover {
+				&:before {
+					background-position: 0 100%;
+				}
+			}
+
+		}
+
+ 		.backgroundsize & {
+ 			a:before {
+			background-image: url('../images/left@2x.gif');
+			background-size: 22px 82px;
+ 			}
+		}
+		@include at-breakpoint($bp-tablet) {
+			// @include pre(1);
+			margin-left: 0;
+
+			a {
+				padding-right: 0;
+				padding-left: columns(1,4);
+			}
+		}
+	}
+
+}
+
+/*** news on project page ***/
+
+.project-news-list {
+
+	.node-news-article {
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(5, 16);
+			margin-right: 0;
+		}
+
+		@include at-breakpoint($bp-desktop) {
+			@include span-columns(4, 16);
+			margin-right: 0;
+		}
+
+	}
+}
+
+/*** blog articles news pages ***/
+.node-news-article .share-links-wrapper {
+	p {
+		margin-right: 0;
+		margin-left: 5px;
+	}
+
+	ul.share-links li {
+		float: right;
+	}
+
+	ul.share-links li.facebook {
+		margin-right: 20px;
+	}
+
+	ul.share-links li.twitter {
+		margin-right: 0;
+	}
+}
+
+// Adding this pasdding here as the Arabic template doesn't have the blog article tags for spacing.
+.node-news-article .news-view-list {
+	padding-top: 4.444em;
+}
+
+/*** related news on a blog page ***/
+// with-grid-settings([$<columns>, $<width>, <$gutter>, <$padding>]) { <@content> }
+.view-display-id-related_news_block {
+
+	@include at-breakpoint($bp-tablet) {
+		@include with-grid-settings(12, 2.778em, 1.000em, 0) {
+		   	.view-content {
+	 			@include container;
+	 		}
+		}
+
+	 	.views-row {
+	 		@include span-columns(4, 12);
+	 	}
+
+	 	.views-row-first {
+	 		@include span-columns(4 alpha, 12);
+	 		margin-right: 0;
+	 		margin-left: 0;
+	 	}
+
+	 	.views-row:nth-child(3n) {
+	 		@include span-columns(4 omega, 12);
+	 	}
+
+	 	.views-row:nth-child(4n) {
+	 		@include span-columns(4, 12);
+	 		margin-right: 0;
+	 		margin-left: 0;
+	 		clear: both;
+	 	}
+	}
+
+	@include at-breakpoint($bp-769) {
+		@include with-grid-settings(20, 2.778em, 1.000em, 0) {
+		   	.view-content {
+	 			@include container;
+	 		}
+		}
+
+	 	.views-row {
+	 		clear: none;
+	 		@include span-columns(4, 20);
+	 		margin-left: 0;
+	 	}
+
+	 	.views-row-first {
+	 		@include span-columns(4 alpha, 20);
+			margin-right: 0;
+	 		margin-left: 0;
+	 	}
+
+	 	.views-row:nth-child(3n) {
+	 		@include span-columns(4, 20);
+	 	}
+
+	 	.views-row:nth-child(4n) {
+	 		@include span-columns(4, 20);
+	 		clear: none;
+	 	}
+
+	 	.views-row:nth-child(5n) {
+	 		@include span-columns(4 omega, 20);
+	 	}
+
+	 	.views-row:nth-child(6n) {
+	 		@include span-columns(4 omega, 20);
+	 		clear: both;
+	 	}
+	}
+}
+
+ .view-display-id-related_news_block {
+
+ 	.views-row {
+ 		padding-bottom: 0;
+ 	}
+
+ 	.views-row .filter_image, .views-row .teaser-image {
+ 		width: 100%;
+ 		display: block;
+ 	}
+
+ 	.views-row .teaser-text {
+ 		width: 100%;
+ 		float: left;
+ 	}
+ }
+
+
+$from-direction: left;
+$omega-float: opposite-position($from-direction);

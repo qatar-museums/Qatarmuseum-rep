@@ -1,0 +1,12 @@
+name = QMA Membership Code
+description = A module containing membership-related code
+package = QMA
+
+version = 7.x-1.0
+core = 7.x
+
+dependencies[] = views_data_export
+
+files[] = views/qma_membership_code_handler_field_role_name.inc
+files[] = views/qma_membership_code_handler_filter_role_name.inc
+files[] = views/qma_membership_code_handler_argument_role_name.inc

@@ -1,0 +1,15 @@
+name=Past Log Grabber
+description=Searches for error log entries in the server logs and logs them as Past events.
+package = Logging
+core=7.x
+
+dependencies[]=past
+
+files[]=past_grabber.test
+
+; Information added by Drupal.org packaging script on 2016-04-02
+version = "7.x-1.0-alpha3"
+core = "7.x"
+project = "past"
+datestamp = "1459591740"
+

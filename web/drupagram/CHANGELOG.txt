@@ -1,0 +1,36 @@
+Drupagram 7.x-1.x-dev, xxxx-xx-xx
+---------------------------------
+By rmontero: Improved theming & field options.
+By rmontero: Allow the item count to be adjusted, option to load via HTTPS.
+By AlbertoL: Misc improvements.
+#1851112 by Fizk: Fixed the install link.
+By DamienMcKenna: Added a CHANGELOG.txt file.
+By DamienMcKenna: Removed the LICENSE.txt file, it is automatically added when
+  the releases is built.
+#2406085 by DamienMcKenna: Removed the ROADMAP.txt file, moved all items to
+  issues in the issue queue.
+#2122535 by timb: Deleting one user's drupagram account would delete ALL
+  accounts.
+#2027517 by farrington: INSTALL.txt still referenced Tumblr.
+#1989126 by intrafusion: Incorrect menu path stopped accounts being added.
+#2008740 by m0d: Incorrect URL in user edit form stopped accounts being added.
+#2071411 by anemirovsky: Fixed compatibility with EntityCache.
+#2404921 by DamienMcKenna: Function for loading all accounts.
+#2405321 by DamienMcKenna: Make serialized fields serialized.
+
+
+Drupagram 7.x-1.2, xxxx-xx-xx
+-----------------------------
+By rmontero: Major improvements / enhancements.
+
+
+Drupagram 7.x-1.1, xxxx-xx-xx
+-----------------------------
+#1410566 by DerTobi75: Added INSTALL.txt file.
+By rmontero: Escape characters in any incoming strings.
+By rmontero: Painful fix for emoji characters.
+
+
+Drupagram 7.x-1.0, xxxx-xx-xx
+-----------------------------
+By rmontero: Initial release.

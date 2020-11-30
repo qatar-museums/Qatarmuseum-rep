@@ -1,0 +1,195 @@
+.node-press-room {
+
+	.field-name-field-intro-text {
+		border-top: 2px solid #000000;
+		padding-top: 0.5em;
+		margin-bottom: 2.5em;
+	}
+
+	.view-filters {
+
+		p {
+			float: left;
+			margin: 1.1em 1em 0 0;
+		}
+
+		form {
+			float: left;
+		}
+
+		.select-target.select-theme-default {
+			width: 12em;
+		}
+
+		.views-submit-button {
+			clear: left;
+		}
+
+		.reset {
+			margin: 1.6em 0 0 1em;
+		}
+
+	}
+
+	.press-list-content {
+		margin-bottom: 1.5em;
+		margin-top: 1em;
+
+		@include at-breakpoint($bp-tablet) {
+			margin-top: 0;
+		}
+	}
+
+	.view-header, .view-empty {
+		margin-top: 1em;
+	}
+
+	.view-content {
+
+		margin-top: -6px;
+
+		@include at-breakpoint($bp-tablet) {	
+			margin-top: 0;
+		}
+
+		th {
+			text-align: left;
+			text-transform: uppercase;
+			@include din-bold;
+		}
+
+		tr {
+			
+			display: inline-block;
+			@include box-sizing(content-box);
+			width: 100%;
+
+			td {
+				padding: 2.556em 0 1em 0;
+
+				@include at-breakpoint($bp-tablet) {
+					padding-bottom: 2.556em;
+				}
+			}
+		}
+
+		.odd {
+			background-color: #FAFAFA;
+			margin-left: -1em;
+			padding-left: 1em;
+			padding-right: 1em;
+
+			.ie9 & {
+				td {
+					background-color: #FAFAFA;
+					
+					&.views-field-title {
+						margin-left: -1em;
+						padding-left: 1em;
+						margin-right: 2em;
+					}
+
+					&.views-field-field-press-tags {
+						padding-right: 1em;
+					}
+
+				}
+			}
+
+		}
+
+		thead tr {
+			display: none;
+
+			@include at-breakpoint($bp-tablet) {
+				display: inline-block;
+			}
+
+			th {
+				padding: 1em 0;
+			}
+		}
+
+		td {
+			width: 100%;
+			clear: left;
+			float: left;
+			margin-bottom: 1.5em;
+
+			@include at-breakpoint($bp-tablet) {
+				clear: none;
+				margin-bottom: 0;
+			}
+		}
+
+		.views-field-title {
+
+			@include at-breakpoint($bp-tablet) {
+				@include span-columns(5, 10);
+			}
+		}
+
+		.views-field-field-press-file-attachment {
+
+			@include at-breakpoint($bp-tablet) {
+				@include span-columns(2, 10);
+			}
+
+		}
+
+		.views-field-field-press-tags {
+
+			@include at-breakpoint($bp-tablet) {
+				@include span-columns(3 omega, 10);
+			}
+
+			ul {
+				margin-bottom: 0;
+
+				li {
+					margin-left: 0;
+
+					&:before {
+						display: none;
+					}
+
+				}
+
+			}
+		}
+
+	}
+
+}
+
+.views-field-field-press-file-attachment,
+.field-name-field-press-file-attachment {
+
+	span {
+		clear: left;
+		display: block;
+	}
+}
+
+.node-press-release {
+
+	.press-tags {
+
+		.field-item {
+			margin-bottom: 0.556em;
+		}
+
+	}
+	
+}
+
+#views-exposed-form-press-block {
+	.ajax-progress {
+		margin-top: 2.381em;
+		margin-right: -19px;
+	}
+
+	input[type="text"] {
+		background-color: #FFF;
+	}
+}

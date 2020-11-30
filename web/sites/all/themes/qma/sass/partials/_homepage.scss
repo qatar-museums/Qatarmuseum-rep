@@ -1,0 +1,504 @@
+.node-type-homepage {
+
+	header {
+		margin-bottom: 0;
+	}
+
+	#main-wrapper {
+		margin-bottom: -6px;
+	}
+
+	.field-collection-container.clearfix:after {
+		content: ".";
+		display: none;
+	}
+
+}
+
+.homepage-collection {
+	width: 100%;
+	margin: 0 auto 0 auto;
+	display: block;
+
+
+	.homepage-box {
+		width: 100%;
+		float: left;
+		position: relative;
+		text-align: center;
+		overflow: hidden;
+
+		@include at-breakpoint($bp-tablet) {
+			width: 50%
+		}
+
+		//these specific breakpoints are to fix ios6 ipad from spazzing out
+
+		@include at-breakpoint($bp-small-desktop) {
+			width: 33.3333333%;
+			height: 256px;
+		}
+
+		@include at-breakpoint($bp-769) {
+			height: auto;
+		}
+
+		@include at-breakpoint($bp-desktop) {
+			height: 341px;
+		}
+
+		@include at-breakpoint($bp-1025) {
+			height: auto;
+		}
+
+		h2 {
+			position: absolute;
+			left: -99999em;
+		}
+
+		&:hover {
+
+			cursor: pointer;
+
+			.text-container {
+				display: block;
+			}
+
+		}
+
+		// logo container to only be shown on tablet to get round the 9 items being in a 2x2 grid
+		&.tablet-logo-container {
+			display: none;
+
+			@include at-breakpoint($bp-tablet) {
+				display: block;
+			}
+
+			@include at-breakpoint($bp-small-desktop) {
+				display: none;
+			}
+
+		}
+
+	}
+
+	.homepage-box-image {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		z-index: 8;
+		opacity: 0;
+
+		// one of the images has to be relative so that the box sizes correctly
+		&.front {
+			position: relative;
+			z-index: 9;
+			float: left;
+			opacity: 1;
+		}
+
+		&.logo-container.front {
+			background-color: #FFFFFF;
+		}
+
+
+		.text-container {
+			clear: left;
+			padding: 1em;
+			display: block;
+			text-align: left;
+
+			@include at-breakpoint($bp-tablet) {
+				position: absolute;
+				background: transparent url('../images/trans_white.png') repeat top left;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				z-index: 11;
+				display: none;
+				top: 0;
+				clear: none;
+			}
+
+			.field-type-text-long {
+				@include adjust-font-size-to(16px);
+
+				@include at-breakpoint($bp-fullwidth) {
+					@include adjust-font-size-to(18px);
+				}
+			}
+		}
+
+		img {
+			width: 100%;
+		}
+
+		.field-type-link-field {
+			margin-bottom: 1em;
+
+			a {
+				background-color: transparent;
+				border-bottom: 1px solid $pink;
+			}
+		}
+
+		&:hover {
+			.field-type-link-field a {
+				border-bottom: 1px solid #000000;
+				padding-bottom: 1px;
+			}
+		}
+
+	}
+
+}
+
+.js {
+	.homepage-collection .homepage-box-image {
+		.text-container {
+			display: block;
+			top: 100%;
+
+		}
+	}
+
+	.homepage-box.hovered {
+		.text-container {
+
+			top: 50%;
+
+			@include at-breakpoint($bp-small-desktop) {
+				top: 0;
+			}
+
+			@include at-breakpoint($bp-desktop) {
+				top: 60%;
+			}
+
+			@include at-breakpoint($bp-fullwidth) {
+				top: 70%;
+			}
+
+		}
+	}
+}
+
+.touch .homepage-collection *:hover,
+.touch .homepage-collection *:active {
+	// -webkit-tap-highlight-color: rgba(0,0,0,0);
+	// -webkit-user-select: none;
+	// -webkit-touch-callout: none;
+}
+
+.js.no-touch {
+	.homepage-collection .homepage-box-image {
+		.text-container {
+			@include transition(top 0.2s linear);
+		}
+	}
+}
+
+.node-type-qma-homepage {
+  .site-header {
+    margin-bottom: 0;
+  }
+
+  .node-qma-homepage .content {
+    .full-width {
+      padding-bottom: 2.222em;
+    }
+    .full-width:last-of-type {
+      padding-top: 2.222em;
+    }
+  }
+}
+
+.primary-features__item,
+.secondary-features__item {
+  .field-home-feature-text,
+  .field-home-feature-link {
+    @include adjust-font-size-to(16px);
+    @include adjust-leading-to(5, 16px);
+
+    a {
+      font-weight: bold;
+    }
+  }
+
+  .field-home-feature-category {
+    @include adjust-font-size-to(14px);
+    @include adjust-leading-to(5, 14px);
+  }
+
+  .field-home-feature-title {
+    @include adjust-font-size-to(20px);
+    @include adjust-leading-to(7, 20px);
+    margin-bottom: 0.75em;
+  }
+
+  .field-home-feature-link {
+    margin-bottom: 0.75em;
+  }
+
+  .filter_image canvas {
+    width: 100%;
+  }
+
+  .filter_image a {
+    float: none;
+  }
+}
+
+.primary-features__item {
+  margin-bottom: 2.222em;
+
+  @media (min-width: 569px) and (max-width: 767px) {
+    @include span-columns(8, 16);
+
+    &:nth-child(2n) {
+      @include omega;
+    }
+  }
+
+  @media (min-width: 768px) {
+    @include span-columns(4, 16);
+    margin-bottom: 0;
+
+    &:nth-child(4n) {
+      @include omega;
+    }
+  }
+}
+
+.primary-features__field {
+  display: block;
+
+  img {
+    display: block;
+    float: none;
+    width: 100%;
+  }
+
+  &.field-home-feature-text,
+  &.field-home-feature-thumbnail {
+    margin-bottom: 1em;
+  }
+
+  &.field-home-feature-thumbnail a {
+    display: block;
+    padding-bottom: 0;
+
+    &:hover {
+      border-bottom: 0;
+    }
+  }
+}
+
+.secondary-features__item {
+  margin-bottom: 2.222em;
+
+  @media (min-width: 569px) and (max-width: 767px) {
+    @include span-columns(8, 16);
+
+    &:nth-child(2n) {
+      @include omega;
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 1023px) {
+    @include span-columns(4, 16);
+    margin-bottom: 0;
+
+    &:nth-child(4n) {
+      @include omega;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    @include span-columns(8, 16);
+    background: #FFF;
+
+    &:nth-child(2n) {
+      @include omega;
+    }
+  }
+}
+
+.secondary-features__field {
+  display: block;
+
+  @include at-breakpoint($bp-desktop) {
+    &.field-home-feature-thumbnail {
+      @include span-columns(4, 8);
+    }
+
+    &:not(.field-home-feature-thumbnail) {
+      @include span-columns(4 omega, 8);
+      padding-right: ($gutter-percentage * 2)#{"%"};
+      clear: right;
+    }
+  }
+
+  img {
+    display: block;
+    float: none;
+    width: 100%;
+  }
+
+  &.field-home-feature-text {
+    margin-bottom: 1em;
+  }
+
+  &.field-home-feature-category {
+    margin-bottom: 0.25em;
+    margin-top: 0.5em;
+    text-transform: uppercase;
+  }
+
+  &.field-home-feature-link {
+    a {
+      font-weight: bold;
+    }
+  }
+
+}
+
+.homepage-slideshow {
+  clear: both;
+  position: relative;
+
+  .container {
+    position: relative;
+  }
+
+  .homepage-slideshow__wrapper {
+    margin: 0;
+  }
+
+  .homepage-slideshow__slide:not(:first-child) {
+    display: none;
+  }
+
+  .js & .homepage-slideshow__slide:not(:first-child) {
+    display: block;
+  }
+
+  .homepage-slideshow__slide {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    &:before {
+      display: none;
+    }
+  }
+
+  .homepage-slideshow__text {
+    padding: 20px 0 0;
+  }
+
+  .homepage-slideshow__controls {
+    display: none;
+    float: right;
+  }
+
+  .js & .homepage-slideshow__controls {
+    display: block;
+  }
+
+  .homepage-slideshow__title {
+    @include endash-after;
+    margin-bottom: 0.2em;
+  }
+
+  .homepage-slideshow__link {
+    @include adjust-font-size-to(20px);
+    @include adjust-leading-to(6, 20px);
+
+    a {
+      font-weight: bold;
+    }
+  }
+
+  .homepage-slideshow__image {
+    overflow: hidden;
+
+    img {
+      display: block;
+      float: none;
+      width: 100%;
+    }
+
+    @include at-breakpoint($bp-fullwidth) {
+      height: 30.222em;
+      padding-bottom: 0;
+    }
+  }
+
+  .homepage-slideshow__category {
+    @include adjust-font-size-to(14px);
+    @include adjust-leading-to(5, 14px);
+
+    margin-bottom: 0.5em;
+    text-transform: uppercase;
+  }
+
+  .homepage-slideshow__next,
+  .homepage-slideshow__prev {
+    @include adjust-font-size-to(20px);
+    float: left;
+    margin-left: 10px;
+
+    a {
+      background-color: rgba(255, 255, 255, 0.8);
+      background-position: center center;
+      background-repeat: no-repeat;
+      border: 1px grey solid;
+      display: block;
+      height: 32px;
+      text-indent: -9999em;
+      width: 32px;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.9);
+      }
+    }
+  }
+
+  .homepage-slideshow__next a {
+    @include chevron__right;
+  }
+
+  .homepage-slideshow__prev a {
+    @include chevron__left;
+  }
+
+  // On desktop, float the text to the right of the image
+  @include at-breakpoint($bp-desktop) {
+    .homepage-slideshow__text {
+      @include span-columns(5, 16);
+      background: rgba(255, 255, 255, 0.8);
+      display: block;
+      padding: 35px;
+      bottom: 4.444em;
+      position: absolute;
+      margin-left: $grid-padding;
+      left: 0;
+    }
+
+    .homepage-slideshow__controls {
+      position: absolute;
+      bottom: 1.111em;
+      margin-right: $grid-padding;
+      right: 0;
+    }
+
+    .homepage-slideshow__next,
+    .homepage-slideshow__prev {
+      a {
+        border: 0;
+      }
+    }
+  }
+}

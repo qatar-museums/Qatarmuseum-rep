@@ -1,0 +1,388 @@
+@font-face{
+font-family:"DIN Next W02 Light";
+src:url("../fonts/694409/48e5a0e1-2d56-46e5-8fc4-3d6d5c973cbf.eot?#iefix");
+src:url("../fonts/694409/48e5a0e1-2d56-46e5-8fc4-3d6d5c973cbf.eot?#iefix") format("eot"),url("../fonts/694409/07d62b21-8d7a-4c36-be86-d32ab1089972.woff") format("woff"),url("../fonts/694409/c0050890-bbed-44b9-94df-2611d72dbb06.ttf") format("truetype"),url("../fonts/694409/9f774d17-c03a-418e-a375-34f3beecbc7a.svg#9f774d17-c03a-418e-a375-34f3beecbc7a") format("svg");
+}
+@font-face{
+font-family:"DIN Next W02 Bold";
+src:url("../fonts/694427/50d13d4e-96c6-4412-a8fa-baa4814c5332.eot?#iefix");
+src:url("../fonts/694427/50d13d4e-96c6-4412-a8fa-baa4814c5332.eot?#iefix") format("eot"),url("../fonts/694427/109143ca-57fb-459c-9814-3a68f0245ac3.woff") format("woff"),url("../fonts/694427/c9fa50e2-c243-451a-b91b-ee74f341d7a8.ttf") format("truetype"),url("../fonts/694427/1201bd6f-15f5-4b51-9c6f-c5c4b35d31f5.svg#1201bd6f-15f5-4b51-9c6f-c5c4b35d31f5") format("svg");
+}
+@font-face{
+font-family:"DIN Next LT W23 Light";
+src:url("../fonts/893517/77774782-4fa3-441a-bd91-702d88ef6e2d.eot?#iefix");
+src:url("../fonts/893517/77774782-4fa3-441a-bd91-702d88ef6e2d.eot?#iefix") format("eot"),url("../fonts/893517/0ab2eaf2-c728-4d1b-ae19-53aa13d5a213.woff") format("woff"),url("../fonts/893517/f33821f7-e0bf-48e9-b084-b195190e3870.ttf") format("truetype"),url("../fonts/893517/6b80f501-2781-47be-982c-4f11934d6716.svg#6b80f501-2781-47be-982c-4f11934d6716") format("svg");
+}
+@font-face{
+font-family:"DIN Next LT W23 Bold";
+src:url("../fonts/893520/f4bce1cb-f2a5-4bcb-af4c-79f63da8c8e0.eot?#iefix");
+src:url("../fonts/893520/f4bce1cb-f2a5-4bcb-af4c-79f63da8c8e0.eot?#iefix") format("eot"),url("../fonts/893520/708871f8-768c-4f13-9371-1684fb16711f.woff") format("woff"),url("../fonts/893520/bb726818-fa8e-4f9a-9305-c3823a880f46.ttf") format("truetype"),url("../fonts/893520/93953467-ca69-4f0e-aad5-a6e7ba360f0d.svg#93953467-ca69-4f0e-aad5-a6e7ba360f0d") format("svg");
+}
+
+@mixin din-light {
+  font-family:"DIN Next W02 Light", Tahoma, sans-serif;
+  font-size-adjust:0.5;
+  font-weight:400;
+  font-style:normal;
+}
+
+@mixin din-bold {
+  font-family:"DIN Next W02 Bold", Tahoma, sans-serif;
+  font-size-adjust:0.5;
+  font-weight:400;
+  font-style:normal;
+}
+
+@mixin din-arabic-light {
+  font-family:"DIN Next LT W23 Light", Tahoma, sans-serif;
+  font-size-adjust:0.5;
+  font-weight:400;
+  font-style:normal;
+}
+
+@mixin din-arabic-bold {
+  font-family:"DIN Next LT W23 Bold", Tahoma, sans-serif;
+  font-size-adjust:0.5;
+  font-weight:400;
+  font-style:normal;
+}
+
+.hide-content,
+.element-invisible {
+  @include hide-content;
+}
+
+#skip-link:focus {
+  position: static;
+  left: 0;
+}
+
+body {
+  @include adjust-font-size-to(18px);
+  @include adjust-leading-to(6, 18px);
+  @include din-light;
+
+  -webkit-font-smoothing: antialiased;
+
+  // @include at-breakpoint($bp-1300) {
+  //   @include adjust-font-size-to(16px);
+  //   @include adjust-leading-to(5, 16px);
+  // }
+
+  // @include at-breakpoint($bp-1800) {
+  //   @include adjust-font-size-to(20px);
+  //   @include adjust-leading-to(5, 20px);
+  // }
+
+}
+
+html[dir='rtl'] {
+  @include din-arabic-light;
+}
+
+/* FOR REFERENCE */
+
+// $base-font-size: 14px;
+// $base-line-height: 4px;
+
+h1 {
+  @include span-columns(8,8);
+
+  /* change the font size, but make sure it changes to ems */
+  @include adjust-font-size-to(36px);
+
+  /* change the line height (leading). but make sure it changes relative to the base line height,
+  INSTEAD of the new font size (36px) */
+  @include adjust-leading-to(9, 36px);
+
+  /* add a bottom margin on it, but make sure it changes relative to the base line height,
+  INSTEAD of the new font size (36px) */
+  margin-bottom: rhythm(12, 36px);
+
+  @include at-breakpoint($bp-tablet) {
+    width: 100%;
+    @include adjust-font-size-to(56px);
+    @include adjust-leading-to(13, 56px);
+    margin-bottom: rhythm(12, 56px);
+
+  }
+
+  @include din-bold;
+  text-transform: uppercase;
+
+  html[dir='rtl'] & {
+    @include din-arabic-bold;
+    text-transform: none;
+    margin-right: 0;
+
+    @include at-breakpoint($bp-tablet) {
+      @include adjust-leading-to(15, 56px);
+    }
+  }
+
+  float: none;
+  display: inline-block;
+
+  .title-container & {
+    @include at-breakpoint($bp-tablet) {
+      margin-bottom: 0;
+    }
+  }
+
+}
+
+
+h2 {
+
+  @include adjust-font-size-to(36px);
+  @include adjust-leading-to(9, 36px);
+  margin-bottom: rhythm(10, 36px);
+
+  @include at-breakpoint($bp-tablet) {
+    @include adjust-font-size-to(56px);
+    @include adjust-leading-to(13, 56px);
+    margin-bottom: rhythm(10, 56px);
+  }
+
+  @include din-bold;
+
+  html[dir='rtl'] & {
+
+    @include din-arabic-bold;
+
+    @include at-breakpoint($bp-tablet) {
+        @include adjust-leading-to(15, 56px);
+    }
+
+  }
+
+  text-transform: uppercase;
+
+  &.number {
+    @include adjust-font-size-to(56px);
+    @include adjust-leading-to(13, 56px);
+    margin-bottom: rhythm(8, 56px);
+  }
+
+}
+
+.full-width .column h2 {
+
+  @include adjust-font-size-to(30px);
+  @include adjust-leading-to(8, 30px);
+  margin-bottom: rhythm(8, 30px);
+
+  @include at-breakpoint($bp-desktop) {
+    @include adjust-font-size-to(44px);
+    @include adjust-leading-to(10, 44px);
+    margin-bottom: rhythm(8, 44px);
+  }
+
+}
+
+h3,
+.field-name-field-interview-question,
+.view-creative-resources .view-header h2,
+h2.homepage-slideshow__title {
+  text-transform: uppercase;
+  @include din-bold;
+
+  html[dir='rtl'] & {
+    @include din-arabic-bold;
+    text-transform: none;
+    @include adjust-leading-to(9, 28px);
+
+    @include at-breakpoint($bp-desktop) {
+      @include adjust-leading-to(10, 32px);
+    }
+  }
+
+  @include adjust-font-size-to(28px);
+  @include adjust-leading-to(8, 28px);
+  margin-bottom: rhythm(6, 28px);
+
+  @include at-breakpoint($bp-desktop) {
+    @include adjust-font-size-to(32px);
+    @include adjust-leading-to(8, 32px);
+    margin-bottom: rhythm(6, 32px);
+  }
+}
+
+.black-square p,
+.field-name-field-element-pull-quote,
+.field-name-field-element-user-quote,
+.gallery-count span,
+.subheading,
+.field-name-field-quote,
+.filter_image .field-name-field-teaser-text,
+.area-of-work-experience h4,
+.node-news-article.hub-teaser h4 {
+  @include din-bold;
+  text-transform: uppercase;
+
+  html[dir='rtl'] & {
+    @include din-arabic-bold;
+    @include adjust-leading-to(8, 22px);
+    text-transform: none;
+  }
+
+  @include adjust-font-size-to(22px);
+  @include adjust-leading-to(6, 22px);
+
+}
+
+h4,
+footer h2 {
+  text-transform: uppercase;
+  @include din-bold;
+
+  html[dir='rtl'] & {
+    @include din-arabic-bold;
+    text-transform: none;
+    @include adjust-leading-to(7, 18px);
+  }
+
+  @include adjust-font-size-to(18px);
+  @include adjust-leading-to(6, 18px);
+
+  &.pink {
+    color: $pink;
+  }
+
+  margin-bottom: rhythm(6, 18px);
+}
+
+p,
+.language-switcher,
+ul {
+  margin-bottom: rhythm(6, 18px);
+
+  .field-name-field-element-pull-quote-name & {
+    margin-bottom: 0;
+  }
+
+  .ar a {
+    @include din-arabic-light;
+  }
+
+}
+
+.site-title,
+.homepage-box .field-type-link-field {
+  text-transform: uppercase;
+  @include din-bold;
+}
+
+.site-title {
+  @include adjust-font-size-to(20px);
+}
+
+.no-bold .field-name-field-teaser-text {
+  @include din-light;
+  text-transform: none;
+
+  html[dir='rtl'] & {
+    @include din-arabic-light;
+  }
+
+  @include adjust-font-size-to(18px);
+  @include adjust-leading-to(5, 18px);
+}
+
+.subheading {
+  text-transform: none;
+}
+
+.caption,
+.field-name-field-element-image-caption,
+.video-embed-description,
+.field-name-field-element-pull-quote-name,
+.field-name-field-element-user-quote-name,
+.field-name-field-interview-image-caption,
+.tweet-item,
+.instagram-item {
+  margin-top: 0.556em;
+  @include adjust-font-size-to(16px);
+  @include adjust-leading-to(5, 16px);
+  display: inline-block;
+}
+
+b,
+strong {
+  @include din-bold;
+
+  html[dir='rtl'] & {
+    @include din-arabic-bold;
+  }
+}
+
+li {
+  list-style-type: none;
+  margin-bottom: 0.556em;
+
+  .region-content & {
+
+    @include at-breakpoint($bp-tablet) {
+      margin-left: 36px;
+    }
+
+    &:before {
+      content: '\2013'; // ascii number for an ndash. see http://css-tricks.com/snippets/html/glyphs/
+      display: inline;
+      padding-right: 6px;
+    }
+
+  }
+
+}
+
+// list style overrides
+.cbp-fwslider {
+
+  li {
+    margin-left: 0;
+
+    &:before {
+      display: none;
+    }
+
+  }
+
+}
+
+dl {
+  width: 100%;
+  margin-top: rhythm(8, 16px);
+  display: inline-block;
+
+  dt, dd {
+    float: left;
+    display: inline;
+    width: 70%;
+    margin-bottom: rhythm(4, 16px);
+  }
+
+  dt {
+    clear: left;
+    width: 30%;
+  }
+
+}
+
+.site-nav a {
+  @include din-light;
+  @include adjust-font-size-to(20px);
+  text-transform: none;
+
+  html[dir='rtl'] & {
+    @include din-arabic-light;
+  }
+
+  .link-descriptor {
+    @include adjust-font-size-to(14px);
+  }
+}
+
+.black {
+  color: #FFF;
+}

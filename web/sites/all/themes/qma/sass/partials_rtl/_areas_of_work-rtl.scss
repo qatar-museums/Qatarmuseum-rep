@@ -1,0 +1,69 @@
+
+.grid-three  {
+
+	.views-row {
+
+		@include at-breakpoint($bp-tablet) {
+			@include span-columns(8 omega, 16);
+			float: right;
+		}
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(5 omega, 16);
+			float: right;
+		}
+
+		&.last {
+			margin-left: 0
+		}
+	}
+
+	//handle what breaks and clears where
+
+	.views-row {
+		clear: right;
+
+		@include at-breakpoint($bp-tablet) {
+
+			clear: none;
+
+			&:nth-child(2n + 1) {
+				clear: both;
+			}
+
+			&:nth-child(2n) {
+				margin-right: $gutter-percentage#{"%"};
+			}
+
+		}
+
+		@include at-breakpoint($bp-small-desktop) {
+
+			&:nth-child(2n) {
+				margin-right: 0;
+			}
+
+			&:nth-child(2n + 1) {
+				clear: none;
+			}
+
+			&:nth-child(3n) {
+				margin-right: $gutter-percentage#{"%"};
+				clear: none;
+			}
+
+			&:nth-child(3n+1) {
+				clear: both;
+				margin-left: $gutter-percentage#{"%"};
+			}
+
+		}
+
+	}
+
+	.view-footer {
+		clear: right;
+		float: right
+	}
+
+}

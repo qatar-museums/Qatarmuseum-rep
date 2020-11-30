@@ -1,0 +1,72 @@
+<?php
+/**
+ * @file
+ * Provides a fallback language for language negotiation if user language
+ * couldn't be detected and you want use a other language like the
+ * system default language as default.
+ */
+
+/**
+ * Implements hook_language_negotiation_info().
+ * - provides provider callback for language negotiation
+ *
+ * @see hook_language_negotiation_info()
+ *
+ * @return array
+ */
+function qma_language_negotiation_language_negotiation_info() {
+  return array(
+    'qma_language_negotiation_provider' => array(
+      'callbacks' => array(
+        'language' => 'qma_language_negotiation_provider_callback',
+      ),
+      'file' => drupal_get_path('module', 'qma_language_negotiation') . '/qma_language_negotiation.module',
+      'name' => t('Fallback language for language negotiation'),
+      'description' => t('Provides a fallback language for language negotiation if user language couldn´t be detected and you want use an other language than the system default language as default. Tempory fix for QM project, hardcoded to english'),
+    ),
+  );
+}
+
+/**
+ * Language negotiation callback.
+ *
+ * @param $languages
+ *   An array of valid language objects.
+ *
+ * @return
+ *   A valid language code on success, FALSE otherwise.
+ */
+function qma_language_negotiation_provider_callback($languages) {
+  $default = 'en'; //hardcode the string in here
+  if (isset($default) && isset($languages[$default]->enabled) && $languages[$default]->enabled == TRUE) {
+    return $default;
+  }
+  return 'en';
+}
+
+
+function qma_language_negotiation_init(){
+  //if no language has been specified in the URL we prevent content on this path being cached
+  //this allows fallback to language detection via browser settings
+  //performance should not be significantly hindered as the vast majority of pages will be accessed with a language prefix
+  //n.b requires all languages to have a prefix set and URL detection to be the primary form of language negotiation 
+  
+  // Sometimes this file will be require_once-d by the locale module before
+  // this point, and sometimes not (crucially when running drush commands). We require_once it ourselves to be sure.
+  require_once DRUPAL_ROOT . '/includes/language.inc';
+  
+  //get the language set in the URL prefix
+  $languages = language_list('enabled');
+    $languages = $languages[1];  
+  $path = urldecode($_SERVER['REQUEST_URI']);
+  $path = substr($path, 1); //strip leading slash or language_url_split_prefix will always return false
+  $urlLang =  language_url_split_prefix($path, $languages);
+  
+  //if no language specified in URL prevent page from being cached
+  $defaultCacheBool = drupal_page_is_cacheable();
+  if (!$urlLang[0]) {
+    drupal_page_is_cacheable(FALSE);
+  } else {
+    drupal_page_is_cacheable($defaultCacheBool);
+  }
+}

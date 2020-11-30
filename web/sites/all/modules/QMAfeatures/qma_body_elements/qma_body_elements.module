@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA Body Elements feature.
+ */
+
+include_once 'qma_body_elements.features.inc';

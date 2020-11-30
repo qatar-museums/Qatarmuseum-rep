@@ -1,0 +1,62 @@
+$from-direction: right;
+$omega-float: opposite-position($from-direction);
+
+.node-advpoll {
+
+	.poll-title {
+		
+
+		@include at-breakpoint($bp-tablet) {
+			@include span-columns(6, 16);
+			margin-right: 0;
+		}
+
+	}
+
+	.content {
+ 
+		@include at-breakpoint($bp-tablet) {
+		 	@include span-columns(10, 16);
+		 	margin-left: 0;
+		}
+
+	}
+
+	.advpoll-title {
+		float: right;
+	}
+
+	.percent {
+		float: left;
+	}
+
+	form {
+
+		.form-type-radio {
+
+
+			@include at-breakpoint($bp-small-desktop) {
+		 		@include span-columns(5, 10);
+		 		margin-right: 0;
+			}
+
+			&:nth-child(2n) {
+				@include at-breakpoint($bp-small-desktop) {
+		 			@include span-columns(5 omega, 10);
+		 			margin-right: 0;
+				}	
+			}
+
+
+		}
+
+		.js & input[type='radio'] {
+			display: none;
+		}
+
+	}
+
+}
+
+$from-direction: left;
+$omega-float: opposite-position($from-direction);

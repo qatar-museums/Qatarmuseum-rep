@@ -1,0 +1,178 @@
+.node-landing-page {
+
+	.random-layout {
+		margin-top: 0;
+	}
+
+}
+
+.grid-four {
+
+	margin-bottom: -26px;
+	display: inline-block;
+	width: 100%;
+
+	&>.field>.field-items>.field-item {
+
+		width: 100%;
+		margin-bottom: 3em;
+
+		@include at-breakpoint($bp-tablet) {
+			@include span-columns(7, 16);
+			max-width: 254px;
+			margin-bottom: 0;
+		}
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(5, 16);
+		}
+
+		@include at-breakpoint($bp-desktop) {
+			@include span-columns(4, 16);
+
+			&:nth-child(4n) {
+				@include span-columns(4 omega, 16);
+			}
+		}
+
+	}
+
+	.filter_image {
+		@include at-breakpoint($bp-tablet) {
+			max-width: 254px;
+		}
+	}
+
+	h4 {
+		margin-bottom: 1em;
+	}
+
+	p {
+		@include adjust-font-size-to(16px);
+  		@include adjust-leading-to(5, 16px);
+	}
+
+}
+
+.node-hero-wrapper .hero-container {
+	overflow: hidden;
+
+	.block-color-filler {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		width: 100%;
+		height: 100%;
+		display: none;
+	}
+
+	&.experience .block-color-filler {
+		background-color: $pink;
+	}
+
+	&.create .block-color-filler {
+		background-color: $orange;
+	}
+
+	&.connect .block-color-filler {
+		background-color: $blue;
+	}
+
+	.colour-fade {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		width: 108%;
+		height: 100%;
+
+		@include at-breakpoint($bp-fullwidth) {
+			height: auto;
+			width: 100%;
+
+			.ie9 & {
+				height: 105%;
+			}
+
+			.ie-10 & {
+				height: 108%;
+			}
+		}
+
+	}
+
+}
+
+.js .node-hero-wrapper .hero-container {
+
+	.block-color-filler {
+		@include at-breakpoint($bp-tablet) {
+			display: block;
+		}
+	}
+
+}
+
+.shape-header {
+	position: absolute;
+	border: 10px solid #FFFFFF;
+	left: 0;
+	right: 0;
+	height: 320px;
+	width: 320px;
+	margin: 0 auto;
+	top: 50%;
+	border-radius: 50%;
+	@include transform(translateY(-50%));
+
+	.lt-ie9 & {
+		top: 10%;
+	}
+
+	.experience & {
+		@include at-breakpoint($bp-tablet) {
+			height: 424px;
+			width: 424px;
+		}
+	}
+
+	.create & {
+		@include transform(translateY(-50%) rotate(45deg));
+		border-radius: 0;
+
+		.text {
+			@include square(-45deg);
+		}
+	}
+
+	.connect & {
+		border-radius: 0;
+	}
+
+	.museums--galleries & {
+	  border-radius: 0;
+
+	  h1 {
+		@include adjust-font-size-to(52px);
+	  }
+
+	}
+
+	.text {
+
+		@include square(0deg);
+
+		h1 {
+			margin-bottom: 0;
+			color: #FFFFFF;
+		}
+
+		.node-type-areas-hub & h1 {
+			color: #FFFFFF
+		}
+
+	}
+}

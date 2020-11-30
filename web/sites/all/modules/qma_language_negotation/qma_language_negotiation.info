@@ -1,0 +1,6 @@
+name = QMA language negotiation
+description = "force site to fallback to non-default language. Tempory fix for QM project, default to english"
+core = 7.x
+package = QMA
+dependencies[] = locale
+

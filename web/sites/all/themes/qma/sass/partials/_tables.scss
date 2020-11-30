@@ -1,0 +1,31 @@
+
+/*add borders to tables that appear in editorially controlled fields*/
+.field-items td, 
+.field-items th,
+{
+  border: 1px black solid;
+  padding:.2em;
+}
+
+.field-items th {
+	@include din-bold;
+
+	html[dir='rtl'] & {
+		@include din-arabic-bold;
+	}
+}
+
+/*wysiwyg adds inline width in px as default*/
+.field-items table,
+{
+	width:100% !important;
+  	margin-left:0; 
+  	margin-right:0;
+  	margin-bottom: 1.33333em;
+
+  	@include at-breakpoint($bp-tablet) {
+		width:90% !important;
+		margin-left:5%; 
+		margin-right:5%;
+	}
+}

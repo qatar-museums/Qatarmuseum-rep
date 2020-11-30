@@ -1,0 +1,159 @@
+.lt-ie9 {
+
+	.site-header {
+		.region-header-search{
+			visibility: hidden;
+		}
+	}
+
+	.site-header.open {
+		.site-title {
+			visibility: hidden;
+		}
+		.region-header-search {
+			visibility: visible;
+		}
+	}
+
+	.view-display-id-all_projects_and_areas,
+	.view-display-id-experience_map_block {
+
+		.view-filters,
+		.experience-view-header {
+			display: none;
+		}
+	}
+
+	.image-gallery {
+
+		display: none;
+
+	}
+
+	.gallery-controls-container,
+	.block-color-filler,
+	.poll-container {
+		display: none !important;
+	}
+
+	.project-social-container {
+
+		.tweet-item,
+		.instagram-item {
+			float: left;
+			position: static !important;
+			margin-right: 5% !important;
+		}
+
+	}
+
+	.breadcrumb .container,
+	.breadcrumb ul {
+		background-color: $pale-yellow;
+	}
+
+	.view-creative-resources .view-header .header-wrapper p {
+		margin-bottom: 1.333em;
+	}
+
+}
+
+html[dir="rtl"].lt-ie9 {
+	.project-social-container {
+
+		.tweet-item,
+		.instagram-item {
+			float: right;
+			position: static !important;
+			margin-left: 5% !important;
+			margin-right: 0% !important;
+		}
+
+	}
+}
+
+// area of work/hub/convo hub layout in ie8
+//handles layout styling for area of work, in convo hub and generic hub listing of children
+/* 
+IE8 can't understand the nth-child selector so we use selectivzr
+IE8 can't understand media queries so we use respond.js
+respond.js and selectivzr don't work together, so any nth-child selector within a media query won't
+be read by IE8
+
+so we have to use lots of !important tags here so that IE8 doesn't use the more specific css in the 
+media query, but then not apply it properly because it doesn't understand it.
+
+*/
+html.lt-ie9 .grid-three {
+
+	width: 100%;
+
+	.views-row {
+		margin-bottom: 3.311em;
+
+		@include span-columns(5, 16);	
+
+		&.last {
+			margin-right: 0;
+		}
+
+	}
+
+	//handle what breaks and clears where
+
+	.views-row {
+
+		clear: none;
+	
+		&:nth-child(2n) {
+			margin-right: $gutter-percentage#{"%"} !important;
+		}
+
+		&:nth-child(2n + 1) {
+			clear: none !important;
+		}
+
+		&:nth-child(3n) {
+			margin-right: 0 !important;
+			clear: none !important;
+		}
+
+		&:nth-child(3n+1) {
+			clear: both !important;
+		}
+
+
+	}
+
+
+}
+
+
+html[dir="rtl"].lt-ie9 .grid-three {
+
+	.views-row {
+
+		float: right !important;
+		margin-right: 0 !important;
+
+		&:nth-child(2n) {
+			margin-right: 0 !important;
+		}
+
+		&:nth-child(2n + 1) {
+			clear: none !important;
+		}
+
+		&:nth-child(3n) {
+			margin-right: $gutter-percentage#{"%"} !important;
+			clear: none !important;
+		}
+
+		&:nth-child(3n+1) {
+			clear: both !important;
+			margin-left: $gutter-percentage#{"%"} !important;
+		}
+
+	}
+
+}

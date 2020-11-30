@@ -1,0 +1,335 @@
+
+/* full view mode */
+.node-hero-wrapper {
+
+	// we presume it always has a hero image. if so, then give negative margin to negate the header margin.
+	margin-top: -3em;
+
+	.hero-container {
+		position: relative;
+		float: left;
+		width: 100%;
+
+		padding-bottom: 50%;
+		background-size: cover;
+		background-repeat: no-repeat;
+
+		@include at-breakpoint($bp-tablet) {
+			float: none;
+		}
+
+		@include at-breakpoint($bp-fullwidth) {
+			height: 30.222em;
+			padding-bottom: 0;
+		}
+
+		.container {
+			height: 100%;
+			position: absolute;
+			left: 0;
+			right: 0;
+			bottom: 0;
+		}
+
+		.field-name-field-hero-image-caption {
+			width: 100%;
+			bottom: 1em;
+			padding-left: 1em;
+			position: absolute;
+		}
+
+	}
+
+	.header-area {
+
+		.title-container {
+
+			width: 100%;
+
+			@include at-breakpoint($bp-tablet) {
+				@include span-columns(7, 16);
+			}
+
+			.node-interview & {
+
+				@include at-breakpoint($bp-tablet) {
+					width: 100%;
+					margin-right: 0;
+				}
+
+				@include at-breakpoint($bp-860) {
+					@include span-columns(7, 16);
+				}
+			}
+		}
+
+		.intro-text {
+
+			width: 100%;
+
+			@include at-breakpoint($bp-tablet) {
+				@include span-columns(7 omega, 16);
+			}
+
+			.node-interview & {
+
+				@include at-breakpoint($bp-tablet) {
+					width: 100%;
+					margin-right: 0;
+				}
+
+				@include at-breakpoint($bp-860) {
+					@include span-columns(7 omega, 16);
+				}
+			}
+
+			border-top: 2px solid #000000;
+			padding-top: 0.378em;
+			position: relative;
+			top: 0.4em;
+
+			 p:last-of-type {
+				margin-bottom: 0;
+			}
+		}
+
+	}
+}
+
+/** repeating field body elements **/
+.field-name-field-body-elements {
+
+	// we only want the top level field item
+	&>.field-items>.field-item {
+
+		width: 100%;
+
+		@include at-breakpoint($bp-tablet) {
+			@include span-columns(8, 16);
+			clear: none;
+		}
+
+		margin-bottom: 2.889em;
+
+		&.odd {
+			@include at-breakpoint($bp-tablet) {
+				@include span-columns(7 omega, 16);
+				clear: right;
+			}
+		}
+
+		&.wide-element {
+			width: 100%;
+			margin-right: 0;
+			clear: both;
+		}
+
+	}
+
+	.field-name-field-element-text-area :last-child {
+		margin-bottom: 0;
+	}
+
+	.group-user-quote {
+		width: 100%;
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(6 omega, 8);
+		}
+
+		@include at-breakpoint($bp-desktop) {
+			@include span-columns(4 omega, 8);
+		}
+
+		background-color: $orange;
+		padding: 1.667em;
+		position: relative;
+
+		.field-name-field-element-user-quote {
+			margin-bottom: 0;
+			@include endash-after;
+		}
+
+		@include left-arrow($orange, 2.222em, 2em);
+
+	}
+
+	.odd .group-user-quote {
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(6, 8);
+		}
+
+		@include at-breakpoint($bp-desktop) {
+			@include span-columns(4, 8);
+		}
+
+		@include right-arrow($orange, 2.222em, 2em);
+
+	}
+
+	.wide-user-quote .group-user-quote {
+		width: 100%;
+	}
+
+}
+
+.group-pull-quote {
+	border: 9px solid #000000;
+	border-right: none;
+	border-left: none;
+	padding: 0.922em 0;
+
+	.field-name-field-element-pull-quote {
+
+		margin-bottom: 0.7em;
+
+	}
+}
+
+.find-out-more {
+
+	h2 {
+
+		margin-bottom: 0.6em;
+
+	}
+}
+
+.project-social-container {
+
+	.tweet-item,
+	.instagram-item {
+		float: left;
+		height: 254px;
+		width: 254px;
+		margin-bottom: 5%;
+		margin-top: 0;
+
+		&:nth-child(2n-1) {
+			margin-right: 5%;
+		}
+
+		&:hover {
+			z-index: 10;
+		}
+
+		a {
+			background-color: transparent;
+			border-bottom: 1px solid black;
+			font-weight: normal;
+
+			&:hover {
+				border-bottom: none;
+			}
+		}
+	}
+
+	.tweet-item {
+		.tweet-item-inner {
+			padding: 12%;
+
+			&.rtl-tweet {
+				text-align: right;
+				direction: rtl;
+				unicode-bidi: embed;
+			}
+		}
+
+		.tweet-text {
+			margin-bottom: 24px;
+		}
+	}
+
+	.tweet-item:nth-child(4n + 1) {
+		background: #EC3B89;
+	}
+
+	.tweet-item:nth-child(4n + 2) {
+		background: #F9FF1E;
+	}
+
+	.tweet-item:nth-child(4n + 3) {
+		background: #FFC200;
+	}
+
+	.tweet-item:nth-child(4n + 4) {
+		background: #79AAF9;
+	}
+
+	@include at-breakpoint($bp-small-desktop) {
+
+		min-height: 900px;
+		position: relative;
+
+		.tweet-item,
+		.instagram-item {
+			position: absolute;
+		}
+
+		> div:nth-child(1) {
+			top: 0;
+			left: 17%;
+		}
+
+		> div:nth-child(2) {
+			top: 59%;
+			left: 0;
+		}
+
+		> div:nth-child(3) {
+			top: 63%;
+			left: 36%;
+		}
+
+		> div:nth-child(4) {
+			top: 40%;
+			left: 67%;
+		}
+
+		> div:nth-child(5) {
+			top: 65%;
+			left: 63%
+		}
+
+		> div:nth-child(6) {
+			top: 20%;
+			left: 0;
+		}
+
+		> div:nth-child(7) {
+			top: 0;
+			left: 61%;
+		}
+
+		> div:nth-child(8) {
+			top: 18%;
+			left: 53%;
+		}
+
+		> div:nth-child(9) {
+			top: 36%;
+			left: 24%;
+		}
+	}
+}
+
+/** TEASER MODE **/
+.node-project.node-teaser {
+
+	// margin-bottom: 3.311em;
+
+	h3 {
+		margin-bottom: 0.5em;
+	}
+
+	.field-name-field-teaser-image {
+		margin-bottom: 1.6em;
+		display: inline-block;
+	}
+
+	.content {
+		display: none; //for now.
+	}
+
+}

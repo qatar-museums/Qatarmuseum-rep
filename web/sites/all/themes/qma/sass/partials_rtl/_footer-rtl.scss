@@ -1,0 +1,20 @@
+$from-direction: right;
+$omega-float: opposite-position($from-direction);
+
+footer {
+  @include at-breakpoint($bp-small-desktop) {
+    section {
+      @include span-columns(4, 16);
+      @include suffix(0.5);
+      margin-right: 0;
+      padding-right: 0;
+
+      &:last-child {
+        @include omega;
+      }
+    }
+  }
+}
+
+$from-direction: left;
+$omega-float: opposite-position($from-direction);

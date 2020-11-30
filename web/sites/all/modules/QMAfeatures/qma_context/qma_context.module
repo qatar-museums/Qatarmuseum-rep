@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA context feature.
+ */
+
+include_once 'qma_context.features.inc';

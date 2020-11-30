@@ -1,0 +1,177 @@
+body {
+  background-color: #FFF;
+}
+
+#main-wrapper {
+    display: inline-block;
+    width: 100%;
+}
+
+.full-width {
+    @include clearfix;
+
+    width: 100%;
+    display: inline-block;
+    padding-top: 2.444em;
+    padding-bottom: 2.444em;
+
+    clear: left;
+    margin-bottom: -6px;
+
+    @include at-breakpoint($bp-tablet) {
+        display: block;
+        padding-top: 4.444em;
+        padding-bottom: 4.444em;
+    }
+
+    &.header-area {
+        @include at-breakpoint($bp-tablet) {
+            padding-top: 2.778em;
+        }
+    }
+
+    &.pink {
+        background-color: $pink;
+    }
+
+    &.yellow {
+        background-color: $yellow;
+    }
+
+    &.blue {
+        background-color: $blue;
+    }
+
+    &.orange {
+        background-color: $orange;
+    }
+
+    &.grey {
+        background-color: $grey-bg;
+    }
+
+    &.find-out-more.grey {
+        background-color: #E1E1E1;
+    }
+
+    &.black {
+        background-color: #000000;   
+    }
+
+    &.pattern {
+        @include at-breakpoint($bp-tablet) {
+            margin-bottom: -6px;
+        }
+
+        @include at-breakpoint($bp-fullwidth) {
+            background-color: #393939;
+        }
+    }
+
+    &.dark-grey {
+        background-color: #ededed;
+    }
+
+    .container {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
+    .column, section {
+        width: 100%;
+        margin-bottom: 2em;
+
+        // ie8 selectivzr doesn't work in media queries
+        .lt-ie9 &.ie8last {
+            @include span-columns(5, 16);
+            margin-right: 0;
+        }
+
+        @include at-breakpoint($bp-small-desktop) {
+            margin-bottom: 0;
+            @include span-columns(5, 16);
+
+            &.first {
+                @include span-columns(6, 16);
+                @include suffix(1);
+            }
+
+            &:last-child {
+                @include span-columns(5, 16);
+                margin-right: 0;
+            }
+        }
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        .share-links {
+            margin-bottom: 0;
+        }
+    }
+
+    &.outro {
+        margin-bottom: -6px;
+    }
+
+}
+
+.half-width {
+    @include clearfix;
+
+    margin-bottom: 2.222em;
+    width: 100%;
+
+    @include at-breakpoint($bp-small-desktop) {
+        @include span-columns(8, 16);
+
+        &.last {
+            @include span-columns(8 omega, 16);
+        }
+
+        float: left;
+        margin-bottom: 0;
+    }
+}
+
+.half-width-left {
+    @include clearfix;
+
+    margin-bottom: 2.222em;
+    width: 100%;
+
+    @include at-breakpoint($bp-small-desktop) {
+        @include span-columns(8, 16);
+        @include post(8);
+    }
+}
+
+.content.container {
+    padding-top: 2.444em;
+    padding-bottom: 2.444em;
+
+    @include at-breakpoint($bp-tablet) {
+        padding-top: 4.444em;
+        padding-bottom: 4.444em;
+
+        &.half-padding-top {
+          padding-top: 2.222em;
+        }
+    }
+
+    .node-generic-page & {
+        padding-top: 3em;
+        padding-bottom: 1.6em;
+    }
+
+    .node-education-hub & {
+      padding-bottom: 1.6em;
+    }
+
+  &.repeating-body-content {
+        @include at-breakpoint($bp-tablet) {
+            padding-bottom: 1.6em;
+        }
+    }
+}

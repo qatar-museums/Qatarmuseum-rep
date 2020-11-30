@@ -1,0 +1,83 @@
+$from-direction: right;
+$omega-float: opposite-position($from-direction);
+
+/*** instagram slider styles ***/
+.instagram-slider {
+
+	.instagram-item {
+		float: right;
+	}
+}
+
+.instagram-item {
+
+
+	.instagram-image {
+		
+		&:after {
+			left: auto;
+			right: 1em;
+		}
+	}
+
+	.instagram-user {
+
+		span {
+			background-position: right 2px;
+			padding-right: 26px;
+			padding-left: 0;
+		}
+	}
+
+}
+
+.social-media-col {
+
+
+	@include at-breakpoint($bp-small-desktop) {
+		@include span-columns(8, 16);
+		margin-right: 0;
+
+		&.youtube-feed {
+			@include span-columns(8 omega, 16);
+		}
+	}
+
+
+
+	@include at-breakpoint($bp-desktop) {
+		@include span-columns(5, 16);
+		margin-right: 0;
+
+		&.youtube-feed {
+			@include span-columns(6, 16);
+			margin-right: 0;
+		}
+
+		&.facebook-feed {
+			@include span-columns(5 omega, 16);
+			margin-right: 0;
+		}
+	}
+
+	.sm-link {
+		clear: right;
+	}
+
+}
+
+
+// twitter styling
+.twitter-feed {
+
+	.sm-container {
+		float: right;
+	}
+
+	iframe {
+		float: right;
+	}
+}
+
+$from-direction: left;
+$omega-float: opposite-position($from-direction);

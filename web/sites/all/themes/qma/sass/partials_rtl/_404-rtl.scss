@@ -1,0 +1,16 @@
+$from-direction: right;
+$omega-float: opposite-position($from-direction);
+
+.page-404 {
+
+	.fourohfour-container {
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(12, 16);
+		}
+	}
+
+}
+
+$from-direction: left;
+$omega-float: opposite-position($from-direction);

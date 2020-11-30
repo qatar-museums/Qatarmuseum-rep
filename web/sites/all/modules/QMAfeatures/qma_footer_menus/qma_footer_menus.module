@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA footer menus feature.
+ */
+
+include_once 'qma_footer_menus.features.inc';

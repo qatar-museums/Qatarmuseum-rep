@@ -1,0 +1,11 @@
+name = Internationalization SEO hreflang
+description = Provides hreflang support for multilingual sites.
+dependencies[] = i18n
+package = Multilingual - Internationalization
+core = 7.x
+; Information added by drupal.org packaging script on 2013-07-09
+version = "7.x-1.0-alpha2"
+core = "7.x"
+project = "i18n_contrib"
+datestamp = "1373385357"
+

@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA social media hub feature.
+ */
+
+include_once 'qma_social_media_hub.features.inc';

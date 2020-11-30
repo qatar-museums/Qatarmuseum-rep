@@ -1,0 +1,6 @@
+name = QMA Search Mods
+description = Customisations to the standard drupal search
+package = QMA
+
+version = 7.x-1.0
+core = 7.x

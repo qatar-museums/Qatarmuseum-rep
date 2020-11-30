@@ -1,0 +1,176 @@
+<?php
+
+/**
+ * @file
+ * qma_custom.install
+ */
+
+
+/**
+ * Install the country translations from the better_countries module.
+ */
+function qma_custom_update_7001() {
+  module_load_include('module', 'better_countries', 'better_countries');
+  better_countries_import_translations();
+}
+
+/**
+ * Update the Press Release display date values for the new date field.
+ */
+function qma_custom_update_7002() {
+  $q = new EntityFieldQuery();
+
+  $q->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', 'press_release');
+
+  $result = $q->execute();
+
+  // For all press releases, update the display date to be either the old
+  // display date or the current date.
+  if (isset($result['node'])) {
+    $nodes = node_load_multiple(array_keys($result['node']));
+
+    foreach ($nodes as $node) {
+      $node_wrapper = entity_metadata_wrapper('node', $node);
+      $date_override_old = $node_wrapper->field_display_date_override->value();
+
+      if (strlen(trim($date_override_old))) {
+        $date = DateTime::createFromFormat('d/m/Y', $date_override_old);
+
+        if (!$date) {
+          continue;
+        }
+
+        $timestamp = $date->format('U');
+      }
+      else {
+        $timestamp = $node_wrapper->created->value();
+      }
+
+      $node_wrapper->field_display_date->set($timestamp);
+      $node_wrapper->save();
+    }
+  }
+}
+
+/**
+ * Creates published --> need_review moderation transition.
+ */
+function qma_custom_update_7003() {
+  if (module_exists('workbench_moderation')) {
+    $new_transition = new stdClass();
+    $new_transition->from_name = 'published';
+    $new_transition->to_name = 'needs_review';
+
+    workbench_moderation_transition_save($new_transition);
+    watchdog('QMA Custom', 'Added workbench transition from Published to Needs Review', array(), WATCHDOG_INFO);
+  }
+}
+
+/**
+ * Forcibly revert the workbench_recent_content view.
+ */
+function qma_custom_update_7004() {
+  $view = views_get_view('workbench_recent_content');
+
+  // This is effectively the same as calling drush views-revert for the view.
+  if ($view && !$view->disabled && $view->type === t('Overridden')) {
+    module_load_include('inc', 'ctools', 'includes/object-cache');
+    $view->delete();
+    ctools_object_cache_clear('view', $view->name);
+    watchdog('QMA Custom', 'Reverted view @name', array('@name' => $view->name));
+  }
+}
+
+/**
+ * Ensure that the vocabulary and terms are created for the exhibitions pages
+ */
+function qma_custom_update_7005() {
+  // Vocabulary details
+  $vocab = new stdClass();
+  $vocab->name = 'Exhibition status';
+  $vocab->description = 'Used to determine if an exhibitions is opens';
+  $vocab->machine_name = 'exhibition_status_';
+
+  // Define the terms
+  $terms = array(
+    'Closed' => 'Closed exhibition, will appear in the past exhibitions list',
+    'Closing soon' => 'An exhibition which is currently open but will close soon',
+    'Coming soon' => 'Not currently open but will be soon',
+    'Now open' => 'A currently open exhibition',
+  );
+
+  // Vocabulary creation, if necessary
+  if (!taxonomy_vocabulary_machine_name_load($vocab->machine_name)) {
+    taxonomy_vocabulary_save($vocab);
+    drupal_set_message(st('New vocabulary %vocab created.', array('%vocab' => $vocab->name)));
+  }
+
+  // Terms creation or addition
+  $parent_title = taxonomy_vocabulary_machine_name_load($vocab->machine_name);
+  // Iterate through the terms and add non existent ones
+  foreach ($terms as $name => $description) {
+    $match = taxonomy_get_term_by_name($name, $parent_title->machine_name);
+    if (empty($match)) {
+      $term = new stdClass();
+      $term->vid = $parent_title->vid;
+      $term->name = st($name, array(), array('context' => 'QMA'));
+      $term->description = st($description);
+      $term->language = 'en';
+      taxonomy_term_save($term);
+      drupal_set_message(st('New term %term added to vocabulary %vocab.', array(
+        '%term' => $name,
+        '%vocab'=> $parent_title->name,
+      )));
+    }
+  }
+}
+
+/**
+ * Remove old ticket text field from exhibitions content-type.
+ */
+function qma_custom_update_7006() {
+  $q = new EntityFieldQuery();
+
+  $q->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', 'exhibition');
+
+  $result = $q->execute();
+
+  // For all exhibitions, migrate ticket text to the link title value and venue
+  // block link information to the location link field.
+  if (isset($result['node'])) {
+    $nodes = node_load_multiple(array_keys($result['node']));
+
+    foreach ($nodes as $node) {
+      $node_wrapper = entity_metadata_wrapper('node', $node);
+
+      // Set ticket link title to be ticket text.
+      $ticket_text = $node_wrapper->field_ticket_text->value();
+      $ticket_link = $node_wrapper->field_ticket_option->value();
+      $ticket_link['title'] = $ticket_text;
+      $node_wrapper->field_ticket_option->set($ticket_link);
+
+      // Set location link values from venue fields.
+      $venue_link = $node_wrapper->field_venue_link->value();
+      $venue_name = $node_wrapper->field_venue_name->value();
+      $location_link = $venue_link;
+      $location_link['title'] = $venue_name;
+      $node_wrapper->field_exhibition_location->set($location_link);
+
+      // Update the node.
+      $node_wrapper->save();
+    }
+  }
+
+  if ($instance = field_info_instance('node', 'field_ticket_text', 'exhibition')) {
+    field_delete_instance($instance);
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function qma_custom_uninstall() {
+  variable_del('date_format_medium_plain_month');
+}

@@ -1,0 +1,19 @@
+diff --git a/drupagram.module b/drupagram.module
+index 1e4637c..48b09ec 100644
+--- a/drupagram.module
++++ b/drupagram.module
+@@ -33,13 +33,12 @@ function drupagram_menu() {
+     'type' => MENU_DEFAULT_LOCAL_TASK,
+   );
+ 
+-  $items['user/%user_category/edit/drupagram'] = array(
++  $items['user/%user/edit/drupagram'] = array(
+     'title' => 'Instagram accounts',
+     'page callback' => 'drupagram_user_settings',
+     'page arguments' => array(1),
+     'access callback' => 'drupagram_edit_access',
+     'access arguments' => array(1),
+-    'load arguments' => array('%map', '%index'),
+     'weight' => 10,
+     'file' => 'drupagram.pages.inc',
+     'type' => MENU_LOCAL_TASK,

@@ -1,0 +1,26 @@
+diff --git a/countries.fields.inc b/countries.fields.inc
+index a700674..fbae404 100644
+--- a/countries.fields.inc
++++ b/countries.fields.inc
+@@ -266,7 +266,7 @@ function countries_field_formatter_view($entity_type, $entity, $field, $instance
+       $element[$delta]['#markup'] = theme('country_icon_adapter', $variables);
+     }
+     else {
+-      $element[$delta]['#markup'] = $item['safe_value'];
++      $element[$delta]['#markup'] = countries_t($country, 'name');
+     }
+   }
+   return $element;
+diff --git a/countries.module b/countries.module
+index cec2649..6d43fa4 100644
+--- a/countries.module
++++ b/countries.module
+@@ -665,7 +665,7 @@ function countries_get_countries($property = 'all', $filters = array()) {
+   $mapped_countries = array();
+   foreach ($filtered_countries as $country) {
+     if (isset($country->$property)) {
+-      $mapped_countries[$country->iso2] = $country->$property;
++      $mapped_countries[$country->iso2] = countries_t($country, $property);
+     }
+   }
+   uasort($mapped_countries, 'countries_sort');

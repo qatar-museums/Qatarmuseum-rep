@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA Promo Type feature.
+ */
+
+include_once 'qma_promo_type.features.inc';

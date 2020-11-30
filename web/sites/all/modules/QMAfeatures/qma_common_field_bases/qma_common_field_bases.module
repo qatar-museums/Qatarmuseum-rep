@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA common field bases feature.
+ */
+
+include_once 'qma_common_field_bases.features.inc';

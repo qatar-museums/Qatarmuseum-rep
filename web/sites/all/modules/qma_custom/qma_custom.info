@@ -1,0 +1,10 @@
+name = QMA custom
+description = Module for QMA customisations that do not have a place in other modules
+package = QMA
+core = 7.x
+
+dependencies[] = better_countries
+dependencies[] = entity
+dependencies[] = qma_workbench_view_overrides
+
+files[] = qma_custom.module

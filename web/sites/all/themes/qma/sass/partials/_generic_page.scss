@@ -1,0 +1,110 @@
+.node-type-generic-page,
+.node-type-news-article {
+
+	.content {
+		clear: left;
+	}
+
+	h3 {
+		margin-bottom: 0.6em;
+	}
+
+}
+
+.generic-center-column {
+	width: 100%;
+
+	@include at-breakpoint($bp-small-desktop) {
+		@include span-columns(12, 16); 
+		@include pre(2);
+	}
+
+	@include at-breakpoint($bp-desktop) {
+		@include span-columns(10, 16); 
+		@include pre(3);
+	}
+
+	.generic-content-wrapper {
+		width: 100%;
+		margin-bottom: 3em;
+		float: left;
+	}
+
+}
+
+.generic-page {
+
+	/** repeating field body elements **/
+	.field-name-field-body-elements {
+
+		// we only want the top level field item
+		&>.field-items>.field-item {
+
+			width: 100%;
+
+			@include at-breakpoint($bp-tablet) {
+				width: 100%;
+			}
+
+			margin-bottom: 2.889em;
+
+			&.odd {
+				@include at-breakpoint($bp-tablet) {
+					width: 100%;
+				}
+			}
+
+			&.wide-element {
+				width: 100%;
+				margin-right: 0;
+				clear: both;
+			}
+
+		}
+
+	}
+
+	.field-name-field-element-image {
+		background-color: $grey-bg;
+
+		img {
+			float: none;
+			margin: 0 auto;
+			display: block;
+		}
+
+	}
+
+}
+
+
+
+/*** sheika page specific styles ***/
+
+.bespoke-page {
+
+	.node-hero-wrapper {
+
+		.hero-container {
+			padding-bottom: 31%;
+
+			@include at-breakpoint($bp-desktop) {
+				height: 25.222em;
+				padding-bottom: 0;
+			}
+
+		}
+
+	}
+
+	h1 {
+		color: #FFFFFF;
+		width: 100%;
+		margin-bottom: 0;
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(10, 16);
+		}
+	}
+
+}

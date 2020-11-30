@@ -1,0 +1,500 @@
+/**
+ * Education related sass rules
+ */
+
+.node-hero-wrapper {
+  .header-area {
+    .intro-text-institution {
+      margin-top: 1.111em;
+    }
+  }
+}
+
+#qma-education-registration-form {
+  .select-target {
+    width: 100%;
+  }
+
+  #edit-submit,
+  #edit-cancel {
+    float: left;
+    clear: both;
+  }
+
+  #edit-cancel {
+    margin: 1em 0;
+  }
+}
+
+ .field-name-field-edures-file-attachment {
+
+   span {
+     clear: left;
+     display: block;
+   }
+ }
+
+.node-education-resource-hub {
+
+  .field-name-field-intro-text {
+    border-top: 2px solid #000000;
+    padding-top: 0.5em;
+    margin-bottom: 2.5em;
+  }
+
+  .education-resource-list-content {
+    margin-bottom: 1.5em;
+    margin-top: 1em;
+
+    @include at-breakpoint($bp-tablet) {
+      margin-top: 0;
+    }
+  }
+
+  .view-header, .view-empty {
+    margin-top: 1em;
+  }
+
+  .view-content {
+
+    margin-top: -6px;
+
+    @include at-breakpoint($bp-tablet) {
+      margin-top: 0;
+    }
+
+    th {
+      text-align: left;
+      text-transform: uppercase;
+      @include din-bold;
+    }
+
+    tr {
+      display: inline-block;
+      @include box-sizing(content-box);
+      width: 100%;
+
+      td {
+        padding: 2.556em 0 1em 0;
+
+        @include at-breakpoint($bp-tablet) {
+          padding-bottom:2.556em;
+        }
+      }
+    }
+
+    .odd {
+      background-color: #FAFAFA;
+      margin-left: -1em;
+      padding-left: 1em;
+      padding-right: 1em;
+
+      .ie9 & {
+        td {
+          background-color: #FAFAFA;
+
+          &.views-field-title {
+            margin-left: -1em;
+            padding-left: 1em;
+            margin-right: 2em;
+          }
+        }
+      }
+    }
+
+    thead tr {
+      display: none;
+
+      @include at-breakpoint($bp-tablet) {
+        display: inline-block;
+      }
+
+      th {
+        padding: 1em 0;
+      }
+    }
+
+    td {
+      width: 100%;
+      clear: left;
+      float: left;
+      margin-bottom: 1.5em;
+
+      @include at-breakpoint($bp-tablet) {
+        clear: none;
+        margin-bottom: 0;
+      }
+    }
+
+    .views-field-title {
+      @include at-breakpoint($bp-tablet) {
+        @include span-columns(7, 10);
+      }
+    }
+
+    .views-field-field-edures-file-attachment {
+
+      @include at-breakpoint($bp-tablet) {
+        @include span-columns(3 omega, 10);
+      }
+
+      span {
+        clear: left;
+        display: block;
+      }
+    }
+  }
+}
+
+.node-education-prog {
+  .view-qma-edu-resource-listings {
+    li {
+      margin: 0 0 2.222em;
+
+      &:before {
+        content: '';
+        display: block;
+        padding: 0;
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    .filesize {
+      &:before {
+        content: ' - ';
+      }
+    }
+  }
+
+  .booking-form + .repeating-body-content {
+    padding-top: 0;
+  }
+}
+
+.view-qma-edu-repeat-calendar {
+
+  .view-header {
+
+    .date-nav {
+      padding-bottom: 0;
+    }
+
+    .date-heading {
+      margin: 1.111em 0 1.111em;
+
+      @include at-breakpoint($bp-860) {
+        @include span-columns(8, 16);
+        float: none;
+        margin: 3.333em auto -1.6666em;
+      }
+    }
+
+    .pager {
+      @include clearfix;
+      border: 0;
+      margin: 0;
+
+      @include at-breakpoint($bp-tablet) {
+        padding: 0;
+      }
+
+      .ie8 & {
+        padding-top: 0;
+      }
+
+      // Show the AJAX spinner inline
+      .ajax-progress {
+        position: absolute;
+        right: 0.25em;
+        top: 0.25em;
+      }
+
+      .date-prev,
+      .date-next {
+        @include adjust-font-size-to(18px);
+        margin: 0;
+        padding: 0;
+        position: relative;
+        text-align: center;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+
+        a {
+          @include adjust-font-size-to(18px);
+          @include adjust-leading-to(7.5, 18px);
+          display: block;
+          font-weight: normal;
+          margin: 0;
+          padding: 0;
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+
+      .date-prev {
+        @include span-columns(7, 16);
+
+        @include at-breakpoint($bp-860) {
+           @include span-columns(4, 16);
+         }
+      }
+
+      .date-next {
+        @include span-columns(7 omega, 16);
+
+        @include at-breakpoint($bp-860) {
+           @include span-columns(4 omega, 16);
+         }
+      }
+
+    } /*END .pager*/
+
+  } /*END .view-header*/
+
+  .view-filters {
+    .ajax-progress {
+      margin-top: 2.222em;
+    }
+  } /*END .view-filters*/
+
+} /*END .view-qma-edu-repeat-calendar*/
+
+
+/* Default calendar style overrides START */
+
+$empty-bg: #E9E9E9;
+
+.calendar-calendar {
+
+  div.calendar {
+    font-size: inherit;
+  }
+
+  th,
+  td,
+  th.days,
+  td.empty {
+    border: 1px black solid;
+  }
+
+  th {
+    &.days {
+      background: #FFF;
+      color: #000;
+    }
+  }
+
+  .month-view,
+  .week-view,
+  .day-view {
+    .full {
+      td.date-box {
+        &.empty {
+          background: $empty-bg;
+        }
+
+        &.today {
+          @include din-bold;
+          border-color: $pink;
+          color: $pink;
+        }
+
+        .day {
+          @include adjust-font-size-to(15px);
+        }
+      }
+
+      div.single-day,
+      td.single-day,
+      td.multi-day {
+        &.empty {
+          background: $empty-bg;
+        }
+
+        &.single-day.today {
+          border-color: $pink;
+        }
+
+        div {
+          .monthview,
+          .weekview,
+          .dayview {
+            @include adjust-font-size-to(12px);
+            @include adjust-leading-to(3, 12px);
+            background: $light-pink;
+            -moz-border-radius: 0;
+            border-radius: 0;
+            color: #000;
+            font-weight: normal;
+            margin: 2px 0;
+            padding: 0.25em 0.5em;
+
+            a {
+              color: #000;
+              font-weight: normal;
+            }
+          }
+        }
+
+        .inner {
+          .weekview,
+          .monthview {
+            .cutoff,
+            .continues {
+              background: $light-pink;
+              -moz-border-radius: 0;
+              border-radius: 0;
+            }
+
+            .cutoff {
+              margin-top: -0.25em;
+              padding: 0.25em 0;
+            }
+
+            .continues {
+              margin-top: -0.25em;
+              padding: 0.25em 0 0.25em 0.25em;
+              right: -1px !important;
+              width: 1em;
+            }
+
+            .continuation {
+              margin-top: -0.25em;
+              padding: 0.25em 0;
+            }
+          }
+        }
+      }
+
+      td.today,
+      td.starts-today {
+        div {
+          .monthview,
+          .weekview,
+          .dayview {
+            @include adjust-font-size-to(12px);
+            @include adjust-leading-to(3, 12px);
+            background: $pink;
+            color: #FFF;
+            font-weight: bold;
+            padding: 0.25em 0.5em;
+
+            a {
+              color: #FFF;
+              font-weight: bold;
+            }
+
+            .calendar-more a {
+              color: #000;
+              font-weight: normal;
+            }
+          }
+        }
+
+        .inner {
+          .weekview,
+          .monthview {
+            .cutoff {
+              background: $pink;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/* Default calendar style overrides END */
+
+#qma-education-booking-form {
+  .form-submit {
+    &:disabled {
+      opacity: 0.8;
+    }
+  }
+
+  .form-item-date-select {
+    label {
+      @include adjust-leading-to(5, 18px);
+      padding: 0.781em 0;
+    }
+
+    .select-target {
+      width: 100%;
+    }
+  }
+
+  @include at-breakpoint($bp-tablet) {
+    label,
+    select,
+    .select-target,
+    .form-submit,
+    .form-item-date-select {
+      clear: none;
+      float: left;
+      margin-bottom: 0;
+    }
+
+    .form-item-date-select {
+      width: 100%;
+
+      label {
+        @include span-columns(3, 9);
+        padding: 0.781em 0;
+      }
+
+      .select-target {
+        @include span-columns(6 omega, 9);
+      }
+    }
+
+    .actions {
+      float: right;
+      margin-top: 1.111em
+    }
+  }
+
+  @include at-breakpoint($bp-desktop) {
+    .form-item-date-select {
+      @include span-columns(11, 16);
+    }
+
+    .actions {
+      @include span-columns(5 omega, 16);
+      margin-top: 0;
+    }
+
+    .form-submit {
+      float: right;
+    }
+  }
+}
+
+.registration-qma-education-event-registration {
+  .field-item,
+  .field-items,
+  .field-label {
+    display: inline-block;
+  }
+
+  .field-label {
+    @include din-bold;
+  }
+
+  .field {
+    margin-bottom: 0.5em;
+  }
+}
+
+.page-education-calendar-day {
+  .container {
+    margin-bottom: 4.444em;
+  }
+}

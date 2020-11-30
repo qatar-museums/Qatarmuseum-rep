@@ -1,0 +1,267 @@
+.field-name-field-membership-image {
+  img {
+    display: block;
+    float: none;
+    height: auto;
+    width: 100%;
+  }
+}
+
+#user-register-form {
+  .form-item-pass-pass2,
+  #edit-field-recieve-newsletter-title {
+    margin-bottom: 0;
+  }
+}
+
+.signup-wrapper {
+  @include clearfix;
+  background-color: $grey-bg;
+  margin: 4.444em 0;
+  padding: 1em;
+  width: 100%;
+}
+
+.page-user {
+  .profile {
+    .field {
+      margin-bottom: 0.5em;
+    }
+
+    label,
+    .field-label {
+      font-weight: bold;
+    }
+  }
+}
+
+#user-login,
+#register-form,
+#user-profile-form {
+  margin-bottom: 4.444em;
+
+  form {
+    .field-name-field-recieve-newsletter .form-item:first-child {
+      margin-bottom: 0;
+    }
+
+    /* Override label size since we've hidden the legend */
+    .form-item-language.form-type-radios > label {
+      font-size: 18px;
+    }
+
+    .form-actions {
+      width: 100%;
+      margin-top: 2em;
+    }
+  }
+}
+
+#user-profile-form {
+  .logout-button {
+    display: inline-block;
+    line-height: 1;
+    margin: 0.781em;
+  }
+
+  #edit-submit {
+    margin-bottom: 0.781em;
+    margin-right: 0.781em;
+  }
+}
+
+#user-login-form {
+  .item-list {
+    li {
+      list-style: none;
+      margin-left: 0;
+      padding-left: 0;
+
+      &:before {
+        content: '';
+        padding: 0;
+      }
+    }
+  }
+}
+
+.membership-half-width {
+  @include clearfix;
+
+  width: 100%;
+
+  @include at-breakpoint($bp-desktop) {
+    @include span-columns(10, 16);
+
+    &.last {
+        @include span-columns(10 omega, 16);
+    }
+  }
+}
+
+.membership-number {
+  @include clearfix;
+  background-color: $grey-bg;
+  clear: both;
+  margin: 0 0 2.222em;
+  padding: 1em;
+  width: 100%;
+
+  h3 {
+    margin: 0;
+  }
+
+  .label {
+    margin: 0;
+    width: auto;
+  }
+}
+
+#user-cancel-confirm-form {
+  .form-actions {
+    margin: 2.222em 0;
+  }
+
+  input[type="submit"] {
+    margin: 0 1em 0 0;
+  }
+}
+
+.sponsor-image {
+  display: block;
+  margin-bottom: 2.222em;
+  width: 100%;
+}
+
+.field-name-field-programme-image {
+  margin-bottom: 2.222em;
+
+  .field-item {
+    @include clearfix;
+  }
+}
+
+/* Sponsor logo styling */
+.sponsor-logos {
+  margin-bottom: 2.222em;
+
+  .sponsor-logo {
+    background: none;
+    border: 0;
+    margin-bottom: 1.111em;
+    padding: 0;
+
+    &:hover {
+      border: 0;
+      opacity: 0.6;
+    }
+
+    @include at-breakpoint($bp-small-desktop) {
+      margin: 0;
+    }
+
+    img {
+      display: block;
+      float: none;
+      margin: 0 auto;
+
+      @include at-breakpoint($bp-small-desktop) {
+        float: left;
+      }
+    }
+  }
+
+  /* Override hover state for qma logo since it's not a link */
+  .qma-sponsor-logo {
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  .sponsor-logo,
+  .sponsor-logos-left,
+  .sponsor-logos-right {
+    float: left
+  }
+
+  .sponsor-logos-left {
+    width: 100%;
+
+    .sponsor-logo {
+      width: 100%;
+    }
+
+    @include at-breakpoint($bp-small-desktop) {
+      width: 52.174%;
+
+      .qma-sponsor-logo {
+        width: 50%;
+      }
+
+      .vodafone-sponsor-logo {
+        width: 50%;
+      }
+    }
+  }
+
+  .sponsor-logos-right {
+    width: 100%;
+
+    .sponsor-logo {
+      width: 100%;
+    }
+
+    @include at-breakpoint($bp-small-desktop) {
+      width: 47.826%;
+
+      .national-museum-sponsor-logo {
+        width: 41.818%;
+      }
+
+      .al-zubarah-sponsor-logo {
+        width: 32.727%;
+      }
+
+      .mia-sponsor-logo {
+        width: 25.455%;
+      }
+
+      .mathaf-sponsor-logo {
+        width: 74.545%;
+      }
+
+      .qatar-foundation-sponsor-logo {
+        width: 25.455%;
+      }
+    }
+  }
+}
+
+.membership-card {
+  color: #231F20;
+  float: left;
+  font-family: Tahoma, sans-serif;
+  font-size-adjust: 0.5;
+  font-style: normal;
+  font-weight: bold;
+  margin: 10px;
+  position: relative;
+
+  .membership-card-number,
+  .membership-card-name {
+    left: 4%;
+    padding: 0 3%;
+    position: absolute;
+    width: 61%;
+  }
+
+  .membership-card-name {
+    margin-top: -0.5em;
+    top: 65.24%;
+  }
+
+  .membership-card-number {
+    margin-top: -0.5em;
+    top: 72.5%;
+  }
+}

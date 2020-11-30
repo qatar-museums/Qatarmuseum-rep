@@ -1,0 +1,27 @@
+<?php
+/**
+ * @file
+ * qma_comment.module
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function qma_comments_menu() {
+
+  $items = array();
+
+  $items['admin/comment'] = array(
+    'title' => 'Comments',
+    'description' => 'List and edit site comments and the comment approval queue.',
+    'page callback' => '_qma_comments_redirect',
+    'access arguments' => array('administer comments'),
+    'menu_name' => 'Management',
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+function _qma_comments_redirect() {
+  drupal_goto('admin/content/comment');
+}

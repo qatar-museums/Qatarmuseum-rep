@@ -1,0 +1,110 @@
+<?php
+
+/**
+ * Implementation of hook_schema().
+ */
+function tb_megamenu_schema() {
+  $schema['tb_megamenus'] = array(
+    'fields' => array(
+      'menu_name' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE
+      ),
+      'block_config' => array(
+        'type' => 'text',
+        'not null' => FALSE
+      ),
+      'menu_config' => array(
+        'type' => 'text',
+        'not null' => FALSE
+      ),
+      'language' => array(
+        'type' => 'varchar',
+        'length' => '12',
+        'not null' => TRUE,
+        'default' => ''
+      )
+    ),
+    'primary key' => array('menu_name', 'language')
+  );
+  $schema['tb_megamenu_extensions'] = array(
+    'fields' => array(
+      'machine_name' => array(
+        'type' => 'varchar',
+        'length' => '100',
+        'not null' => TRUE
+      ),
+      'title' => array(
+        'type' => 'varchar',
+        'length' => '100',
+        'not null' => TRUE
+      ),
+      'type' => array(
+        'type' => 'varchar',
+        'length' => '100',
+        'not null' => TRUE
+      )
+    ),
+    'primary key' => array('machine_name')
+  );
+  return $schema;
+}
+
+/**
+ * Add language field.
+ */
+function tb_megamenu_update_7101(&$sandbox) {
+  // Remove existed primary key.
+  db_query("ALTER TABLE {tb_megamenus} DROP primary key");
+  $field = array(
+    'type' => 'varchar',
+    'length' => 12,
+    'not null' => TRUE,
+    'default' => '',
+  );
+  $keys_new = array(
+    'primary key' => array('menu_name', 'language')
+  );
+  db_add_field('tb_megamenus', 'language', $field, $keys_new);
+
+  return t('Add more field language into tb_megamenus table');
+}
+
+/**
+ * Set all existing menus to current language.
+ */
+function tb_megamenu_update_7102(&$sandbox) {
+  db_query("UPDATE {tb_megamenus} SET language = '" . $GLOBALS['language']->language . "'");
+  return t('Set all existing menus to current language');
+}
+
+/**
+ * Add tb_megamenu_themes table.
+ */
+function tb_megamenu_update_7201(&$sandbox) {
+  db_create_table('tb_megamenu_extensions', array(
+    'fields' => array(
+      'machine_name' => array(
+        'type' => 'varchar',
+        'length' => '100',
+        'not null' => TRUE
+      ),
+      'title' => array(
+        'type' => 'varchar',
+        'length' => '100',
+        'not null' => TRUE
+      ),
+      'type' => array(
+        'type' => 'varchar',
+        'length' => '100',
+        'not null' => TRUE
+      )
+    ),
+    'primary key' => array('machine_name')
+  ));
+
+  return t('Add a new table tb_megamenu_extensions');
+}
+
+

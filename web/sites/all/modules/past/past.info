@@ -1,0 +1,18 @@
+name=Past
+description=Provides logging capabilities to log events with arguments in a normalized way.
+package = Logging
+core=7.x
+
+files[]=past.api.inc
+files[]=past.null.inc
+files[]=past.null_argument.inc
+files[]=past.admin.inc
+files[]=past.test
+files[]=past.null.test
+files[]=past.requirements.test
+; Information added by Drupal.org packaging script on 2016-04-02
+version = "7.x-1.0-alpha3"
+core = "7.x"
+project = "past"
+datestamp = "1459591740"
+

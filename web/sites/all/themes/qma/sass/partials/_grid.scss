@@ -1,0 +1,138 @@
+/* susy grid settings calculated using base font size */
+
+$total_columns: 16;
+$column-width: 2.778em; // 50px
+$gutter-width: 1.000em; // 18px
+//$grid-padding: 4.01%; // if we want the padding to adapt, use percentages
+$grid-padding: 2.888em; // 52px
+
+// lets work out our page width so we can get a column width as a percentage (useful for left/right positioning)
+$page-width: ($total_columns * $column-width) + (($total_columns - 1) * $gutter-width);
+
+$column-percentage: ($column-width  / $page-width) * 100;
+$gutter-percentage: ($gutter-width / $page-width) * 100;
+
+/* compass vertical rhythm */
+
+@import "compass/typography/vertical_rhythm";
+
+$base-font-size: 18px;
+$base-line-height: 4px;
+// $rhythm-unit: 'rem';
+
+@include establish-baseline;
+
+* {
+   -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  float: left;
+
+  html[dir='rtl'] & {
+    float: right;
+  }
+
+}
+
+html {
+  @include adjust-leading-to(4);
+}
+
+body {
+  margin: 0 auto;
+  -webkit-backface-visibility: hidden;
+}
+
+.container {
+  width: 100%;
+  padding: 0 1em;
+  @include box-sizing(border-box);
+
+  @include at-breakpoint($bp-tablet) {
+    // has larger padding now
+    @include container;
+    @include box-sizing(content-box);
+    width: auto;
+  }
+
+  position: relative;
+
+  // if the overlay is on screen then have this z index
+  z-index: 2;
+
+  &.no-gutter {
+    padding-left: 0;
+    padding-right: 0;
+    max-width: 65.222em;
+  }
+
+}
+
+/* overlay code */
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  opacity: 0.25;
+  height: 100%;
+  display: none;
+
+  .container {
+    height: 100%;
+  }
+
+}
+
+.col {
+  
+  @include at-breakpoint($bp-tablet) {
+    @include span-columns(1,16);
+  }
+  
+  height: 100%;
+  
+  .overlay & {
+      outline: 1px solid #00f0e9;
+  }
+  
+  &.four {
+    @include at-breakpoint($bp-tablet) {
+      @include span-columns(4,16);
+    }
+  }
+  
+}
+
+.col:nth-child(16) {
+  @include at-breakpoint($bp-tablet) {
+    @include span-columns(1 omega,16);
+  }
+}  
+
+.overlay .horizontal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  
+  & .row {
+    content: '';
+    @include trailing-border(1px, 17);
+    border-color: #00f0e9;
+    width: 100%
+  }
+  
+}
+
+.toggle-grid {
+  position: fixed;
+  right: 1em;
+  bottom: 3em;
+  z-index: 999;
+}

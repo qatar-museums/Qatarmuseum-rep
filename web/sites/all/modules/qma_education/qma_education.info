@@ -1,0 +1,15 @@
+name = QMA education module
+description = Custom functionality related to QMA education options
+package = QMA
+core = 7.x
+
+dependencies[] = entity
+dependencies[] = locale
+dependencies[] = translation
+dependencies[] = registration
+dependencies[] = date_repeat_field
+
+files[] = qma_education.theme
+files[] = includes/qma_education.forms.inc
+files[] = views/qma_education.views.inc
+files[] = views/qma_education_registration_handler_field_entity_capacity_remaining.inc

@@ -1,0 +1,33 @@
+<h2>How do I set up uc_migs?</h2>
+
+The configuration settings for the uc_migs payment method can be located by navigating:
+
+  <tt>Store Admin &gt; Configuration &gt; Payment Settings &gt; Edit &gt; Payment Methods</tt>
+
+You will see the following settings under the fieldset <em>"MIGS 3rd Party"</em>:
+
+<h3>Details provided by your payment institution</h3>
+
+<dl>
+<dt>Merchant ID</dt>
+<dd>An alphanumeric code. Ex: <em>TESTGROBOT</em>.</dd>
+<dt>Access Code</dt>
+<dd>A short code in hex (0-9, A-F), typically 8 characters long. Ex: <em>0A1B2C3D4E</em></dd>
+<dt>Secure Hash Secret</dt>
+<dd>A long code in hex, typically 32 characters long. Ex: <em>699da533c5cb7c2580d666ceccee5164</em></dd>
+<dt>Version Number</dt>
+<dd>A numeric value, currently <em>1</em>.</dd>
+</dl>
+
+<h3>Details you may customise freely</h3>
+
+<dl>
+<dt>Language preference</dt>
+<dd>Allows selection of languages on MIGS pages. Ex: <em>English</em></dd>
+<dt>Payment method title</dt>
+<dd>On the checkout page, this is the label which users will select to choose that payment method. The default is <em>Credit card on a secure server</em> but if you want to present several options (say, Paypal, Google Checkout and MIGS) and distinguish between them, you might enter something which clarifies the gateway people will be opting to use.</dd>
+<dt>Show credit card icons beside the payment method title</dt>
+<dd>Some payment institutions require this, but as the icons are copyrighted, we can't distribute them through the Drupal.org infrastructure. A notice will display the correct path to upload your logo files in order to have them displayed on the checkout page. Your payment institution can help you locate the correct image files to use.</dd>
+<dt>Order review submit button text</dt>
+<dd>Text to display on the button which will transport customers to the MIGS gateway for transaction. Default: <em>Submit Order</em></dd>
+</dl>

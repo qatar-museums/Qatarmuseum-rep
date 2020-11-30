@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA Workbench View Overrides feature.
+ */
+
+include_once 'qma_workbench_view_overrides.features.inc';

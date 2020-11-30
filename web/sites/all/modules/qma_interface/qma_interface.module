@@ -1,0 +1,489 @@
+<?php
+
+/**
+ * @file
+ * qma_interface.module
+ */
+
+
+/**
+ * Implements hook_views_api().
+ */
+function qma_interface_views_api() {
+  return array(
+    'api' => 3,
+    'includes' => drupal_get_path('module', 'qma_interface') . '/views',
+  );
+}
+
+/**
+ * Implements hook_views_data_alter().
+ */
+function qma_interface_views_data_alter(&$data) {
+  if (isset($data['drupagram']) && isset($data['drupagram']['created_time'])) {
+    $data['drupagram']['created_time']['field']['handler'] = 'qma_interface_handler_field_date';
+  }
+}
+
+/**
+ * Implements hook_admin_paths_alter().
+ * 
+ * Adds the instagram paths to the admin area.
+ */
+function qma_interface_admin_paths_alter(&$paths) {
+  if (module_exists('drupagram')) {
+    $paths['user/*/instagram'] = TRUE;
+    $paths['user/*/edit/drupagram'] = TRUE;
+  }
+
+  if (module_exists('feeds_import')) {
+    $paths['import'] = TRUE;
+    $paths['import/*'] = TRUE;
+  }
+
+  if (module_exists('diff') && module_exists('workbench_moderation')) {
+    $paths['node/*/moderation/diff'] = TRUE;
+    $paths['node/*/moderation/diff/list'] = TRUE;
+    $paths['node/*/moderation/diff/view'] = TRUE;
+    $paths['node/*/moderation/diff/view/*/*'] = TRUE;
+  }
+}
+
+//reorder module hooks to ensure this module is the last to intercept the form_alter hooks
+//needed to ensure we can hide  locale options
+function qma_interface_module_implements_alter(&$implementations, $hook) {
+  if ($hook == 'form_alter' || $hook == 'form_user_register_form_alter') {
+    // Move qma_menus_form_alter() to the end of the list. module_implements()
+    // iterates through $implementations with a foreach loop which PHP iterates
+    // in the order that the items were added, so to move an item to the end of
+    // the array, we remove it and then add it.
+    if (isset($implementations['qma_interface'])) {
+      $group = $implementations['qma_interface'];
+      unset($implementations['qma_interface']);
+      $implementations['qma_interface'] = $group;
+    }
+  }
+}
+
+
+//this function and the process function it calls replace the confusing default labels on advanced link field types
+function qma_interface_element_info_alter(&$type) {
+  if (isset($type['advanced_link'])) {
+    $type['advanced_link']['#process'][] = 'qma_interface_link_field_process';
+  }
+}
+
+function qma_interface_link_field_process($element, $form_state, $complete_form) {
+    $element['title']['#title'] = t('Link text', array(), array('context' => 'QMA'));
+    $element['url']['#title'] = t('Destination URL', array(), array('context' => 'QMA'));
+    return $element;
+}
+
+
+/*
+ * Implementation of hook_form_alter
+ * 
+ */
+function qma_interface_form_alter(&$form, &$form_state, $form_id) {
+  global $user;
+
+  //global overrides for all node editing forms
+  if (isset($form['#node_edit_form']) && $form['#node_edit_form']) {
+    //hide unused publishing options
+    hide($form['options']['promote']);
+    hide($form['options']['sticky']);
+    
+    //remove preview & view changes submit buttons
+    hide($form['actions']['preview']);
+    hide($form['actions']['preview_changes']);
+    
+    //hide ability to edit authoring details
+    $form['author']['#access']=FALSE;
+    
+    //hide advanced editing options from all but content managers and the adminitrator account
+    if (!in_array('Content Manager', $user->roles) && $user->uid != 1) {
+      $form['xmlsitemap']['#access']=FALSE;
+      $form['path']['#access']=FALSE;
+      $form['redirect']['#access']=FALSE;
+      $form['options']['#access']=FALSE;
+    }
+    
+    //some node types do not create a page so remove redundant options here
+    if ($form['#id']=='promo-node-form' || $form['#id']=='advpoll-node-form' || $form['#id']=='press-release-node-form' || $form['#id']=='creative-resource-node-form') {
+      $form['xmlsitemap']['#access']=FALSE;
+      $form['path']['#access']=FALSE;
+      $form['redirect']['#access']=FALSE;
+      $form['metatags']['#access']=FALSE;
+    }
+    
+    if ($form['#id']=='generic-page-node-form' || $form['#id']=='landing-page-node-form' || $form['#id']=='project-node-form') {
+      //load custom js validation
+      $form['#attached']['js'][] = drupal_get_path('module', 'qma_interface') . '/js/QMAvalidate.js';
+    }
+    
+    
+    //Alter the body elements field collection to ensure that fieldsets are preopened if they contain any content
+    if(isset($form['field_body_elements'])) {
+      foreach ($form['field_body_elements'][LANGUAGE_NONE] as $fieldCollInx => $fieldCollArr) {  //step through each instance of the field collection
+        if (is_numeric($fieldCollInx)) {  //ignore field colection properties, numeric keys indicate array's storing content
+        
+          /* iterate over the field groups(fieldsets) associated with this collection
+           * and determine the child fields they contain
+           * check associated fields for content and set a flag if found
+           */
+          foreach ($fieldCollArr['#fieldgroups'] as $grpName=>$grpObj) { 
+            $hasContent = FALSE;
+            foreach($grpObj->children as $childField) {
+              switch ($childField) {  //switch case required to deal with different field types storing their content differently (n.b testing on field name not type as we cannot accurately determine type at this point)
+                case 'field_element_text_area':
+                  if ($fieldCollArr[$childField][LANGUAGE_NONE][0]['#default_value'] != '') {
+                    $hasContent = TRUE;
+                  }
+                  break;
+                case 'field_element_video_url':
+                  if ($fieldCollArr[$childField][LANGUAGE_NONE][0]['video_url']['#default_value'] != '' || $fieldCollArr[$childField][LANGUAGE_NONE][0]['description']['#default_value'] != '') {
+                    $hasContent = TRUE;
+                  }
+                  break;
+                case 'field_element_image':
+                  if ($fieldCollArr[$childField][LANGUAGE_NONE][0]['#default_value']['fid']) {
+                    $hasContent = TRUE;
+                  }
+                  break;
+                default: //applies to standard text fields
+                  if ($fieldCollArr[$childField][LANGUAGE_NONE][0]['value']['#default_value'] != '') {
+                    $hasContent = TRUE;
+                  }
+                
+              }
+            }
+            if ($hasContent) {
+              /* We cannot simply update the value format_settings['formatter']='open' because the group object is a reference
+               * that is shared across every instance of the field collection. Therefore updating one instance affects them all.
+               * To avoid this issue we need to clone the object but it's worse than that because the format_settings property
+               * is itself a reference. 
+               * So we clone the group object, make a copy of the format_settings array, modify this copy,
+               * unset the format_settings property on our cloned object to avoid altering the existing reference,
+               * recreate the format_settings property and assign the modified array to it and then reattach the cloned object
+               */
+               
+              $clonedGrpObj = clone $form['field_body_elements'][LANGUAGE_NONE][$fieldCollInx]['#fieldgroups'][$grpName];
+              $format_settingsArr = $clonedGrpObj->format_settings;
+              if ($clonedGrpObj->format_type=='fieldset') {
+                $format_settingsArr['formatter'] = 'collapsible';
+              } else {
+                $format_settingsArr['formatter'] = 'open';
+              }
+              unset($clonedGrpObj->format_settings);
+              $clonedGrpObj->format_settings = $format_settingsArr;
+              $form['field_body_elements'][LANGUAGE_NONE][$fieldCollInx]['#fieldgroups'][$grpName]= $clonedGrpObj;
+            }
+          }
+        }
+      }
+    } //end body elements alterations
+
+  
+  }
+  
+}
+
+
+/**
+ * Implements hook_interface_field_widget_form_alter().
+ *
+ * Update default values for entity references when performing a translation
+ * to ensure that translations of those entities referenced on the source node
+ * are set as defaults if available
+ */
+function qma_interface_field_widget_form_alter(&$element, &$form_state, $context) {
+  $field = $context['field'];
+  $entity = $element['#entity'];
+
+  // Only apply to entityreference fields when creating a translation.
+  if ($field['type'] === 'entityreference' && isset($entity->translation_source)) {
+
+    // In the case where the field cardinality is one, this will only loop once.
+    foreach ($context['items'] as $source_vals) {
+
+      // If the source node is not available in the field options we can assume
+      // it has been filtered out by language.
+      if (!_qma_interface_translation_default_available($source_vals['target_id'], $element['#default_value'])) {
+
+        // Need to retrieve the tnid (translation set id) for the node to ensure
+        // we can match no matter which was the original language of the node.
+        $tnid = db_select('node', 'n')
+                  ->fields('n', array('tnid'))
+                  ->condition('nid', $source_vals['target_id'])
+                  ->execute()
+                  ->fetchField();
+
+        if ($tnid) {
+          $translations = translation_node_get_translations($tnid);
+
+          if (isset($translations[$entity->language])) {
+            $translation_nid = $translations[$entity->language]->nid;
+
+            if ((int) $field['cardinality'] === 1) {
+              $element['#default_value'] = $translation_nid;
+            }
+            else {
+              $element['#default_value'][] = $translation_nid;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Helper function to check availability of entity reference options.
+ */
+function _qma_interface_translation_default_available($option, $defaults) {
+  return is_array($defaults) ? in_array($option, $defaults) : $option === $defaults;
+}
+
+/*
+ * Implementation of hook_form_alter
+ * Alter taxonomy term form to make it cleaner
+ */
+function qma_interface_form_taxonomy_form_term_alter(&$form, &$form_state) {
+  
+  //hide all settings refering to term pages, as we don't use them
+  hide($form['metatags']);
+  hide($form['path']);
+  hide($form['redirect']);
+  
+  //also hide term hierachy settings, we only use flat vocabularies
+  hide($form['relations']);
+  $form['relations']['weight']['#value'] = 0; //required field so force a value
+  $form['relations']['parent']['#value'] = 0;
+}
+
+
+
+
+/*
+ * Implementation of hook_form_alter
+ * Alter the question/answer field collection to ensure that fieldsets are preopened if they contain any content
+ */
+function  qma_interface_form_interview_node_form_alter(&$form, &$form_state) {
+  foreach ($form['field_interview_question_answer'][LANGUAGE_NONE] as $fieldCollInx => $fieldCollArr) {  //step through each instance of the field collection
+    if (is_numeric($fieldCollInx)) {  //ignore field colection properties, numeric keys indicate array's storing content
+    
+      /* iterate over the field groups(fieldsets) associated with this collection
+       * and determine the child fields they contain
+       * check associated fields for content and set a flag if found
+       */
+      foreach ($fieldCollArr['#fieldgroups'] as $grpName=>$grpObj) { 
+        $hasContent = FALSE;
+        foreach($grpObj->children as $childField) {
+          switch ($childField) {  //switch case required to deal with different field types storing their content differently (n.b testing on field name not type as we cannot accurately determine type at this point)
+            case 'field_interview_image':
+              if ($fieldCollArr[$childField][LANGUAGE_NONE][0]['#default_value']['fid']) {
+                $hasContent = TRUE;
+              }
+              break;
+            default: //applies to standard text fields
+              if ($fieldCollArr[$childField][LANGUAGE_NONE][0]['value']['#default_value'] != '') {
+                $hasContent = TRUE;
+              }
+            
+          }
+        }
+        if ($hasContent) {
+          /* We cannot simply update the value format_settings['formatter']='open' because the group object is a reference
+           * that is shared across every instance of the field collection. Therefore updating one instance affects them all.
+           * To avoid this issue we need to clone the object but it's worse than that because the format_settings property
+           * is itself a reference. 
+           * So we clone the group object, make a copy of the format_settings array, modify this copy,
+           * unset the format_settings property on our cloned object to avoid altering the existing reference,
+           * recreate the format_settings property and assign the modified array to it and then reattach the cloned object
+           */
+           
+          $clonedGrpObj = clone $form['field_interview_question_answer'][LANGUAGE_NONE][$fieldCollInx]['#fieldgroups'][$grpName];
+          $format_settingsArr = $clonedGrpObj->format_settings;
+          if ($clonedGrpObj->format_type=='fieldset') {
+            $format_settingsArr['formatter'] = 'collapsible';
+          } else {
+            $format_settingsArr['formatter'] = 'open';
+          }
+          unset($clonedGrpObj->format_settings);
+          $clonedGrpObj->format_settings = $format_settingsArr;
+          $form['field_interview_question_answer'][LANGUAGE_NONE][$fieldCollInx]['#fieldgroups'][$grpName]= $clonedGrpObj;
+        }
+      }
+    }
+  }
+}
+
+
+
+/*
+ * Implementation of hook_form_alter
+ * Alter the advanced poll editing form to remove options not required by this site
+ */
+function  qma_interface_form_advpoll_node_form_alter(&$form, &$form_state) {
+  global $user;
+  if ($user->uid != 1) { //do not hide options from global admin 
+    $form['advpoll_max_choices']['#access'] = FALSE; //we do not currently support checkbox forms for this module
+    $form['advpoll_mode']['#access'] = FALSE; //always use the default of vote api
+    $form['advpoll_cookie_duration']['#access'] = FALSE;
+    $form['advpoll_options']['#access'] = FALSE; //none of these options are required for this site
+    
+    $form['advpoll_results'][LANGUAGE_NONE]['#default_value'] = 'aftervote';
+    $form['advpoll_results']['#access'] = FALSE; 
+  
+    $form['advpoll_behavior'][LANGUAGE_NONE]['#default_value'] = 'pool'; //just get raw data we don't need http://en.wikipedia.org/wiki/Approval_voting
+    $form['advpoll_behavior']['#access'] = FALSE; 
+  }
+}
+
+/*
+ * Implementation of hook_views_default_views_alter
+ * modify views provided by other modules, cannot do this in features as they would be overriden 
+ */
+function qma_interface_views_default_views_alter(&$views) {
+  
+  // add 'Language' column to workbench views
+  if(isset($views['workbench_edited'])) {
+    $view = $views['workbench_edited'];
+    
+    foreach ($view->display as $displayID => $displayObj) {
+      $handler =& $view->display[$displayID]->handler;
+      if(isset($handler->display->display_options['fields'])) { //not all displays will have this defined if they are not overriding default
+        $fieldsArr = $handler->display->display_options['fields'];
+        
+        // Field: Content: Language 
+        $langFieldArr = array('language'=>array('id' => 'language',
+        'table' => 'node',
+        'field' => 'language',
+        'relationship' => 'vid',
+        'label' => 'Language'));
+            
+        //column order is down to position in fields array hence slice and merge n.b index of 3 as first field is hidden
+        $handler->display->display_options['fields'] = array_merge(
+              array_slice($fieldsArr, 0, 3),
+              $langFieldArr,
+              array_slice($fieldsArr, 3)
+          );
+        
+          //Make column sortable 
+        $handler->display->display_options['style_options']['info']['language'] = array(
+            'sortable' => 1,
+            'default_sort_order' => 'asc',
+            'align' => '',
+            'separator' => '',
+            'empty_column' => 0,
+        );
+        
+        //remove default filter that prevents unpublished content being available to non-admins
+        if (isset($handler->display->display_options['filters']['status_extra'])) {
+          unset($handler->display->display_options['filters']['status_extra']);
+        }
+      }
+    
+    }
+  }
+  
+  if (isset($views['workbench_recent_content'])) {
+
+    $view =& $views['workbench_recent_content'];
+
+    foreach ($view->display as $displayID => $displayObj) {
+      $handler =& $view->display[$displayID]->handler;
+
+      if (isset($handler->display->display_options['fields'])) { //not all displays will have this defined if they are not overriding default
+        $fieldsArr = $handler->display->display_options['fields'];
+        
+        // Field: Content: Language
+        $langFieldArr = array(
+          'language' => array(
+            'id' => 'language',
+            'table' => 'node',
+            'field' => 'language',
+            'label' => 'Language'
+          ),
+        );
+            
+        //column order is down to position in fields array hence slice and merge 
+        $handler->display->display_options['fields'] = array_merge(
+          array_slice($fieldsArr, 0, 2),
+          $langFieldArr,
+          array_slice($fieldsArr, 2)
+        );
+        
+          //Make column sortable 
+        $handler->display->display_options['style_options']['info']['language'] = array(
+          'sortable' => 1,
+          'default_sort_order' => 'asc',
+          'align' => '',
+          'separator' => '',
+          'empty_column' => 0,
+        );
+
+        if ($displayID === 'page_1') {
+          // Temporarily set this as a new tab so that it can co-exist with the new
+          // custom Workbench Moderation view.
+          $handler->display->display_options['menu']['title'] = 'All Legacy Content';
+          $handler->display->display_options['path'] = 'admin/workbench/content/legacy';
+        }
+      }
+      
+      //remove default filter that prevents unpublished content being available to non-admins
+      if (isset($handler->display->display_options['filters']['status_extra'])) {
+        unset($handler->display->display_options['filters']['status_extra']);
+      }
+
+    }
+  }
+}
+
+
+/*
+ * implementation of hook_views_query_alter($view, $query)
+ */
+function qma_interface_views_query_alter($view, $query){
+  
+  //we want to sort our workbench views by language.
+  //the only way to do this by default is by language code not by language display name
+  // to get around this we alter the query at runtime 
+  if ($view->name == "workbench_recent_content" || $view->name == "workbench_edited") {
+    
+    if ($view->name == "workbench_edited") {
+      $joinTo = 'node_node_revision'; // workbench_edited is dependent on an existing join to the node_revision table so we need to join on the join
+    } else {
+      $joinTo = 'node';
+    }
+  
+    //setup a join to retrieve the display name of the language from the languages table 
+    $ga_join = new views_join();
+    $ga_join->table = 'languages';
+    $ga_join->field = 'language';
+    $ga_join->left_table = $joinTo;
+    $ga_join->left_field = 'language';
+    $ga_join->type = 'LEFT';
+    
+    $query->add_relationship('lang_node', $ga_join, 'node', null);
+    
+    foreach ($query->orderby as $idx=>$sortArr) {
+      if ($sortArr['field'] == 'node_language' || $sortArr['field'] == 'node_node_revision_language') { //replace any occurence of sorting by langauge code on the node table with a sort on name from the languages join
+        $query->orderby[$idx]['field'] = 'lang_node.name';
+      }
+    }
+  }
+}
+
+
+/*This function allows us to increase the limits offered on multi-valued fields to a max of 30 rather than 10*/
+function qma_interface_form_field_ui_field_edit_form_alter(&$form, &$form_state, $form_id) {
+  // Increase the max cardinality to 30
+  $range = drupal_map_assoc(range(1, 30));
+  $new_options =  array(FIELD_CARDINALITY_UNLIMITED => t('Unlimited')) + $range;
+
+  // Change the options
+  $form['field']['cardinality']['#options'] = $new_options;
+}
+
+?>

@@ -1,0 +1,71 @@
+<?php
+/**
+ * @file
+ * qma_news.install
+ */
+
+/**
+ * Implements hook_install().
+ */
+function qma_news_install() {
+
+  qma_news_create_blog_tags_vocab();
+  qma_news_update_arabic_blog_path();
+
+}
+
+/**
+ * Adds a vocabulary for blog tags.
+ */
+function qma_news_update_7001() {
+
+  qma_news_create_blog_tags_vocab();
+
+}
+
+/**
+ * Changes the path alias for the arabic blog hub.
+ */
+function qma_news_update_7002() {
+
+  qma_news_update_arabic_blog_path();
+}
+
+/**
+ * Creates a vocabulary to add blog tags.
+ */
+function qma_news_create_blog_tags_vocab() {
+
+  if (taxonomy_vocabulary_machine_name_load('blog_tags')) {
+
+    // If there is a vocabulary with that name return.
+    return;
+
+  } else {
+
+    $vocab = (object) array(
+      'name' => t('Blog tags', array(), array('context' => 'QMA')),
+      'machine_name' => 'blog_tags',
+      'description' => t('Add tags to blog posts', array(), array('context' => 'QMA')),
+      'module' => 'qma_news',
+      'i18n_mode' => I18N_MODE_TRANSLATE,
+    );
+
+    taxonomy_vocabulary_save($vocab);
+
+  }
+}
+
+/**
+ * Create the update query for arabic blog path and execute it.
+ */
+function qma_news_update_arabic_blog_path() {
+
+  $query = db_update('url_alias')
+    ->fields(array(
+      'alias' => 'our-ar-blog',
+    ))
+    ->condition('source', 'node/156', '=')
+    ->execute();
+
+}

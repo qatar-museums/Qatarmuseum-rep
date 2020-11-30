@@ -1,0 +1,242 @@
+<?php
+/**
+ * @file
+ * Code for the QMA news feature.
+ */
+
+include_once 'qma_news.features.inc';
+
+/**
+ * Implements hook_entity_info_alter().
+ */
+function qma_news_entity_info_alter(&$info) {
+
+  // Create custom urls for terms associated with the blog_tags vocab.
+  $info['taxonomy_term']['bundles']['blog_tags']['uri callback'] = 'qma_news_taxonomy_term_uri';
+
+}
+
+/**
+ * Creates uri for taxonomy terms of blog tag vocabulary.
+ *
+ * @param object $term
+ *   A taxonomy term object.
+ *
+ * @return array
+ *   An array passed to url() function to construct the new path.
+ */
+function qma_news_taxonomy_term_uri($term) {
+
+  // Check the term language to determine the language of the post this term is
+  // part of.
+  $lang = $term->language;
+
+  if ($lang == 'en') {
+    return qma_news_get_english_path($term);
+  }
+
+  if ($lang == 'ar') {
+    return qma_news_get_arabic_path($term);
+  }
+
+  // If term has an undefined language (can be assigned to blog posts from both
+  // languages) then take into account the interface language.
+  if ($lang == 'und') {
+
+    // Get interface language
+    global $language;
+
+    if ($language->language == 'en') {
+
+      return qma_news_get_english_path($term);
+
+    } else {
+
+      return qma_news_get_arabic_path($term);
+
+    }
+
+  }
+}
+
+/**
+ * Returns the english based path for blog hub terms.
+ *
+ * @param obj $term
+ *   A taxonomy term object.
+ * @return array
+ *   An array passed to url() function to construct the new path.
+ */
+function qma_news_get_english_path($term) {
+  return array(
+    'path' => 'our-blog',
+    'options' => array('query' => array('filter' => $term->tid)),
+  );
+}
+
+/**
+ * Returns the arabic based path for blog hub terms.
+ *
+ * @param obj $term
+ *   A taxonomy term object.
+ * @return array
+ *   An array passed to url() function to construct the new path.
+ */
+function qma_news_get_arabic_path($term) {
+  return array(
+    'path' => 'our-ar-blog',
+    'options' => array('query' => array('filter' => $term->tid)),
+  );
+}
+
+/**
+ * Implements hook_mail().
+ */
+function qma_news_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'membership_checkbox':
+      $message['subject'] = $params['subject'];
+      $message['body'] = $params['body'];
+      break;
+  }
+}
+
+/**
+ * Preprocesses news_articles content types.
+ */
+function qma_news_preprocess_node(&$variables) {
+
+  global $base_url;
+  global $language;
+
+  // Operate only on blog articles which are fully displayed.
+  if ($variables['type'] === 'news_article' && $variables['view_mode'] === 'full') {
+
+    // Get the actual date that is going to be used.
+    $published_date = $variables['field_news_date'][0]['value'];
+
+    // Get previous and next node.
+    $previous_node = qma_news_get_previous_blog_post($published_date, $language);
+    $next_node = qma_news_get_next_blog_post($published_date, $language);
+
+    // Add a previous/next link render array if we have actual results.
+    if (!empty($previous_node->nid) || !empty($previous_node->title)) {
+      $previous = array(
+          '#type' => 'link',
+          '#title' => '<div><span>' . t('Previous blog post:', array(), array('context' => 'QMA')) . '</span></div><span>' . $previous_node->title . '</span>',
+          '#href' => $base_url . '/' . $language->language . '/' . drupal_get_path_alias('node/' . $previous_node->nid),
+          '#options' => array('attributes' => array('title' => $previous_node->title, 'class' => 'previous-link'), 'html' => true),
+      );
+    }
+
+    if (!empty($next_node->nid) || !empty($next_node->title)) {
+      $next = array(
+          '#type' => 'link',
+          '#title' => '<div><span>' . t('Next blog post:', array(), array('context' => 'QMA')) . '</span></div><span>' . $next_node->title . '</span>',
+          '#href' => $base_url . '/' . $language->language . '/' . drupal_get_path_alias('node/' . $next_node->nid),
+          '#options' => array('attributes' => array('title' => $next_node->title, 'class' => 'next-link'), 'html' => true),
+      );
+    }
+
+    // Attach render array links to pager variable.
+    $simple_pager['previous'] = (isset($previous) ? $previous : null);
+    $simple_pager['next'] = (isset($next) ? $next : null);
+
+    // Attach simple_pager to variables.
+    $variables['simple_pager'] = true;
+    $variables['content']['simple_pager'] = $simple_pager;
+  }
+}
+
+/**
+ * Get the next Blog Post based on a node ID.
+ *
+ * @param string $published_date
+ *   The published date to send to the base query.
+ * @param string $language
+ *   The active interface language
+ *
+ * @see qma_news_simple_pager_base_query()
+ *
+ * @return object
+ *   On object containing basic metadata for the previous next post, or an
+ *   empty object if on the latest Blog Post.
+ */
+function qma_news_get_next_blog_post($published_date, $language) {
+  return qma_news_simple_pager_base_query($published_date, $language);
+}
+
+/**
+ * Get the next Blog Post based on a node ID.
+ *
+ * @param string $published_date
+ *   The published date to send to the base query.
+ * @param string $language
+ *   The active interface language
+ *
+ * @see qma_news_simple_pager_base_query()
+ *
+ * @return object
+ *   On object containing basic metadata for the previous blog post, or an
+ *   empty object if on the earliest Blog Post.
+ */
+function qma_news_get_previous_blog_post($published_date, $language) {
+  return qma_news_simple_pager_base_query($published_date, $language, 'DESC');
+}
+
+/**
+ * The base query for getting previous or next Blog Post items.
+ *
+ * @param string $published_date
+ *   A UNIX timestamp containing the published date of a Blog Post.
+ * @param string $direction
+ *   The direction the search should be performed in (i.e. ASC for next post,
+ *   or DESC for previous Blog Post).
+ *
+ * @throws \EntityFieldQueryException
+ *   Standard behaviour for a failed EntityFieldQuery.
+ *
+ * @see \EntityFieldQuery
+ * @see qma_news_get_next_blog_post()
+ * @see qma_news_get_previous_blog_post()
+ *
+ * @return object
+ *   Either an EFQ result object, or an empty object if there were no results.
+ */
+function qma_news_simple_pager_base_query($published_date, $language, $direction = 'ASC') {
+
+  $query = new EntityFieldQuery();
+
+  // As ascending is the default direction, we should make greater than the
+  // default operator.
+  $operator = '>';
+
+  // If someone has entered DESC as the direction, then we switch the operator
+  // to a less than so our query still works.
+  if ($direction === 'DESC') {
+    $operator = '<';
+  }
+
+  // We should now have everything we need to get either the next or previous
+  // blog post.
+  $query->entityCondition('entity_type', 'node')
+      ->entityCondition('bundle', 'news_article')
+      ->propertyCondition('status', NODE_PUBLISHED)
+      ->propertyCondition('language', $language->language)
+      ->fieldOrderBy('field_news_date', 'value', $direction)
+      ->fieldCondition('field_news_date', 'value', $published_date, $operator)
+      ->range(0, 1);
+
+  $result = $query->execute();
+
+  // If our query returned a result, then we should return that...
+  if (isset($result['node']) && count($result['node'])) {
+    $node_data = current($result['node']);
+    // We'll only ever have one result, so this is pretty safe.
+    return node_load($node_data->nid);
+  }
+
+  // ...otherwise we just return an empty object for consistency with the
+  // overall implementation.
+  return (object) array();
+}

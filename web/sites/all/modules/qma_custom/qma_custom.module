@@ -1,0 +1,382 @@
+<?php
+
+/**
+ * @file
+ * qma_custom.module
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function qma_custom_menu() {
+  $items = array();
+
+  $items['admin/qma'] = array(
+    'title' => 'QMA',
+    'description' => 'QMA admin pages',
+    'position' => 'left',
+    'weight' => 20,
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('access qma menu'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function qma_custom_permission() {
+  $permissions = array();
+
+  $permissions['access qma menu'] = array(
+    'title' => t('Access QMA menu', array(), array('context' => 'QMA')),
+    'description' => t('Access the QMA admin menu', array(), array('context' => 'QMA')),
+  );
+
+  $permissions['access qma user export'] = array(
+    'title' => t('Access QMA user export', array(), array('context' => 'QMA')),
+    'description' => t('Access the QMA user view and exports', array(), array('context' => 'QMA')),
+  );
+
+  return $permissions;
+}
+
+/**
+ * Implements hook_block_view_MODULE_DELTA_alter().
+ */
+function qma_custom_block_view_workbench_block_alter(&$data, $block) {
+  $data['content']['workbench'] = array(
+    '#prefix' => '<div class="container">',
+    '#markup' => $data['content']['#markup'],
+    '#suffix' => '</div>',
+  );
+
+  unset($data['content']['#markup']);
+  unset($data['content']['#attached']);
+}
+
+/**
+ * Implements hook_workbench_content_alter().
+ *
+ * Alters the default workbench block to use our custom view.
+ *
+ * @param $output
+ */
+function qma_custom_workbench_content_alter(&$output) {
+  $output['workbench_recent_content'] = array(
+    '#view' => 'qma_workbench_recent_content',
+    '#view_display' => 'block',
+    '#attributes' => array('class' => array('clearfix'), 'style' => array('clear: both;')),
+    '#theme' => 'workbench_element',
+  );
+}
+
+/**
+ * Implements hook_workbench_moderation_transition().
+ *
+ * Taken from Field Collection Workbench Moderation sandbox.
+ *
+ * @param $node
+ * @param $previous_state
+ * @param $new_state
+ *
+ * @see https://www.drupal.org/sandbox/johnpitcairn/1991516
+ */
+function qma_custom_workbench_moderation_transition($node, $previous_state, $new_state) {
+  // If the node is not published then we just track the latest revision.
+  if (!isset($node->workbench_moderation['published'])) {
+    return;
+  }
+
+  // Get the machine name of the published state.
+  $published = workbench_moderation_state_published();
+
+  if (isset($node->original) && $new_state != $published) {
+    // Saved from node form to a non-published state.
+    $host_entity = $node->original;
+    $default = $previous_state == $published;
+  }
+  else {
+    // Moderated to a new state.
+    $host_entity = $node;
+    $default = $new_state == $published;
+  }
+
+  // Find all field collection fields on the host node.
+  foreach (field_info_instances('node', $node->type) as $field_name => $value) {
+    $field_info = field_info_field($field_name);
+    if ($field_info['type'] == 'field_collection' && ($collections = field_get_items('node', $host_entity, $field_name))) {
+      foreach ($collections as $collection) {
+        // Load each field collection item revision.
+        $entities = entity_load(
+          'field_collection_item',
+          array($collection['value']),
+          array('revision_id' => array($collection['revision_id']))
+        );
+
+        // Re-save each field collection item to set the default revision status and ensure
+        // the values in the corresponding {field_data_*} table reflect the published revision.
+        foreach ($entities as $entity) {
+          // Set default revision state.
+          $entity->default_revision = $default;
+          // Don't save a new revision.
+          $entity->revision = 0;
+          // Save without saving the host node.
+          $entity->save(TRUE);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_views_default_views_alter().
+ *
+ * Disables the default workbench view in favour of our custom view.
+ *
+ * @param $views
+ */
+function qma_custom_views_default_views_alter(&$views) {
+//  if (isset($views['workbench_recent_content'])) {
+//    $views['workbench_recent_content']->disabled = TRUE;
+//  }
+}
+
+/**
+ * Implements hook_views_query_alter().
+ */
+function qma_custom_views_query_alter(&$view, &$query){
+  //if filtering by area with the exposed filter we are checking that the selected id matches that of area of work reference field on a project
+  //this filters out the area node itself. To add this node back in we check for the existence of the area filter being set and introduce an
+  //extra clause so that instead of field_data_field_area_of_work.field_area_of_work_target_id=XX we get (field_data_field_area_of_work.field_area_of_work_target_id=xx or node.nid=xx)
+  //in order for this to work we must have set up the area of work filter in its own OR group in the views UI (with the and/or,rearrange option)
+  if ($view->name === 'projects_by_area' && $view->current_display === 'all_projects_and_areas') {
+    foreach ($query->where as &$whereGroup) {
+      foreach ($whereGroup['conditions'] as $whereSubGroup) {
+        if (is_string($whereSubGroup['field']) && $whereSubGroup['field'] === 'field_data_field_area_of_work.field_area_of_work_target_id') {
+          $whereGroup['conditions'][] = array(
+            'field' => 'node.nid',
+            'value' => $whereSubGroup['value'],
+            'operator' => '=',
+          );
+        }
+      }
+    }
+  }
+
+  // Fix for this issue https://www.drupal.org/node/1766338
+  // The patch did not work, and there appears to be a deeper issue here.
+  // This allows the OR filter to work correctly in this view based on the
+  // workbench state.
+  if ($view->name === 'qma_edu_repeat_calendar' && $view->current_display === 'block_3') {
+    $query->table_queue['field_eduprog_repeat_date_field_collection_item__workbench_moderation_node_history']['join']->type = 'LEFT';
+  }
+}
+
+/*
+ * Implements hook_form_alter().
+ */
+function qma_custom_form_views_exposed_form_alter(&$form, &$form_state) {
+
+  if ($form['#id'] =='views-exposed-form-projects-by-area-all-projects-and-areas' || $form['#id'] =='views-exposed-form-projects-by-area-experience-map-block'){
+    //fix for views bug https://drupal.org/node/1269794 with passing contextual filters into action attribute
+    $form['#action'] = url(current_path());
+    //Override the label of the tags filter 'All' option on the experience hub
+    $form['tagid']['#options']['All'] = t('more', array(), array('context' => 'QMA'));
+  }
+
+
+  if ($form['#id'] =='views-exposed-form-press-block'){
+    //fix for views bug https://drupal.org/node/1269794 with passing contextual filters into action attribute
+    $form['#action'] = url(current_path());
+    //Override the label of the taxonomy filters 'All' options
+    $form['typeid']['#options']['All'] = t('All types', array(), array('context' => 'QMA'));
+    $form['tagid']['#options']['All'] = t('All Projects and Museums', array(), array('context' => 'QMA'));
+  }
+
+  if ($form['#id'] =='views-exposed-form-creative-resources-creative-map-block' || $form['#id'] =='views-exposed-form-creative-resources-creative-list-block'){
+    //fix for views bug https://drupal.org/node/1269794 with passing contextual filters into action attribute
+    $form['#action'] = url(current_path());
+    //Override the label of the tags filter 'All' option on the experience hub
+    $form['tagid']['#options']['All'] = t('Any Resource', array(), array('context' => 'QMA'));
+  }
+
+  if ($form['#id'] === 'views-exposed-form-press-block') {
+    $text = t("See all", array(), array('context' => 'QMA'));
+    $options = array(
+      'attributes' => array(
+        'class' => array(
+          'reset',
+        ),
+      ),
+      'fragment' => ' ',
+    );
+
+    $form['reset'] = array(
+      '#markup' => l($text, '', $options),
+    );
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function qma_custom_form_advpoll_choice_form_alter(&$form, &$form_state, $form_id) {
+  $form['submit']['#value'] = t('Submit your answer', array(), array('context' => 'QMA'));
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function qma_custom_form_search_form_alter(&$form, &$form_state, $form_id) {
+  $form['basic']['keys']['#title'] = t('What are you looking for?', array(), array('context' => 'QMA'));
+}
+
+/**
+ * Implements hook_views_pre_view().
+ *
+ * Forces the press view to always be rendered in English. This is the earliest
+ * hook we can implement in the view construction process.
+ *
+ * Sets up language-independent taxonomy filtering for exhibitions listings.
+ *
+ * @see qma_custom_views_post_render().
+ */
+function qma_custom_views_pre_view(&$view, &$display_id, &$args) {
+  if ($view->name === 'press') {
+    $languages = language_list();
+    $english = $languages['en'];
+
+    // This isn't particularly nice, but it does what it needs to.
+    // We want to output a fully English press listing since there are no Arabic
+    // translations. To do this we disable language-specific content in the view,
+    // and also temporarily reset the global language variables. These are reset
+    // in hook_views_post_render().
+    global $language, $language_url, $language_content;
+
+    $view->old_langs = array($language, $language_url, $language_content);
+    $language = $language_url = $language_content = $english;
+  }
+  elseif (in_array($view->name, array('current_exhibitions', 'past_exhibitions'))) {
+    global $language;
+
+    $closed_term = taxonomy_get_term_by_name('Closed', 'exhibition_status_');
+
+    if (count($closed_term)) {
+      $closed_term = array_shift($closed_term);
+      $closed_term_translated = i18n_taxonomy_term_get_translation($closed_term, $language->language);
+
+      $filters = $view->display_handler->get_option('filters');
+
+      // For current exhibitions, show all exhibitions that aren't 'Closed'.
+      $filters['tid'] = array(
+        'id' => 'tid',
+        'table' => 'taxonomy_index',
+        'field' => 'tid',
+        'operator' => 'not',
+        'exposed' => false,
+        'value' => array_unique(array(
+          $closed_term->tid,
+          $closed_term_translated->tid,
+        )),
+        'vocabulary' => 'exhibition_status_',
+      );
+
+      // For past exhibitions, show only exhibitions that are 'Closed'.
+      if ($view->name === 'past_exhibitions') {
+        $filters['tid']['operator'] = 'or';
+      }
+
+      $view->display_handler->override_option('filters', $filters);
+    }
+  }
+}
+
+/**
+ * Implements hook_views_post_render().
+ *
+ * End forcing this view to always be rendered in English. This is the latest
+ * hook we can implement in the view construction process.
+ *
+ * @see qma_custom_views_pre_render().
+ */
+function qma_custom_views_post_render(&$view, &$display_id, &$args) {
+  if ($view->name === 'press' && isset($view->old_langs)) {
+    global $language, $language_url, $language_content;
+    list($language, $language_url, $language_content) = $view->old_langs;
+  }
+}
+
+/**
+ * Implements hook_date_formats().
+ */
+function qma_custom_date_formats() {
+  $formats = array();
+
+  $formats[] = array(
+    'type' => 'medium_plain_month',
+    'format' => 'j F Y',
+    'locales' => array(),
+  );
+
+  $formats[] = array(
+    'type' => 'concise_full',
+    'format' => 'M d, G:i',
+    'locales' => array(),
+  );
+
+  $formats[] = array(
+    'type' => 'year_only',
+    'format' => 'Y',
+    'locales' => array(),
+  );
+
+  foreach ($formats as $format) {
+    variable_set('date_format_' . $format['type'], $format['format']);
+  }
+
+  return $formats;
+}
+
+/**
+ * Implements hook_date_format_types().
+ */
+function qma_custom_date_format_types() {
+  $formats = array();
+
+  $formats['medium_plain_month'] = t('Medium plain month', array(), array('context' => 'QMA'));
+  $formats['concise_full'] = t('Concise full', array(), array('context' => 'QMA'));
+  $formats['year_only'] = t('Year only', array(), array('context' => 'QMA'));
+
+  return $formats;
+}
+
+/**
+ * Implements hook_node_view().
+ *
+ * A simplified version of the Rabbit Hole module's behaviour.
+ */
+function qma_custom_node_view($node, $view_mode, $langcode) {
+  global $user;
+
+  if ($view_mode === 'full' && $node->type === 'exhibition') {
+    $external_links = field_get_items('node', $node, 'field_external_link');
+
+    $member_roles = array(
+      'authenticated user',
+      'Member',
+    );
+
+    $staff_roles = array_diff($user->roles, $member_roles);
+    $not_staff_user = user_is_anonymous() || (!count($staff_roles) && $user->uid !== '1');
+
+    // If we have an external link and the user is anonymous or only has
+    // the member roles, redirect them to that page instead.
+    if (!empty($external_links) && $not_staff_user) {
+      drupal_goto($external_links[0]['url'], array(), 303);
+    }
+  }
+}

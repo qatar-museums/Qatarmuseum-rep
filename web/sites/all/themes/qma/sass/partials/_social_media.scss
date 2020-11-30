@@ -1,0 +1,194 @@
+
+
+/*** instagram slider styles ***/
+.instagram-slider {
+
+	.instagram-row {
+		@include clearfix;
+		background-color: $blue;
+		display: none;
+	}
+
+	.instagram-row:nth-child(1) {
+		display: block;
+		position: relative
+	}
+
+	.instagram-item {
+		float: left;
+		width: 50%;
+		display: inline-block;
+		margin-top: 0;
+
+		&:last-child {
+			display: none;
+		}
+
+		.lt-ie9 &:last-child {
+			display: block;
+		}
+
+		@include at-breakpoint($bp-small-desktop) {
+			width: 33.33333336%;
+
+			&:last-child {
+				display: block;
+			}
+
+		}
+
+	}
+}
+
+.instagram-item {
+	position: relative;
+
+	@include adjust-font-size-to(16px);
+  	@include adjust-leading-to(5, 16px);
+
+	.instagram-image {
+		
+		img {
+			width: 100%;
+		}
+
+		&:after {
+			content: '';
+			background: transparent url('../images/instagram-watermark.png') no-repeat 0 0;
+			display: block;
+			height: 47px;
+			width: 47px;
+			position: absolute;
+			bottom: 1em;
+			left: 1em;
+		}
+	}
+
+	.instagram-overlay {
+		position: absolute;
+		background-color: #FFFFFF;
+		display: none;
+		right: 0;
+		left: 0;
+		top: 0;
+		bottom: 0;
+
+		@include at-breakpoint($bp-fullwidth) {
+
+			.instagram-slider & {			
+				right: 4em;
+				left: 4em;
+				top: 4em;
+				bottom: 4em;
+			}
+		}
+		
+	}
+
+	@include at-breakpoint($bp-tablet) {
+		&:hover .instagram-overlay {
+			display: block;
+		}
+
+		.lt-ie9 &:hover .instagram-overlay {
+			display: none;
+		}
+	}
+
+	.instagram-overlay-inner {
+		padding: 2em;
+	}
+
+	.instagram-postdate {
+		color: $grey-font;
+	}
+
+	.instagram-user {
+
+		span {
+			display: block;
+			background: transparent url('../images/instagram-grey.gif') no-repeat 0 2px;
+			padding-left: 26px;
+			margin-bottom: 0.2em;
+		}
+	}
+
+}
+
+.social-media-col {
+	width: 100%;
+	margin-bottom: 2em;
+
+	@include at-breakpoint($bp-small-desktop) {
+		@include span-columns(8, 16);
+
+		&.youtube-feed {
+			@include span-columns(8 omega, 16);
+		}
+	}
+
+
+
+	@include at-breakpoint($bp-desktop) {
+		@include span-columns(5, 16);
+
+		&.youtube-feed {
+			@include span-columns(6, 16);
+		}
+
+		&.facebook-feed {
+			@include span-columns(5 omega, 16);	
+		}
+	}
+
+	iframe {
+		width: 100% !important;
+	}
+
+	.sm-container {
+		margin-bottom: 0.778em;
+
+		@include at-breakpoint($bp-small-desktop) {
+			min-height: 517px;
+			margin-bottom: 2.778em;
+		}
+	}
+
+	.sm-link {
+		clear: left;
+		display: block;
+
+	}
+
+}
+
+// facebook styling
+.facebook-feed {
+	span, iframe,
+	.fb_iframe_widget {
+		width: 100% !important;
+		position: relative !important;
+	}
+}
+
+// twitter styling
+.twitter-feed {
+
+	.sm-container {
+		float: left;
+		width: 100%;
+	}
+
+	iframe {
+		height: 517px !important;
+		float: left;
+	}
+}
+
+.youtube-feed {
+	.field-item.even {
+		margin-bottom: 1em;
+	}
+}
+
+/*** end social media hub page ***/

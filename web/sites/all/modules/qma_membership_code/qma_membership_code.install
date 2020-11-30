@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * @file
+ * qma_membership_code.install
+ */
+
+
+/**
+ * Implements hook_install().
+ */
+function qma_membership_code_install() {
+  // Alter module weight so we can alter forms after the system module.
+  db_update('system')
+    ->fields(array('weight' => 1))
+    ->condition('type', 'module')
+    ->condition('name', 'qma_membership_code')
+    ->execute();
+}
+
+/**
+ * Implements hook_uninstall();
+ */
+function qma_membership_code_uninstall() {
+  variable_del('qma_membership_code_cron_last_run');
+}

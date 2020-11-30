@@ -1,0 +1,51 @@
+$from-direction: right;
+$omega-float: opposite-position($from-direction);
+
+.grid-four {
+
+	&>.field>.field-items>.field-item {
+
+		@include at-breakpoint($bp-tablet) {
+			@include span-columns(7, 16);
+			margin-right: 0;
+		}
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(5, 16);
+		}
+
+		@include at-breakpoint($bp-desktop) {
+			@include span-columns(4, 16);
+
+			&:nth-child(4n) {
+				@include span-columns(4 omega, 16);
+			}
+		}
+
+	}
+
+}
+
+.hover-text {
+  text-align: right;
+}
+
+/** generic page styling **/
+
+/*** sheika page specific styles ***/
+
+.bespoke-page {
+
+
+	h1 {
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(10, 16);
+			margin-right: 0;
+		}
+	}
+
+}
+
+$from-direction: left;
+$omega-float: opposite-position($from-direction);

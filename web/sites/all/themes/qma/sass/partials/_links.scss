@@ -1,0 +1,311 @@
+// if a link is in a <p> it is deemed to be in body copy
+
+// general links
+
+@mixin link-style {
+  text-decoration: none;
+  background-color: $grey-bg;
+  padding: 0;
+  color: $body-color;
+  padding-bottom: 1px;
+  font-weight: bold;
+
+  &.hover,
+  &:hover {
+    background-color: transparent;
+    border-bottom: 1px solid $body-color;
+    padding-bottom: 0;
+  }
+}
+
+a {
+
+  @include link-style;
+
+  h2 &,
+  h3 &,
+  h4 &,
+  p &,
+  .field-name-field-body-elements .field-name-field-element-text-area &,
+  .exhibition-details__venue &,
+  .exhibition-details__ticket & {
+  	background-color: transparent;
+  	border-bottom: 1px solid $pink;
+    font-weight: normal;
+    &:hover {
+      padding-bottom: 1px;
+      border-bottom: 1px solid #000000;
+    }
+  }
+
+}
+
+// links on colour
+.pink,
+.orange,
+.blue,
+.yellow {
+
+  a {
+    background-color: transparent;
+    border-bottom: 1px solid $body-color;
+    padding-bottom: 0;
+    font-weight: normal;
+    &:hover {
+      background-color: #FFFFFF;
+      padding-bottom: 1px;
+      border-bottom: none;
+    }
+  }
+
+}
+
+
+.black {
+
+  a {
+    color: #FFF;
+    font-weight: normal;
+  }
+
+}
+
+#footer a {
+  background-color: transparent;
+  border-bottom: 1px solid #FFF;
+  padding-bottom: 0;
+  font-weight: normal;
+
+  &:hover {
+    padding-bottom: 1px;
+    border-bottom: none;
+  }
+}
+
+.find-out-more a {
+  background-color: transparent;
+  border-bottom: 1px solid $body-color;
+  padding-bottom: 0;
+  font-weight: normal;
+
+  &:hover {
+    padding-bottom: 1px;
+    border-bottom: none;
+  }
+}
+
+.find-out-more a {
+  border-bottom: 1px solid $pink;
+  font-weight: normal;
+
+  &:hover {
+    border-bottom: 1px solid #000000;
+  }
+}
+
+// social media links
+.sm-link {
+  background: transparent url('../images/twitter.png') no-repeat top left;
+  padding: 13px 0 9px 13px;
+  height: 46px;
+  font-weight: normal;
+
+  .backgroundsize & {
+    background-image: url('../images/twitter@2x.png');
+    background-size: 47px 92px;
+  }
+
+  &.hover {
+    background-position: 0 100%;
+  }
+
+  ul & {
+    margin-left: 0;
+    margin-right: 0;
+    padding: 12px 0 9px 13px;
+    &:before {
+      display: none;
+    }
+  }
+
+  &.youtube {
+    background-image: url('../images/youtube.png');
+
+    .backgroundsize & {
+      background-image: url('../images/youtube@2x.png');
+    }
+  }
+
+  &.facebook {
+    background-image: url('../images/facebook.png');
+
+    .backgroundsize & {
+      background-image: url('../images/facebook@2x.png');
+    }
+  }
+
+  a {
+    margin-left: 45px;
+    display: inline-block;
+    font-weight: normal;
+  }
+}
+
+// pagination
+.pager {
+
+  width: 100%;
+  border-top: 2px solid #000000;
+  padding-top: 2.222em;
+  margin-bottom: 4.444em;
+
+  .pager-last,
+  .pager-first {
+    display: none;
+  }
+
+  li {
+    float: left;
+    margin-left: 0.25em;
+    margin-right: 0.25em;
+    font-weight: bold;
+
+    &:before {
+      display: none;
+    }
+
+    a {
+      background-color: transparent;
+      text-decoration: underline;
+      font-weight: normal;
+
+      &:hover {
+        text-decoration: none;
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+
+    }
+
+    //make the number links easier to press on touch screens
+    .touch &.pager-item a {
+      display: block;
+      min-width: 32px;
+      min-height: 32px;
+      text-align: center;
+    }
+
+  }
+
+  .pager-next,
+  .pager-previous {
+
+    a {
+      text-indent: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      display: block;
+      float: left;
+      background: url('../images/pagination-sprite.gif') no-repeat 0 0;
+      width: 22px;
+      height: 41px;
+      position: relative;
+      top: -0.5em;
+      margin-right: 1em;
+      font-weight: normal;
+
+      &:hover {
+        background-position: 0 100%;
+      }
+
+      .backgroundsize & {
+        background-image: url('../images/pagination-sprite@2x.gif');
+        background-size: 44px 82px;
+      }
+
+    }
+
+  }
+
+  .pager-next {
+
+      a {
+        background-position: 100% 0;
+        margin-left: 1em;
+        margin-right: 0;
+        font-weight: normal;
+
+        &:hover {
+          background-position: 100% 100%;
+        }
+
+      }
+
+  }
+
+}
+
+.back-to-parent {
+  display: block;
+  text-transform: uppercase;
+  margin-bottom: 2.556em;
+  background: transparent url('../images/left.gif') no-repeat 0 0;
+  float: left;
+  padding: 0 0 0 2em;
+  height: 41px; //have to hardcode the height because Firefox was being funny about the sprite bg
+
+  @include at-breakpoint($bp-tablet) {
+    padding-left: 3em;
+  }
+
+  .backgroundsize & {
+    background-image: url('../images/left@2x.gif');
+    background-size: 22px 82px;
+  }
+
+  span {
+    background-color: $yellow;
+    padding-bottom: 1px;
+    position: relative;
+    top: 9px;
+  }
+
+  &:hover {
+    background-position: 0 100%;
+    background-color: transparent;
+    border-bottom: none;
+    padding-bottom: 0.5em;
+
+    span {
+      border-bottom: 1px solid #000000;
+      background-color: transparent;
+    }
+
+  }
+
+}
+
+/*** tag styles ***/
+
+.views-field-field-press-tags,
+.views-field-field-resource-tags,
+.views-field-see-more,
+.blog-tags {
+  a {
+    background-color: #FFFFFF;
+    border: 2px solid $pink;
+    color: $pink;
+    @include din-bold;
+    float: left;
+    padding: 0.1em 0.2em;
+    margin-bottom: 0.5em;
+    margin-right: 0.5em;
+    @include adjust-font-size-to(16px);
+    font-weight: normal;
+
+    &:hover {
+      border-color: #000000;
+      color: #000000;
+    }
+  }
+}

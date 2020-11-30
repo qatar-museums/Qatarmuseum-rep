@@ -1,0 +1,5 @@
+name = QMA comments
+description = Module for QMA commenting system.
+package = QMA
+core = 7.x
+

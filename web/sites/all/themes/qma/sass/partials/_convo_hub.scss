@@ -1,0 +1,88 @@
+.node-interview-hub {
+	.content.container {
+		padding-top: 6em;
+	}
+}
+
+// Convo hub header styles
+.convo-header {
+
+	margin-top: 2.444em;
+	margin-bottom: 2.444em;
+
+	@include at-breakpoint($bp-tablet) {
+		margin-top: 3.167em;
+		margin-bottom: 5.167em;
+	}
+	
+	p {
+		width: 100%;
+		float: left;		
+	}
+
+}
+
+.latest-interview {
+	display: inline-block;
+	padding-top: 2em;
+	padding-bottom: 0;
+	min-height: 330px;
+}
+
+.featured-conversation {
+
+	.title-container {
+		float: left;
+		width: 100%;
+
+
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(9, 16);
+		}
+
+		p {
+			@include din-bold;
+			@include adjust-font-size-to(22px);
+  			@include adjust-leading-to(6, 22px);
+  			margin-bottom: 2em;
+
+		}
+
+		h2 {
+			margin-bottom: 0.2em;
+		}
+
+	}
+
+	.filter_image {
+		width: 100%;
+		float: left;
+		border: 10px solid black;
+		margin-bottom: 1em;
+        overflow: hidden;
+
+		@include at-breakpoint($bp-tablet) {
+			max-width: 455px;
+			max-height: 455px;
+			margin-bottom: 2em;
+		}
+
+		@include at-breakpoint($bp-small-desktop) {
+			@include span-columns(7 omega, 16);
+			position: absolute;
+			right: $column-percentage#{"%"};
+			top: -1.2em;
+			margin-bottom: 0;
+		}
+
+		@include at-breakpoint($bp-769) {
+			top: -5.5em;
+		}
+
+		.field-name-field-teaser-image {
+			margin-bottom: -6px;
+		}
+	}
+
+}

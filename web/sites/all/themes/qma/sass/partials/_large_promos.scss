@@ -1,0 +1,138 @@
+/* large promos on project pages */
+
+.wide-promo {
+
+  margin-bottom: 4.389em;
+  width: 100%;
+  float: left;
+
+  .title-container {
+    width: 100%;
+
+    @include at-breakpoint($bp-small-desktop) {
+      @include span-columns(6, 16);
+    }
+
+    h2 {
+
+      @include adjust-font-size-to(36px);
+      @include adjust-leading-to(10, 36px);
+      margin-bottom: rhythm(12, 36px);
+
+      @include at-breakpoint($bp-desktop) {
+        @include adjust-font-size-to(48px);
+        @include adjust-leading-to(13, 48px);
+        margin-bottom: rhythm(12, 48px);
+      }
+
+      @include at-breakpoint($bp-fullwidth) {
+        @include adjust-font-size-to(56px);
+        @include adjust-leading-to(13, 56px);
+        margin-bottom: rhythm(12, 56px);
+      }
+
+    }
+  }
+
+  .content {
+    width: 100%;
+    display: inline-block;
+
+    @include at-breakpoint($bp-small-desktop) {
+      @include span-columns(10 omega, 16);
+    }
+
+    .field-name-field-promo-image,
+    .filter_image {
+      width: 100%;
+      margin-bottom: 1em;
+      display: inline-block;
+
+      @include at-breakpoint($bp-tablet) {
+        @include span-columns(5, 10);
+        margin-bottom: 0;
+      }
+
+    }
+
+    .group-promo-text {
+      width: 100%;
+
+      @include at-breakpoint($bp-tablet) {
+        @include span-columns(5 omega, 10);
+      }
+
+      .field {
+        margin-bottom: rhythm(7.5, 16px);
+      }
+
+    }
+
+    .field-name-field-teaser-image {
+      margin-bottom: 0;
+    }
+
+  }
+}
+
+.wide-promo--exhib {
+
+  width: 100%;
+  @include at-breakpoint($bp-small-desktop) {
+    @include span-columns(12, 16); 
+    @include pre(2);
+  }
+
+  @include at-breakpoint($bp-desktop) {
+    @include span-columns(10, 16); 
+    @include pre(3);
+  }
+
+  .content {
+
+
+    @include at-breakpoint($bp-small-desktop) {
+      @include span-columns(4 omega, 12); 
+    }
+
+    @include at-breakpoint($bp-desktop) {
+      @include span-columns(3 omega, 10); 
+    }
+
+    // @include at-breakpoint($bp-desktop) {
+    //   @include span-columns(10, 16); 
+    //   @include pre(3);
+    // }
+
+
+
+    .field-name-field-promo-image,
+    .filter_image {
+      cursor: auto;
+      @include at-breakpoint($bp-small-desktop) {
+        @include span-columns(4 omega, 4);
+        width: 100%;
+        margin-bottom: 0;
+      }
+      @include at-breakpoint($bp-desktop) {
+        @include span-columns(3 omega, 3);
+        width: 100%;
+        margin-bottom: 0;
+      }
+
+    } 
+  }
+  .title-container {
+    @include at-breakpoint($bp-small-desktop) {
+      @include span-columns(8, 12);
+    }
+    @include at-breakpoint($bp-desktop) {
+      @include span-columns(7, 10);
+    }    
+  }
+  .field-type-link-field {
+    margin-top: 23px;
+  }
+}
+
+/* teaser promos */

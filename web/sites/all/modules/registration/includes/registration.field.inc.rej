@@ -1,0 +1,157 @@
+***************
+*** 160,165 ****
+        'field types' => array('registration'),
+        'settings' => array(
+          'label' => NULL,
+          'i18n_string_key' => NULL,
+        ),
+      ),
+--- 160,169 ----
+        'field types' => array('registration'),
+        'settings' => array(
+          'label' => NULL,
++         'registered_option' => 'register_link',
++         'edit_label' => t('Edit registration'),
++         'delete_label' => t('Delete registration'),
++         'registered_text' => t('You have already registered for this event.'),
+          'i18n_string_key' => NULL,
+        ),
+      ),
+***************
+*** 193,198 ****
+        '#description' => t("Optional label to use when displaying the registration title or link. Leave blank to use the parent event's label."),
+      );
+  
+      // Store a key so we can store/retrieve translated strings for this field
+      // formatter instance.
+      $element['i18n_string_key'] = array('#type' => 'value', '#value' => implode(':', array(
+--- 197,257 ----
+        '#description' => t("Optional label to use when displaying the registration title or link. Leave blank to use the parent event's label."),
+      );
+  
++     $element['registered_option'] = array(
++       '#title' => t('Already registered option'),
++       '#type' => 'select',
++       '#options' => array(
++         'register_link' => t('Register link'),
++         'registered_text' => t('Registered text'),
++         'edit_link' => t('Edit link'),
++         'delete_link' => t('Delete link')
++        ),
++       '#default_value' => $settings['registered_option'],
++       '#description' => t("What to present to the user when they have already registered."),
++     );
++ 
++     $element['registered_text'] = array(
++       '#title' => t('Registered text'),
++       '#type' => 'textfield',
++       '#size' => 20,
++       '#default_value' => $settings['registered_text'],
++       '#required' => FALSE,
++       '#description' => t("Text to display when the user has already registered."),
++       '#states' => array(
++         'visible' => array(
++           'select[name="fields[' . $field['field_name'] . '][settings_edit_form][settings][registered_option]"], select[name="options[settings][registered_option]"]' => array('value' => 'registered_text'),
++         ),
++       ),
++     );
++ 
++     $element['edit_label'] = array(
++       '#title' => t('Edit Label'),
++       '#type' => 'textfield',
++       '#size' => 20,
++       '#default_value' => $settings['edit_label'],
++       '#required' => FALSE,
++       '#description' => t("Label to use when displaying the edit link."),
++       '#states' => array(
++         'visible' => array(
++           'select[name="fields[' . $field['field_name'] . '][settings_edit_form][settings][registered_option]"], select[name="options[settings][registered_option]"]' => array('value' => 'edit_link'),
++         ),
++       ),
++     );
++ 
++     $element['delete_label'] = array(
++       '#title' => t('Delete Label'),
++       '#type' => 'textfield',
++       '#size' => 20,
++       '#default_value' => $settings['delete_label'],
++       '#required' => FALSE,
++       '#description' => t("Label to use when displaying the delete link."),
++       '#states' => array(
++         'visible' => array(
++           'select[name="fields[' . $field['field_name'] . '][settings_edit_form][settings][registered_option]"], select[name="options[settings][registered_option]"]' => array('value' => 'delete_link'),
++         ),
++       ),
++     );
++ 
+      // Store a key so we can store/retrieve translated strings for this field
+      // formatter instance.
+      $element['i18n_string_key'] = array('#type' => 'value', '#value' => implode(':', array(
+***************
+*** 267,284 ****
+        case 'registration_link':
+          // Enable registration link if accessible.
+          if (registration_register_page_access($entity_type, $entity) && registration_status($entity_type, $entity_id)) {
+            $uri = entity_uri($entity_type, $entity);
+-           $element[0] = array(
+-             '#markup' => theme('registration_link',
+-               array(
+                  'label' => $label,
+                  'path' => $uri['path'] . '/register',
+                  'registration type' => $reg_type,
+                  'entity_type' => $entity_type,
+                  'entity' => $entity,
+-               )
+-             ),
+-           );
+          }
+          break;
+  
+--- 326,372 ----
+        case 'registration_link':
+          // Enable registration link if accessible.
+          if (registration_register_page_access($entity_type, $entity) && registration_status($entity_type, $entity_id)) {
++           // Set registration path
+            $uri = entity_uri($entity_type, $entity);
++           $path = $uri['path'] . '/register';
++ 
++           $user = $GLOBALS['user'];
++           // Check already registered setting
++           if (($settings['registered_option'] == 'registered_text') || ($settings['registered_option'] == 'delete_link') || ($settings['registered_option'] == 'edit_link')) {
++             // Check if user is already registered
++             if (isset($user->uid) &&
++               ($registration_id = registration_is_registered_id($entity_type, $entity_id, NULL, $user->uid, registration_get_states_options()))) {
++               if ($settings['registered_option'] == 'edit_link') {
++                 $path = '/registration/' . $registration_id . '/edit';
++                 $label = $settings['edit_label'];
++               }
++               if ($settings['registered_option'] == 'delete_link') {
++                 $path = '/registration/' . $registration_id . '/delete';
++                 $label = $settings['delete_label'];
++               }
++               if ($settings['registered_option'] == 'registered_text') {
++                 $registered_text = $settings['registered_text'];
++               }
++             }
++           }
++           if (isset($registered_text)) {
++              $element[0] = array(
++               '#markup' => $registered_text . 'sdd',
++              );
++           }
++           else {
++             $element[0] = array(
++               '#markup' => theme('registration_link', array(
+                  'label' => $label,
+                  'path' => $uri['path'] . '/register',
+                  'registration type' => $reg_type,
+                  'entity_type' => $entity_type,
+                  'entity' => $entity,
++                 'options' => array('query' => array('destination' => drupal_get_path_alias()))
++                 )
++               ),
++             );
++           }
+          }
+          break;
+  

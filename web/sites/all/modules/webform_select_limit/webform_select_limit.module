@@ -1,0 +1,470 @@
+<?php
+/**
+ * @file
+ * Provides a webform validator to limit select option submissions.
+ */
+
+/**
+ * Defines the placeholder strings available for the error message.
+ */
+define('WEBFORM_SELECT_LIMIT_COMPONENT_NAME_TOKEN', '%component_name');
+define('WEBFORM_SELECT_LIMIT_SELECT_OPTION_TOKEN', '%select_option_label');
+
+/**
+ * Implements hook_help().
+ */
+function webform_select_limit_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#webform_select_limit':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The Webform Select Limit module provides the ability for select options, radio buttons, or checkboxes to only be submitted a set number of times. It does this by providing configuration options within the Webform select options component. Because of this, a user must be able to create webforms to use this module.') . '</p>';
+      $output .= '<h3>' . t('Configuration') . '</h3>';
+      $output .= '<p>' . t('Follow the below steps to add the Webform Select Limit validation to your webform:') . '</p>';
+
+      $config = array(
+        'Create a webform with a select options component.',
+        'Configure the options found within the "select optios limitation" fieldset in the form.',
+        'Save the component.',
+        'Select the form validation menu link and add the "Maximum number of select option submissions" validator',
+      );
+
+      $output .= theme('item_list', array('items' => $config));
+      $output .= '<h3>' . t('Configuration options') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('Enable select option limitation') . '</dt>';
+      $output .= '<dd>' . t('Allows this component to use the Webform Select Limit validator.') . '</dd>';
+      $output .= '<dt>' . t('Select option limitation number') . '</dt>';
+      $output .= '<dd>' . t('This is where you set the number of times each select option can be submitted. This field is required.') . '</dd>';
+      $output .= '<dt>' . t('Select option limitation error message') . '</dt>';
+      $output .= '<dd>' . t('This options allows you to set a custom error message for the component. A default error message will be displayed if empty.') . '</dd>';
+      $output .= '<dt>' . t('Disable unavailable options in select list') . '</dt>';
+      $output .= '<dd>' . t('Will disable the unavailable options using javascript, preventing the user from selecting it.') . '</dd>';
+      $output .= '</dl>';
+      $output .= '<h3>' . t('Example usage') . '</h3>';
+      $output .= '<p>' . t('An example of when this module would be useful is if you have a booking form where each time slot is limited to a certain number of individuals.') . '</p>';
+
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Updates the component form for select list components to provide additional
+ * options for validation.
+ */
+function webform_select_limit_form_webform_component_edit_form_alter(&$form, &$form_state, $form_id) {
+  if (!empty($form['type']['#value']) && $form['type']['#value'] == 'select') {
+    // In order to access the saved values more easily, we load the component.
+    $cid = arg(4);
+    $node = $form['#node'];
+    $component = isset($node->webform['components'][$cid]) ? $node->webform['components'][$cid] : FALSE;
+    if ($component) {
+      webform_component_defaults($component);
+    }
+
+    // Attach our own validation and submit functions to the form.
+    $form['#validate'][] = 'webform_select_limit_validate';
+    $form['#submit'][] = 'webform_select_limit_submit';
+
+    // Add the additional options to the form and attach the admin JS.
+    $form['extra']['webform_select_limit'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Select option limitation'),
+      '#collapsible' => TRUE,
+      '#weight' => 50,
+      '#attached' => array(
+        'js' => array(drupal_get_path('module', 'webform_select_limit') . '/js/webform_select_limit_admin.js'),
+      ),
+    );
+
+    // Option to enable the validation.
+    $enable_default = !empty($component['extra']['webform_select_limit']['enable_webform_select_limit']);
+    $form['extra']['webform_select_limit']['enable_webform_select_limit'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Enable select option limitation'),
+      '#description' => t('Select this to allow a select to only be submitted a set number of time.'),
+      '#default_value' => $enable_default ? $enable_default : NULL,
+    );
+
+    // Set the limitation numbers for each component.
+    $limit_value_set = !empty($component['extra']['webform_select_limit']['webform_select_limit_value']);
+    if ($limit_value_set && is_numeric($component['extra']['webform_select_limit']['webform_select_limit_value'])) {
+      // The value is set from the previous version of the module where a single
+      // value was set for all options. We will transform it.
+      $limit_value_default = 'all|' . $component['extra']['webform_select_limit']['webform_select_limit_value'];
+    }
+    elseif($limit_value_set) {
+      $limit_value_default = $component['extra']['webform_select_limit']['webform_select_limit_value'];
+    }
+    else {
+      $limit_value_default = '';
+    }
+    $form['extra']['webform_select_limit']['webform_select_limit_value'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Select option limitation number'),
+      '#description' => t('<strong>Key-value pairs MUST be specified as "safe_key|submission limit"</strong>. Specify the limit for each option on a single line each - the copy select options button below will pre-format a list for you. If a limit is not specified after the pipe, or it is 0, no limit will apply. You can use a global limit for all options using "all|some limit".'),
+      '#default_value' => $limit_value_default,
+      '#states' => array(
+        'visible' => array(
+          ':input[name="extra[webform_select_limit][enable_webform_select_limit]"]' => array('checked' => TRUE),
+        ),
+        'required' => array(
+          ':input[name="extra[webform_select_limit][enable_webform_select_limit]"]' => array('checked' => TRUE),
+        ),
+      ),
+    );
+
+    // Add the button to update the list of options.
+    $form['extra']['webform_select_limit']['webform_select_limit_copy'] = array(
+      '#type' => 'button',
+      '#value' => t('Copy select options'),
+      '#attributes' => array(
+        'class' => array('webform-select-limit-copy-options'),
+      ),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="extra[webform_select_limit][enable_webform_select_limit]"]' => array('checked' => TRUE),
+        ),
+      ),
+    );
+
+    // Set a custom error message.
+    $error_message_default = !empty($component['extra']['webform_select_limit']['webform_select_limit_error']);
+    $placeholders = array(
+      t('!c - Component name', array('!c' => WEBFORM_SELECT_LIMIT_COMPONENT_NAME_TOKEN)),
+      t('!s - The label for the selected option', array('!s' => WEBFORM_SELECT_LIMIT_SELECT_OPTION_TOKEN)),
+    );
+    $error_description = t('Enter the error message you wish to display on validation failure. If nothing is entered a default message is displayed. The following placeholders can be used: !placeholders', array(
+      '!placeholders' => theme('item_list', array('items' => $placeholders)),
+    ));
+    $form['extra']['webform_select_limit']['webform_select_limit_error'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Select option limitation error message'),
+      '#description' => $error_description,
+      '#default_value' => $error_message_default ? $component['extra']['webform_select_limit']['webform_select_limit_error'] : '',
+      '#states' => array(
+        'visible' => array(
+          ':input[name="extra[webform_select_limit][enable_webform_select_limit]"]' => array('checked' => TRUE),
+        ),
+      ),
+    );
+
+    // Option to disable form elements within the select list.
+    $disable_options_default = !empty($component['extra']['webform_select_limit']['webform_select_limit_disable_options']);
+    $form['extra']['webform_select_limit']['webform_select_limit_disable_options'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Disable unavailable options in select list'),
+      '#description' => t('Select this option to disable options in the select list.'),
+      '#default_value' => $disable_options_default ? $disable_options_default : NULL,
+      '#states' => array(
+        'visible' => array(
+          ':input[name="extra[webform_select_limit][enable_webform_select_limit]"]' => array('checked' => TRUE),
+        ),
+      ),
+    );
+  }
+}
+
+/**
+ * Validation handler for the component edit form.
+ */
+function webform_select_limit_validate($form, &$form_state) {
+  $webform_select_limit = !empty($form_state['values']['extra']['webform_select_limit']['enable_webform_select_limit']);
+  $webform_select_limit_values = $form_state['values']['extra']['webform_select_limit']['webform_select_limit_value'];
+
+  if ($webform_select_limit && empty($form_state['values']['extra']['webform_select_limit']['webform_select_limit_value'])) {
+    form_set_error('extra][webform_select_limit][webform_select_limit_value', t('You must specify a limit for each option.'));
+  }
+
+  if ($webform_select_limit && !empty($webform_select_limit_values)) {
+    // Go through each limit and ensure it has been set correctly.
+    $options = explode(PHP_EOL, $webform_select_limit_values);
+    // Try and find the option and value within the array.
+    foreach ($options as $string) {
+      // Remove more space at the end when set multi option limit.
+      $string = preg_replace('/\s+/', '', $string);
+      $option_array = explode('|', $string);
+      if (!isset($option_array[1]) || !is_numeric($option_array[1])) {
+        // The user hasn't added a limit value.
+        form_set_error('extra][webform_select_limit][webform_select_limit_value', t('The option %option does not have a value set.', array('%option' => $option_array[0])));
+      }
+      elseif (strtolower($option_array[0]) == 'all' && $option_array[1] === '0') {
+        // If the all key is set we use that no matter what.
+        form_set_error('extra][webform_select_limit][webform_select_limit_value', t('Setting the "all" key to zero disables all limits. Disable the option instead.'));
+      }
+    }
+  }
+}
+
+/**
+ * Submit handler for the component edit form.
+ */
+function webform_select_limit_submit($form, &$form_state) {
+  $webform_select_limit = !empty($form_state['values']['extra']['webform_select_limit']['enable_webform_select_limit']);
+
+  // Advise the user that the webform validation rule must be configured.
+  if ($webform_select_limit) {
+    drupal_set_message(t('Ensure the "maximum number of section option submissions" validation rule has been configured and this component added. Otherwise the limit options will have no affect.'), 'warning');
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Alter the webform client form to check for the option of disabling
+ * unavailable select options.
+ */
+function webform_select_limit_form_webform_client_form_alter(&$form, &$form_state, $form_id) {
+  $nid = $form['#node']->nid;
+  $validators = webform_validation_get_node_rules($nid);
+  $components_to_validate = array();
+  $using_validator = FALSE;
+  // Check to make sure we are actually using the validator.
+  foreach ($validators as $validator) {
+    if ($validator['validator'] == 'webform_select_limit') {
+      $using_validator = TRUE;
+      foreach ($validator['components'] as $component) {
+        $components_to_validate[] = $component['cid'];
+      }
+    }
+  }
+
+  // Don't perform any additional checks if the validator hasn't been added.that
+  if (!$using_validator) {
+    return;
+  }
+
+  // Attach the disabled form elements via Drupal settings so we can disable
+  // them client side.
+  $elements_to_disable = webform_select_limit_remove_elements($nid, $form['submitted'], $components_to_validate, array());
+  if (!empty($elements_to_disable)) {
+    $form['#attached']['js'][] = array(
+      'data' => array('webformSelectLimit' => $elements_to_disable),
+      'type' => 'setting',
+    );
+
+    $form['#attached']['js'][] = drupal_get_path('module', 'webform_select_limit') . '/js/webform_select_limit.js';
+  }
+}
+
+/**
+ * Builds an array of form elements to disable.
+ *
+ * This function works recursively in order to reach the children of fieldsets.
+ *
+ * @param int $nid
+ *   The node ID for the webform.
+ * @param array $components
+ *   An array of webform components.
+ * @param array $cids
+ *   An array of component ids which are using the component.
+ * @param array $elements
+ *   An array of form elements.
+ *
+ * @return array
+ *   An array of components to disable.
+ */
+function webform_select_limit_remove_elements($nid, $components, $cids, $elements) {
+  foreach ($components as $component) {
+    // Check if the component is a webform select component.
+    if (is_array($component) && isset($component['#type']) && in_array($component['#type'], array('select', 'radios', 'checkboxes'))) {
+      $validate_set = !empty($component['#webform_component']['extra']['webform_select_limit']['enable_webform_select_limit']);
+      $remove_options = !empty($component['#webform_component']['extra']['webform_select_limit']['webform_select_limit_disable_options']);
+      $cid = $component['#webform_component']['cid'];
+      $to_validate = in_array($cid, $cids);
+      // Check if we are removing the unavailable options.
+      if ($validate_set && $remove_options && $to_validate) {
+        $form_key = $component['#webform_component']['form_key'];
+        $settings = $component['#webform_component']['extra']['webform_select_limit']['webform_select_limit_value'];
+        $unavailable = array();
+
+        // Check each option to see if it is available.
+        foreach ($component['#options'] as $option_key => $option_value) {
+          $count = webform_select_limit_get_limit($settings, $option_key);
+          if ($count && !webform_select_limit_check_availability($cid, $nid, $option_key, $count)) {
+            $unavailable[] = $option_key;
+          }
+        }
+
+        // Only add to the array if options are actually disabled.
+        if (!empty($unavailable)) {
+          $elements[$component['#type']][$form_key] = $unavailable;
+        }
+      }
+    }
+    // Otherwise check if it has has children. If it does then we need to see if
+    // those components are being limited.
+    elseif (is_array($component) && !empty($component['#webform_component']['children'])) {
+      $child_elements = array();
+      foreach ($component['#webform_component']['children'] as $child) {
+        $child_elements[$child['form_key']] = $component[$child['form_key']];
+      }
+
+      $elements += webform_select_limit_remove_elements($nid, $child_elements, $cids, $elements);
+    }
+  }
+
+  return $elements;
+}
+
+/**
+ * Returns the limit for the selected option if it exists. It also checks if a
+ * global flag has been set. If 0 then there is no limit.
+ *
+ * @param string $settings
+ *   The string contained in the limit textarea.
+ * @param string $option
+ *   The option selected by the user.
+ *
+ * @return mixed
+ *   The set limit for the option
+ */
+function webform_select_limit_get_limit($settings, $option) {
+  // The previous version of the module just used a single integer to limit all
+  // options. This just allows these settings to still work.
+  if (is_numeric($settings)) {
+    $settings = 'all|' . $settings;
+  }
+
+  $options = explode(PHP_EOL, $settings);
+  $limit = 0;
+  // Try and find the option and value within the array.
+  foreach ($options as $string) {
+    $option_array = explode('|', $string);
+    if ($option_array[0] == $option) {
+      $limit = $option_array[1];
+    }
+    elseif (strtolower($option_array[0]) == 'all') {
+      // If the all key is set we use that no matter what.
+      return $option_array[1];
+    }
+  }
+
+  return $limit;
+}
+
+/**
+ * Implements hook_webform_validation_validators().
+ */
+function webform_select_limit_webform_validation_validators() {
+  return array(
+    'webform_select_limit' => array(
+      'name' => t('Maximum number of select option submissions'),
+      'component_types' => array(
+        'select',
+      ),
+      'description' => t('Provides an ability to limit the amount of times a select option can be submitted.'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_webform_validation_validate().
+ */
+function webform_select_limit_webform_validation_validate($validator_name, $items, $components, $rule) {
+  if (!$items) {
+    return NULL;
+  }
+
+  $errors = array();
+
+  switch ($validator_name) {
+    case 'webform_select_limit':
+      $nid = $rule['nid'];
+
+      // Filter through each component and validate the values.
+      foreach ($items as $key => $item) {
+        $options = array();
+        if (!empty($components[$key]['extra']['webform_select_limit']['enable_webform_select_limit'])) {
+          if (is_array($item)) {
+            // This component is using checkboxes. Check to see which options
+            // have been selected and add them to the options array for checking.
+            // Checkboxes always return an array.
+            foreach ($item as $option_key => $option_value) {
+              if (!is_int($option_value)) {
+                // Non-selected options have the integer 0 as their value.
+                $options[] = $option_key;
+              }
+            }
+          }
+          elseif (strlen($item)) {
+            // This is essentially to ensure we don't do a database query for an
+            // empty component. Select list boxes return an empty string if
+            // nothing is selected, while radios return NULL.
+            $options[] = $item;
+          }
+
+          $settings = $components[$key]['extra']['webform_select_limit']['webform_select_limit_value'];
+
+          foreach ($options as $option_key => $option) {
+            $count = webform_select_limit_get_limit($settings, $option);
+
+            if ($count && !webform_select_limit_check_availability($components[$key]['cid'], $nid, $option, $count)) {
+
+              if (!empty($components[$key]['extra']['webform_select_limit']['webform_select_limit_error'])) {
+                $error_string = $components[$key]['extra']['webform_select_limit']['webform_select_limit_error'];
+                $errors[$key] = webform_select_limit_generate_error_message($error_string, $components[$key], $option);
+              }
+              else {
+                $errors[$key] = t('The selected item is unavailable');
+              }
+            }
+          }
+        }
+      }
+      break;
+  }
+
+  return $errors;
+}
+
+/**
+ * Generates the error message for the given component.
+ *
+ * @param string $string
+ *   The entered error message string for the component.
+ * @param array $component
+ *   The component to provide the error message for.
+ * @param string $selected_option
+ *   The selected option value.
+ *
+ * @return string
+ *   The error message to display to the user.
+ */
+function webform_select_limit_generate_error_message($string, $component, $selected_option) {
+  // Retrieve an array of the form options.
+  $options = _webform_select_options_from_text($component['extra']['items'], TRUE);
+
+  // Replace the placeholders with their actual values.
+  $new_str = str_replace(array(WEBFORM_SELECT_LIMIT_COMPONENT_NAME_TOKEN, WEBFORM_SELECT_LIMIT_SELECT_OPTION_TOKEN), array($component['name'], $options[$selected_option]), $string);
+
+  return check_plain($new_str);
+}
+
+/**
+ * Checks if the submission option is available.
+ *
+ * @param int $cid
+ *   The component ID to check submissions for.
+ * @param int $nid
+ *   The node ID for the webform.
+ * @param string $option
+ *   The option selected by the user.
+ * @param int $count
+ *   The number of allowed submissions.
+ *
+ * @return bool
+ *   TRUE if the option is available FALSE if not.
+ */
+function webform_select_limit_check_availability($cid, $nid, $option, $count) {
+  $check = db_select('webform_submitted_data', 'w')
+    ->fields('w')
+    ->condition('nid', $nid)
+    ->condition('cid', $cid)
+    ->condition('data', $option)
+    ->execute();
+
+  return $check->rowCount() < $count;
+}

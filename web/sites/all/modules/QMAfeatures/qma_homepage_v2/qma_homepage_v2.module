@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA Homepage v2 feature.
+ */
+
+include_once 'qma_homepage_v2.features.inc';

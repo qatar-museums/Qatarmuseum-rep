@@ -1,0 +1,12 @@
+name = QMA Feeds
+description = Feeds importers for QMA site
+core = 7.x
+package = QMAFeatures
+version = 7.x-1.0
+project = qma_feeds
+dependencies[] = ctools
+dependencies[] = feeds
+features[ctools][] = feeds:feeds_importer_default:1
+features[features_api][] = api:2
+features[feeds_importer][] = news_items
+project path = sites/all/modules/QMAfeatures

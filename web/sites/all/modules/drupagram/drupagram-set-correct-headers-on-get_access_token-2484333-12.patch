@@ -1,0 +1,45 @@
+diff --git a/drupagram.lib.php b/drupagram.lib.php
+index 15750b6..b11948c 100644
+--- a/drupagram.lib.php
++++ b/drupagram.lib.php
+@@ -379,7 +379,7 @@ class Instagram {
+    * @param bool $use_auth
+    * @return type
+    */
+-  protected function request($url, $params = array(), $method = 'GET', $use_auth = FALSE) {
++  protected function request($url, $params = array(), $method = 'GET', $use_auth = FALSE, $headers = array()) {
+     // @TODO: GET requests could potentially be cached.
+     $data = '';
+ 
+@@ -398,7 +398,9 @@ class Instagram {
+       }
+     }
+ 
+-    $headers = array();
++    if (!is_array($headers)) {
++      $headers = (array) $headers;
++    }
+     // @TODO: implement headers when $use_auth == TRUE
+ 
+     $response = drupal_http_request($url, array(
+@@ -547,7 +549,8 @@ class InstagramOAuth extends Instagram {
+       'code' => $code,
+     );
+     try {
+-      $response = $this->auth_request($url, $params, 'POST', FALSE);
++      $headers = array('Content-Type' => 'application/x-www-form-urlencoded');
++      $response = $this->auth_request($url, $params, 'POST', FALSE, $headers);
+     }
+     catch (InstagramException $e) {
+       watchdog('drupagram OAuth', '!message', array('!message' => $e->__toString()), WATCHDOG_ERROR);
+@@ -562,8 +565,8 @@ class InstagramOAuth extends Instagram {
+     return $token;
+   }
+ 
+-  public function auth_request($url, $params = array(), $method = 'POST', $use_auth = TRUE) {
+-    return $this->request($url, $params, $method, $use_auth);
++  public function auth_request($url, $params = array(), $method = 'POST', $use_auth = TRUE, $headers = array()) {
++    return $this->request($url, $params, $method, $use_auth, $headers);
+   }
+ 
+ }

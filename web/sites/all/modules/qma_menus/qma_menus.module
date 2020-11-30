@@ -1,0 +1,108 @@
+<?php
+
+/**
+ * Implement hook_views_api().
+ */
+function qma_menus_views_api() {
+  return array('api' => 2.0);
+}
+
+/**
+ * Implements hook_menu_block_blocks().
+ */
+function qma_menus_menu_block_blocks() {
+  return array(
+    'qma_menus_header_menu' => array(
+      'parent' => 'main-menu',
+      'title_link' => FALSE,
+      'admin_title' => 'Header Menu',
+      'level' => 1,
+      'follow' => '0',
+      'depth' => 2,
+      'expanded' => TRUE,
+      'sort' => FALSE,
+    ),
+  );
+}
+
+/**
+ * Implement hook_views_post_execute().
+ * Modify results of child_pages view to retrieve nodes in current language
+ * See qma_menus.views.inc for a full description of what we are doing here
+ */
+function qma_menus_views_post_execute(&$view) {
+
+	global $language;
+  
+	if ($view->name == 'child_pages_by_menu' && (isset($view->args[0]) && is_numeric($view->args[0]))) { //need to ensure we are called with a nid (the view may be invoked by an ajax form without any context, in which case lets return everything as it was)
+		//the first view argument should be the node id of the calling page
+		//by preference get the content language, rather than the interface language
+		
+		if(isset($_GET['translation']) && isset($_GET['target']) && in_array($_GET['target'],array_keys(language_list()))) { //n.b snatise by whitelisting valid languages here
+			//special case for filter display when translating a node
+			//the node id of the source node is passed in the argument, so we know where we are in the menu structure
+			//but the correct language version must be retrieved from the URL
+			$lang =$_GET['target'];
+		} else {
+			$callingNode = node_load($view->args[0]); 
+			$lang = $callingNode->language;
+		}
+		
+		
+		$newResults = array();
+		//iterate through child pages in the menu structure and for each check if we have a translation in the current langauge
+		//build new results array containing only those translated pages.
+		foreach ($view->result as $resultObj) {
+			$translations = translation_node_get_translations($resultObj->node_tnid);
+			if ($resultObj->node_language == $lang) {
+				$newResults[] = $resultObj;
+			} else if (isset($translations[$lang])) {
+				$resultObj->nid = $translations[$lang]->nid;
+				$newResults[] = $resultObj;
+			}
+		}
+		$view->result = $newResults;
+	
+		
+		
+		
+		//this display is invoked to feed the entity reference field used to highlight decendents on the generic hub content type
+		//we make some modifications here to exclude/include pages that would be difficult to manage in the view setup
+		if ($view->current_display=='grandchild_select_filter') {
+
+			
+			//Run the view that outputs immediate children on the generic hub pages and build an array of their node id's
+			//Use this array to exclude these children from the filtered results as there would be no need to output these twice on the same page
+			$topLevelResult=views_get_view_result('child_pages_by_menu','child_pages_block',$view->args[0],$view->args[1]);
+			$excludeArr = array();
+			foreach($topLevelResult as $tlrObj) {
+				$excludeArr[]=$tlrObj->nid;
+			}
+			
+			
+			$newResults = array();
+			foreach ($view->result as $resultObj) {
+				//The view retrieves nodes based on their position in the menu structure
+				//Some content types are not added to the menu structure but may be considered as children of their hub pages
+				//If we find one of these hub pages in our list of children we run a seperate query to retrieve related content and inject these into our results array.
+				if ($resultObj->node_type == 'interview_hub' || $resultObj->node_type == 'news_hub') {
+					if(!in_array($resultObj->nid, $excludeArr)){
+						$newResults[] = $resultObj;
+					}
+					$childType = ($resultObj->node_type == 'interview_hub'?'interview':'news_article');
+					$result =  db_query("SELECT nid,title AS node_title FROM {node} WHERE type = :sType AND language= :sLang ORDER BY title",array(':sType'=>$childType,':sLang'=>$lang));
+					
+					foreach($result as $childObj) {
+						$newResults[]=$childObj;
+					}
+					
+				} else if(!in_array($resultObj->nid, $excludeArr)){
+					$newResults[] = $resultObj;
+				}
+			}
+
+			$view->result = $newResults;
+		}
+
+	}
+}

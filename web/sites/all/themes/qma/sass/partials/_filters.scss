@@ -1,0 +1,127 @@
+.filter_image {
+  position: relative;
+  -webkit-backface-visibility: hidden;
+
+  a,
+  .no-touch & a:hover {
+
+    background-color: transparent !important;
+    padding: 0 !important;
+    border-bottom: none !important;
+    font-weight: normal;
+  }
+
+  .touch & a {
+    float: left;
+    display: block;
+    font-weight: normal;
+  }
+
+  img,
+  html[dir='rtl'] & img {
+    display: block;
+    float: none;
+    width: 100%;
+  }
+
+  .field-name-field-teaser-image {
+    display: block !important;
+  }
+
+}
+
+.view-child-pages-by-menu h4 {
+  margin-top: 0.8em;
+}
+
+.no-touch .filter_image:hover {
+  cursor: pointer;
+}
+
+.filter_image canvas {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+
+  .touch & {
+    display: none;
+  }
+
+  @include at-breakpoint($bp-fullwidth) {
+    .ie & {
+      max-height: 100%;
+    }
+  }
+
+}
+
+.hover-text {
+
+  position: absolute;
+  display: none;
+  right: 0;
+  left: 0;
+  text-align: left;
+  width: 80%;
+  margin: 0 auto;
+  top: 50.5%;
+  @include transform(translateY(-50%));
+
+  .field-name-field-teaser-text {
+    @include adjust-font-size-to(16px);
+    @include adjust-leading-to(5, 16px);
+  }
+
+  .field-name-field-hub-featured-children & {
+    top: 1.2em;
+    @include transform(translateY(0));
+  }
+
+  .touch &,
+  .lt-ie9 & {
+    background-color: $pink;
+    width: 100%;
+    top: 0;
+    bottom: auto;
+    display: none;
+    @include transform(translateY(0));
+    padding: 0.4em;
+  }
+
+  .touch .hovered &,
+  .lt-ie9 .hovered & {
+
+    @include at-breakpoint($bp-tablet) {
+      display: block;
+      float: left;
+    }
+
+  }
+
+}
+
+@include at-breakpoint($bp-tablet) {
+
+  .no-touch .filter_image:hover {
+
+    canvas,
+    .hover-text {
+      display: block;
+
+    }
+
+  }
+}
+
+.touch .grid-four {
+  .filter_image {
+    float: left;
+  }
+
+  .hover-text {
+    bottom: 6px;
+    overflow: hidden;
+  }
+}

@@ -1,0 +1,396 @@
+<?php
+
+/**
+ * @file
+ * qma_education.install
+ */
+
+
+/**
+ * Deletes fields belonging to education event which is rebranded as 
+ * education institution.
+ */
+
+function qma_education_update_7001() {
+  $fields_to_delete = array(
+    'field_eduevent_programme',
+    'field_eduevent_agegroup',
+    'field_eduevent_topics',
+    'field_eduevent_resources',
+    'field_eduevent_register',
+    'field_eduevent_date',
+  );
+
+  foreach ($fields_to_delete as $field_name) {
+    field_delete_field($field_name);
+    watchdog('qma_education', 'Deleted the :field_name field from all content type instances.', array(':field_name' => $field_name));
+  }
+
+// The fields aren't really deleted until the purge function runs, ordinarily
+  // during cron.  Count the number of fields we need to purge, and add five in
+  // case a few other miscellaneous fields are in there somehow.
+  field_purge_batch(count($fields_to_delete) + 5);
+}
+
+/**
+ * Deletes field field_eduevent_register from education programme.
+ */
+// function qma_education_update_7002() {
+//   field_delete_field('field_eduevent_register');
+//   watchdog('qma_education', 'Deleted the field_eduevent_register field from all content type instances.');
+//   field_purge_batch(count($fields_to_delete) + 5);
+// }
+
+/**
+ * Adds terms to the Age Groups taxonomy
+ */
+function qma_education_update_7003() {
+  $vocabulary = taxonomy_vocabulary_machine_name_load('age_groups');
+
+  if ($vocabulary) {
+    $terms = array(
+      'All ages',
+      'Families',
+      'Adults',
+      'University students',
+      'Under 5 year olds',
+      '5-11 year olds',
+      '11-18 year olds',
+    );
+
+    foreach ($terms as $idx => $term_name) {
+      $term = new stdClass();
+      $term->name = $term_name;
+      $term->vid = $vocabulary->vid;
+      $term->weight = $idx;
+      taxonomy_term_save($term);
+    }
+  }
+  else {
+    throw new DrupalUpdateException('Make sure you\'ve installed the Age Groups vocabulary in the QMA Education Content Types feature.');
+  }
+}
+
+/**
+ * Adds terms to the Programme Type taxonomy
+ */
+function qma_education_update_7004() {
+  $vocabulary = taxonomy_vocabulary_machine_name_load('programme_type');
+
+  if ($vocabulary) {
+    $terms = array(
+      'Lecture',
+      'Workshop',
+      'Field trip',
+      'Survey',
+      'Gallery tour',
+      'Training',
+      'Teacher training',
+      'Screening',
+      'Reading',
+      'Conference',
+      'Special event',
+    );
+
+    foreach ($terms as $idx => $term_name) {
+      $term = new stdClass();
+      $term->name = $term_name;
+      $term->vid = $vocabulary->vid;
+      $term->weight = $idx;
+      taxonomy_term_save($term);
+    }
+  }
+  else {
+    throw new DrupalUpdateException('Make sure you\'ve installed the Programme Type vocabulary in the QMA Education Content Types feature.');
+  }
+}
+
+/**
+ * Adds terms to the Affiliation taxonomy
+ */
+function qma_education_update_7005() {
+  // Delete the old school field from registration events. This should now use
+  // the affiliation field associated with the affiliation vocabulary.
+  $field_name = 'field_qma_edu_reg_schoold';
+  field_delete_field($field_name);
+  watchdog('qma_education', 'Deleted the :field_name field from all content type instances.', array(':field_name' => $field_name));
+  field_purge_batch(10);
+
+  $vocabulary = taxonomy_vocabulary_machine_name_load('affiliation');
+
+  if ($vocabulary) {
+    $terms = array(
+      'Primary School (Qatar)',
+      'Secondary School (Qatar)',
+      'University (Qatar)',
+      'Organization/Company (Please specify)',
+      'Other (Please specify)',
+    );
+
+    foreach ($terms as $idx => $term_name) {
+      $term = new stdClass();
+      $term->name = $term_name;
+      $term->vid = $vocabulary->vid;
+      $term->weight = $idx;
+      taxonomy_term_save($term);
+    }
+  }
+  else {
+    throw new DrupalUpdateException('Make sure you\'ve installed the Affiliation vocabulary in the QMA Education Content Types feature.');
+  }
+}
+
+/**
+ * Converts the field_eduprog_date and field_qma_edu_reg_date fields to use
+ * per-date rather than site-wide timezones.
+ */
+function qma_education_update_7006() {
+  // General approach to updating this field follows
+  // https://www.drupal.org/node/1378894#comment-5734400
+
+  $timezone = 'Asia/Qatar';
+  $timezone_object = new DateTimeZone($timezone);
+
+  $fields = array(
+    'field_eduprog_date',
+    'field_qma_edu_reg_date',
+  );
+
+  $database_prefixes = array(
+    'field_data_',
+    'field_revision_',
+  );
+
+  // Taken from date_field_schema().
+  $schema = array(
+    'timezone' => array(
+      'type' => 'varchar',
+      'length' => 50,
+      'not null' => FALSE,
+      'sortable' => TRUE,
+      'views' => FALSE,
+    ),
+    'offset' => array(
+      'type' => 'int',
+      'not null' => FALSE,
+      'sortable' => TRUE,
+      'views' => FALSE,
+    ),
+    'offset2' => array(
+      'type' => 'int',
+      'not null' => FALSE,
+      'sortable' => TRUE,
+      'views' => FALSE
+    ),
+  );
+
+  foreach ($fields as $field) {
+    $field_config_update = array(
+      'sql' => array(
+        FIELD_LOAD_CURRENT => array(
+          'field_data_' . $field => array(
+            'value' => $field . '_value',
+            'value2' => $field . '_value2',
+          ),
+        ),
+        FIELD_LOAD_REVISION => array(
+          'field_revision_' . $field => array(
+            'value' => $field . '_value',
+            'value2' => $field . '_value2',
+          ),
+        ),
+      ),
+    );
+
+    // For each field, alter the field settings in field_config.
+    // Change the timezone processing from 'site' to 'date' and add any
+    // additional settings.
+    $field_config = field_info_field($field);
+    $field_config['settings']['tz_handling'] = 'date';
+    $field_config['storage']['details'] += $field_config_update;
+
+    db_update('field_config')
+      ->fields(array('data' => serialize($field_config)))
+      ->condition('field_name', $field)
+      ->execute();
+
+    // Update both the data and revision tables.
+    foreach ($database_prefixes as $database_prefix) {
+      // Add new timezone and offset columns to database
+      foreach ($schema as $column => $data) {
+        db_add_field($database_prefix . $field, $field . '_' . $column, $data);
+      }
+
+      // Populate the timezone column with Asia/Qatar for all rows
+      db_update($database_prefix . $field)
+        ->fields(array($field . '_timezone' => $timezone))
+        ->execute();
+
+      $table_data = db_select($database_prefix . $field, 'f')
+        ->fields('f')
+        ->execute();
+
+      // Now calculate and set the date offsets. The value is the date offset
+      // from UTC as calculated by date_get_offset(). See
+      // date_formatter_process() for the date module's implementation.
+      while ($table_row = $table_data->fetchAssoc()) {
+        $date1 = new DateTime();
+        $date1->setTimestamp($table_row[$field . '_value']);
+        $date1->setTimezone($timezone_object);
+        $offset1 = $date1->getOffset();
+
+        $date2 = new DateTime();
+        $date2->setTimestamp($table_row[$field . '_value2']);
+        $date2->setTimezone($timezone_object);
+        $offset2 = $date2->getOffset();
+
+        db_update($database_prefix . $field)
+          ->fields(array(
+            $field . '_offset' => $offset1,
+            $field . '_offset2' => $offset2,
+          ))
+          ->condition('entity_type', $table_row['entity_type'])
+          ->condition('entity_id', $table_row['entity_id'])
+          ->condition('deleted', $table_row['deleted'])
+          ->condition('delta', $table_row['delta'])
+          ->condition('language', $table_row['language'])
+          ->execute();
+      }
+    }
+  }
+}
+
+/**
+ * Migrate date values from the qma_eduprog_date field to the repeating
+ * qma_eduprog_repeat_date field collection, and delete the old field.
+ */
+function qma_education_update_7007(&$sandbox) {
+  if (!isset($sandbox['nids'])) {
+    // Retrieve all education programmes
+    $query = new EntityFieldQuery();
+
+    $query->entityCondition('entity_type', 'node')
+          ->entityCondition('bundle', 'education_prog');
+
+    $result = $query->execute();
+
+    $sandbox['progress'] = 0;
+    $sandbox['nids'] = isset($result['node']) ? array_keys($result['node']) : array();
+  }
+
+  $date_field = 'field_eduprog_repeat_field_date';
+  $date_field_old = 'field_eduprog_date';
+
+  if (empty($sandbox['nids'])) {
+    $sandbox['#finished'] = 1;
+  }
+  else {
+    $sandbox['#finished'] = $sandbox['progress'] / count($sandbox['nids']);
+  }
+
+  if ($sandbox['#finished'] === 1) {
+    // Once all nodes are migrated, delete the old date field.
+    field_delete_field($date_field_old);
+  }
+  else {
+    $max = $sandbox['progress'] + 5;
+
+    for ($i = $sandbox['progress']; $i < $max; $i++) {
+      $node = node_load($sandbox['nids'][$i]);
+
+      $has_old_values = (isset($node->{$date_field_old}) && !empty($node->{$date_field_old}));
+      $has_new_values = (isset($node->{$date_field}) && !empty($node->{$date_field}));
+
+      watchdog('qma_education', 'Considering date values for node @nid', array('@nid' => $node->nid));
+
+      // For each programme, check if it has dates set
+      if ($has_old_values && !$has_new_values) {
+        watchdog('qma_education', 'Migrating date values for node @nid', array('@nid' => $node->nid));
+        _qma_education_migrate_dates($node);
+      }
+    }
+
+    $sandbox['progress'] = $max;
+  }
+}
+
+/**
+ * Delete the old Education calendar view.
+ */
+function qma_education_update_7008() {
+  $view = views_get_view('qma_edu_calendar', TRUE);
+
+  // This may have no effect, since the view lives in a Feature.
+  if ($view) {
+    views_delete_view($view);
+  }
+}
+
+/**
+ * Ensure that date_views formats are set.
+ */
+function qma_education_update_7009() {
+  if (module_exists('date_views')) {
+    variable_set('date_views_month_format_with_year', 'F Y');
+    variable_set('date_views_month_format_without_year', 'F');
+    variable_set('date_views_day_format_with_year', 'l, F j, Y');
+    variable_set('date_views_day_format_without_year', 'l, F j');
+    variable_set('date_views_week_format_with_year', 'F j, Y');
+    variable_set('date_views_week_format_without_year', 'F j');
+  }
+}
+
+/**
+ * Set initial value for education notification e-mail.
+ */
+function qma_education_update_7010() {
+  variable_set('qma_forms_admin_education_email', 'education@qm.org.qa');
+}
+
+/**
+ * Helper function to migrate date values to a repeating date field collection.
+ *
+ * @param $node
+ * @throws DrupalUpdateException
+ */
+function _qma_education_migrate_dates($node) {
+  $date_collection = 'field_eduprog_repeat_date';
+  $date_field = 'field_eduprog_repeat_field_date';
+  $date_field_old = 'field_eduprog_date';
+
+  // Drop out if the field doesn't exist to migrate the data into.
+  if (!isset($node->{$date_collection})) {
+    throw new DrupalUpdateException('Apply the latest Education Programme feature before running this update');
+  }
+
+  // If we have values from the old date field, migrate them.
+  if (isset($node->{$date_field_old})) {
+    $fc_ids = array();
+    $date_values = $node->{$date_field_old}[LANGUAGE_NONE];
+
+    // For each date value, create a new field collection item.
+    foreach ($date_values as $date_value) {
+      // Set the repeating rule value to NULL.
+      $date_value['rrule'] = NULL;
+
+      $fc_values = array('field_name' => $date_collection);
+      $fc_item = entity_create('field_collection_item', $fc_values);
+      $fc_item->setHostEntity('node', $node);
+
+      // Add the date field values to the field collection.
+      $fc_item->{$date_field}[LANGUAGE_NONE] = array($date_value);
+      $fc_item->save(TRUE);
+
+      $fc_ids[] = array(
+        'value' => $fc_item->item_id,
+        'revision_id' => NULL,
+      );
+    }
+
+    // Attach any new field collections to the node.
+    if (!empty($fc_ids)) {
+      $node->{$date_collection}[LANUGAGE_NONE] = $fc_ids;
+      node_save($node);
+    }
+  }
+}

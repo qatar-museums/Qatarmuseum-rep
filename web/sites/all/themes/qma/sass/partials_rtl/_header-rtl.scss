@@ -1,0 +1,210 @@
+.site-header {
+
+	.language-switcher {
+
+		text-align: center;
+		margin-bottom: 0;
+		float: right;
+		width: 100%;
+
+		@include at-breakpoint($bp-desktop) {
+			width: columns(1);
+			position: absolute;
+			bottom: 0;
+			left: $grid-padding;
+			right: auto;
+		}
+
+		@include at-breakpoint($bp-fullwidth) {
+			left: 0;
+		}
+
+		h2 {
+			@include hide-content;
+		}
+
+		a {
+			background-color: transparent;
+		}
+
+		a:hover {
+			border-bottom: 1px solid #000000;
+		}
+
+		ul {
+			display: inline-block;
+			text-align: center;
+			min-width: 5em;
+			margin-bottom: 0;
+
+			@include at-breakpoint($bp-tablet) {
+				min-width: 0;
+			}
+
+			li {
+				float: right;
+				clear: right;
+				width: 100%;
+				text-align: center;
+
+				@include at-breakpoint($bp-small-desktop) {
+					text-align: center;
+					margin-bottom: 0;
+				}
+			}
+		}
+
+		li.active {
+			display: none;
+		}
+	}
+
+	.logo-container {
+
+		@include at-breakpoint($bp-desktop) {
+			margin-right: 0;
+		}
+
+		.site-title {
+			float: right;
+
+			@include at-breakpoint($bp-desktop) {
+				right: 0.786em;
+				left: auto;
+			}
+		}
+
+	}
+
+	.site-nav {
+
+		@include at-breakpoint($bp-desktop) {
+			width: columns(13);
+			position: absolute;
+			bottom: -12px;
+			margin-right: columns(2);
+			margin-left: 0;
+			text-align: right;
+			padding-right: 55px;
+			padding-left: 0;
+		}
+
+		.menu {
+
+			margin-left: 0;
+
+			@include at-breakpoint($bp-desktop) {
+				margin-top: 0em;
+				// margin-right: columns(2);
+			}
+
+			li {
+				margin: 0;
+				padding: 0;
+				text-align: center;
+
+				@include at-breakpoint($bp-desktop) {
+					float: right;
+					text-align: center;
+					text-align: right;
+				}
+
+				a {
+					float: none;
+
+					@include at-breakpoint($bp-desktop) {
+						float: right;
+					}
+
+				}
+
+				span {
+					float: right;
+					clear: right;
+				}
+
+				.menu {
+					left: auto;
+					right: 0;
+					margin-right: 0;
+					top: 41px;
+
+					li {
+						clear: right;
+						float: right;
+					}
+				}
+			}
+		}
+
+	}
+
+	.region-header-search {
+
+		@include at-breakpoint($bp-desktop) {
+			float: left;
+			left: $grid-padding;
+			right: auto;
+			text-align: right;
+
+			.block-search .container-inline div {
+				float: right;
+			}
+		}
+
+		@include at-breakpoint($bp-fullwidth) {
+			left: 0;
+		}
+	}
+
+}
+
+.breadcrumb {
+
+	ul {
+
+		margin-right: 0;
+		margin-left: 0;
+
+		@include at-breakpoint($bp-small-desktop) {
+			// margin-right: -5%;
+		}
+
+		@include at-breakpoint($bp-desktop) {
+			margin-right: 1em;
+		}
+
+		li {
+			float: right;
+
+			&.first {
+				margin-right: 0;
+				margin-left: 0.3em;
+			}
+
+		}
+	}
+}
+
+.js.touch {
+
+	.site-header .language-switcher {
+
+		@include at-breakpoint($bp-desktop) {
+			left: 3.186em;
+			right: auto;
+		}
+
+		@include at-breakpoint($bp-fullwidth) {
+			left: 0;
+			right: auto;
+		}
+
+	}
+
+	.mobile-menu {
+		left: 0.5em;
+		right: auto;
+	}
+
+}

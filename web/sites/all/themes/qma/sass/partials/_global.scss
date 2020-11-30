@@ -1,0 +1,382 @@
+$body-color: #000000;
+$pink: #ed3c8a;
+$light-pink: #ffdde6;
+$yellow: #faff1e;
+$pale-yellow: #fdff8f;
+$animation-yellow: rgb(255,255, 0);
+$orange: #ffc200;
+$blue: #79aafa;
+$light-grey: #f3f3f3;
+$grey-bg: #efefef;
+$grey-font: #999999;
+$grey-blue: #dae4fc;
+
+$bp-tablet: 569px 16;
+$bp-small-desktop: 768px 16;
+$bp-769: 769px 16;
+$bp-860: 860px 16;
+$bp-desktop: 1024px 16;
+$bp-1025: 1025px 16;
+$bp-fullwidth: 1174px 16;
+$bp-1800: 1800px 16;
+
+// fonts
+
+@font-face{
+font-family:"DIN Next W02 Light";
+src:url("../fonts/694409/48e5a0e1-2d56-46e5-8fc4-3d6d5c973cbf.eot?#iefix");
+src:url("../fonts/694409/48e5a0e1-2d56-46e5-8fc4-3d6d5c973cbf.eot?#iefix") format("eot"),url("../fonts/694409/07d62b21-8d7a-4c36-be86-d32ab1089972.woff") format("woff"),url("../fonts/694409/c0050890-bbed-44b9-94df-2611d72dbb06.ttf") format("truetype"),url("../fonts/694409/9f774d17-c03a-418e-a375-34f3beecbc7a.svg#9f774d17-c03a-418e-a375-34f3beecbc7a") format("svg");
+}
+@font-face{
+font-family:"DIN Next W02 Bold";
+src:url("../fonts/694427/50d13d4e-96c6-4412-a8fa-baa4814c5332.eot?#iefix");
+src:url("../fonts/694427/50d13d4e-96c6-4412-a8fa-baa4814c5332.eot?#iefix") format("eot"),url("../fonts/694427/109143ca-57fb-459c-9814-3a68f0245ac3.woff") format("woff"),url("../fonts/694427/c9fa50e2-c243-451a-b91b-ee74f341d7a8.ttf") format("truetype"),url("../fonts/694427/1201bd6f-15f5-4b51-9c6f-c5c4b35d31f5.svg#1201bd6f-15f5-4b51-9c6f-c5c4b35d31f5") format("svg");
+}
+@font-face{
+font-family:"DIN Next LT W23 Light";
+src:url("../fonts/893517/77774782-4fa3-441a-bd91-702d88ef6e2d.eot?#iefix");
+src:url("../fonts/893517/77774782-4fa3-441a-bd91-702d88ef6e2d.eot?#iefix") format("eot"),url("../fonts/893517/0ab2eaf2-c728-4d1b-ae19-53aa13d5a213.woff") format("woff"),url("../fonts/893517/f33821f7-e0bf-48e9-b084-b195190e3870.ttf") format("truetype"),url("../fonts/893517/6b80f501-2781-47be-982c-4f11934d6716.svg#6b80f501-2781-47be-982c-4f11934d6716") format("svg");
+}
+@font-face{
+font-family:"DIN Next LT W23 Bold";
+src:url("../fonts/893520/f4bce1cb-f2a5-4bcb-af4c-79f63da8c8e0.eot?#iefix");
+src:url("../fonts/893520/f4bce1cb-f2a5-4bcb-af4c-79f63da8c8e0.eot?#iefix") format("eot"),url("../fonts/893520/708871f8-768c-4f13-9371-1684fb16711f.woff") format("woff"),url("../fonts/893520/bb726818-fa8e-4f9a-9305-c3823a880f46.ttf") format("truetype"),url("../fonts/893520/93953467-ca69-4f0e-aad5-a6e7ba360f0d.svg#93953467-ca69-4f0e-aad5-a6e7ba360f0d") format("svg");
+}
+
+@mixin din-light {
+  font-family:"DIN Next W02 Light", Tahoma, sans-serif;
+  font-size-adjust:0.5;
+  font-weight:400;
+  font-style:normal;
+}
+
+@mixin din-bold {
+  font-family:"DIN Next W02 Bold", Tahoma, sans-serif;
+  font-size-adjust:0.5;
+  font-weight:400;
+  font-style:normal;
+}
+
+
+@mixin din-arabic-light {
+  font-family:"DIN Next LT W23 Light", Tahoma, sans-serif;
+  font-size-adjust:0.5;
+  font-weight:400;
+  font-style:normal;
+}
+
+@mixin din-arabic-bold {
+  font-family:"DIN Next LT W23 Bold", Tahoma, sans-serif;
+  font-size-adjust:0.5;
+  font-weight:400;
+  font-style:normal;
+}
+
+// end fonts
+
+
+/* responsive videos */
+.embed-container,
+.embedded-video .player {
+	position: relative;
+	padding-bottom: 56.25%;
+	padding-top: 30px;
+	height: 0;
+	overflow: hidden;
+	max-width: 100%;
+	height: auto;
+
+	iframe,
+	object,
+	embed {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+	}
+
+}
+
+.desktop {
+	display: none;
+}
+
+@include at-breakpoint($bp-tablet) {
+	.mobile {
+		display: none;
+	}
+	.desktop {
+		display: block;
+	}
+}
+
+/* hide-content */
+@mixin hide-content {
+  position: absolute !important;
+  left: -999em;
+
+  html[dir='rtl'] & {
+    left: auto;
+    right: -999em;
+  }
+
+}
+
+.hidden-header {
+	@include hide-content;
+}
+
+.no-margin {
+	margin: 0 !important;
+}
+
+.no-padding-bottom {
+	padding-bottom: 0 !important;
+}
+.no-padding {
+	padding: 0 !important;
+}
+
+/* endash afters */
+@mixin endash-after {
+	&:after {
+		content: '\2013'; // endash
+		display: block;
+
+	}
+}
+
+/* down quote arrow mixin */
+@mixin bottom-arrow($color, $size, $bottomsize) {
+
+	position: relative;
+
+	&:after {
+		content: '';
+		display: block;
+		position: absolute;
+		width: 0;
+		height: 0;
+		border-left: $size solid transparent;
+		border-right: 0px solid transparent;
+		border-top: $size solid $color;
+		bottom: -$bottomsize;
+		right: 0;
+	}
+
+	html.lt-ie9 &:after {
+		display: none !important;
+	}
+
+}
+
+/* right quote arrow mixin */
+@mixin right-arrow($color, $size, $rightsize) {
+
+	position: relative;
+
+	&:after {
+		content: '';
+		position: absolute;
+		width: 0;
+		height: 0;
+		border-right: $size solid transparent;
+		border-left: 0px solid transparent;
+		border-bottom: $size solid $color;
+		right: -$rightsize;
+		left: auto;
+		bottom: 0;
+
+		display: none;
+
+		@include at-breakpoint($bp-tablet) {
+			display: block;
+		}
+	}
+
+	html[dir='rtl'] &:after {
+		border-left: $size solid transparent;
+		border-right: 0px solid transparent;
+		border-bottom: $size solid $color;
+		left: -$rightsize;
+		right: auto;
+	}
+
+	html[dir='rtl'].ie9 &:after {
+		border-right: $size solid transparent;
+		border-left: 0px solid transparent;
+		border-bottom: $size solid $color;
+		left: -$rightsize;
+		right: auto;
+	}
+
+	html.lt-ie9 &:after {
+		display: none !important;
+	}
+
+}
+
+/* left quote arrow mixin */
+@mixin left-arrow($color, $size, $leftsize) {
+
+	position: relative;
+
+	&:after {
+		content: '';
+		position: absolute;
+		width: 0;
+		height: 0;
+		border-left: $size solid transparent;
+		border-right: 0px solid transparent;
+		border-bottom: $size solid $color;
+		left: -$leftsize;
+		right: auto;
+		bottom: 0;
+
+		display: none;
+
+		@include at-breakpoint($bp-tablet) {
+			display: block;
+		}
+	}
+
+	html[dir='rtl'] &:after {
+		border-right: $size solid transparent;
+		border-left: 0px solid transparent;
+		border-bottom: $size solid $color;
+		right: -$leftsize;
+		left: auto;
+	}
+
+	html[dir='rtl'].ie9 &:after {
+		border-left: $size solid transparent;
+		border-right: 0px solid transparent;
+		border-bottom: $size solid $color;
+		right: -$leftsize;
+		left: auto;
+	}
+
+	html.lt-ie9 &:after {
+		display: none !important;
+	}
+
+}
+
+/* left quote arrow mixin */
+@mixin top-left-arrow($color, $size, $leftsize) {
+
+	position: relative;
+
+	&:after {
+		content: '';
+		position: absolute;
+		width: 0;
+		height: 0;
+		border-left: $size solid transparent;
+		border-right: 0px solid transparent;
+		border-top: $size solid $color;
+		left: -$leftsize;
+		right: auto;
+		top: 0;
+
+		display: none;
+
+		@include at-breakpoint($bp-tablet) {
+			display: block;
+		}
+	}
+
+	html[dir='rtl'] &:after {
+		border-right: $size solid transparent;
+		border-left: 0px solid transparent;
+		border-top: $size solid $color;
+		right: -$leftsize;
+		left: auto;
+	}
+
+	html[dir='rtl'].ie9 &:after {
+		border-left: $size solid transparent;
+		border-right: 0px solid transparent;
+		border-top: $size solid $color;
+		right: -$leftsize;
+		left: auto;
+	}
+
+	html.lt-ie9 &:after {
+		display: none !important;
+	}
+
+}
+
+@mixin button-style {
+
+	@include din-bold;
+
+	background-color: $pink;
+	color: #FFF;
+	display: inline-block;
+	margin: 0;
+	padding: 0.781em;
+	text-align: center;
+	text-transform: uppercase;
+	vertical-align: top;
+	width: 100%;
+
+	html[dir='rtl'] & {
+		text-transform: none;
+	}
+
+	@include adjust-font-size-to(18px);
+	@include adjust-leading-to(5, 18px);
+
+	&.hover,
+	&:hover {
+		cursor: pointer;
+		background-color: #000000;
+		padding: 0.781em;
+		border-bottom: none;
+	}
+
+  @include at-breakpoint($bp-tablet) {
+    min-width: 254px;
+    width: auto;
+  }
+}
+
+
+@mixin square($rotate_angle) {
+	padding: 50% 15%;
+	text-align: center;
+	position: relative;
+	height: 0;
+
+	div {
+		position: absolute;
+		top: 50%;
+		@include transform(translateY(-50%) rotate($rotate_angle));
+		width: 86%;
+		left: 7%;
+	}
+}
+
+
+.field .field-label {
+  font-weight: normal;
+}
+
+@mixin chevron__right {
+  background-image: url('../images/homepage/chevron_right.png');
+
+  &:hover {
+    background-image: url('../images/homepage/chevron_right_over.png');
+  }
+}
+
+@mixin chevron__left {
+  background-image: url('../images/homepage/chevron_left.png');
+
+  &:hover {
+    background-image: url('../images/homepage/chevron_left_over.png');
+  }
+}

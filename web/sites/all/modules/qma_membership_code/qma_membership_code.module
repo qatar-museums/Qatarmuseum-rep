@@ -1,0 +1,742 @@
+<?php
+
+/**
+ * @file
+ * qma_membership_code.module
+ */
+
+
+/**
+ * Implements hook_cron().
+ *
+ * Runs the user data export every hour.
+ */
+function qma_membership_code_cron() {
+  $last_run = variable_get('qma_membership_code_cron_last_run', 0);
+
+  // If the last run was more than an hour ago, run cron job.
+  if (REQUEST_TIME - $last_run > 3600) {
+    // Temporarily set the user to admin so we can access the view.
+    global $user;
+    $old_user = $user;
+    $user = user_load(1);
+
+    // Run the export
+    qma_membership_code_export_user_data();
+
+    // Reset the user and record the cron run timestamp.
+    $user = $old_user;
+    variable_set('qma_membership_code_cron_last_run', REQUEST_TIME);
+  }
+}
+
+/**
+* Implements hook_views_api().
+*/
+function qma_membership_code_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'qma_membership_code') . '/views',
+    'template path' => drupal_get_path('module', 'qma_membership_code') .'/templates',
+  );
+}
+
+/**
+ * Implements hook_theme().
+ */
+function qma_membership_code_theme($existing, $type, $theme, $path) {
+  $hooks = array();
+
+  $hooks['sponsor_logos'] = array(
+    'variables' => array(
+      'logos' => NULL,
+    ),
+    'path' => drupal_get_path('module', 'qma_membership_code') . '/templates',
+    'template' => 'sponsor-logos',
+  );
+
+  return $hooks;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function qma_membership_code_menu() {
+  $items = array();
+
+  $items['culturepasscard'] = array(
+    'page callback' => 'qma_membership_code_membership_card',
+    'file' => 'qma_membership_code.pages.inc',
+    'file path' => drupal_get_path('module', 'qma_membership_code'),
+    'access callback' => 'qma_membership_code_access_membership_card',
+  );
+
+  return $items;
+}
+
+function qma_membership_code_access_membership_card() {
+  return user_is_logged_in() && user_access('access content');
+}
+
+/**
+ * Implements hook_block_info().
+ *
+ */
+function qma_membership_code_block_info() {
+  $blocks = array();
+
+  $blocks['qma_membership_user_edit'] = array(
+    'info' => t('User edit form'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function qma_membership_code_block_view($delta = '') {
+  $block = array();
+
+  switch ($delta) {
+    case 'qma_membership_user_edit':
+      global $user;
+
+      if (user_edit_access($user)) {
+        module_load_include('inc', 'user', 'user.pages');
+
+        $block['subject'] = t('Your details', array(), array('context' => 'QMA'));
+        $block['content'] = drupal_get_form('user_profile_form', user_load($user->uid));
+      }
+      break;
+  }
+
+  return $block;
+}
+
+/**
+ * Implements hook_element_info_alter().
+ *
+ * Taken directly from the disablepwstrength module. Disables the password
+ * strength checking on the registration form.
+ */
+function qma_membership_code_element_info_alter(&$types) {
+  if (isset($types['password_confirm']['#process']) && (($position = array_search('user_form_process_password_confirm', $types['password_confirm']['#process'])) !== FALSE)) {
+    unset($types['password_confirm']['#process'][$position]);
+  }
+}
+
+/**
+ * Implements hook_field_extra_fields().
+ */
+function qma_membership_code_field_extra_fields() {
+  $extra['user']['user'] = array(
+    'form' => array(
+      'account_details_title' => array(
+        'label' => t('Account details title'),
+        'description' => t('Title markup'),
+        'weight' => 0,
+      ),
+      'about_you_title' => array(
+        'label' => t('About you title'),
+        'description' => t('Title markup'),
+        'weight' => 0,
+      ),
+      'membership_title' => array(
+        'label' => t('Membership title'),
+        'description' => t('Title markup'),
+        'weight' => 0,
+      ),
+    ),
+    'display' => array(
+      'account' => array(
+        'label' => t('User name and password'),
+        'description' => t('User module account form elements.'),
+        'weight' => -10,
+      ),
+    ),
+  );
+
+  return $extra;
+}
+
+/**
+ * Implements hook_node_view().
+ *
+ * We attach form blocks here so errors are processed before the page renders.
+ */
+function qma_membership_node_view($node, $view_mode, $langcode) {
+  // Add the login and membership blocks to the membership_page render array.
+  if ($node->type === 'membership_page' && $view_mode === 'full') {
+    $login_block = block_load('user', 'login');
+    $login_block_array = _block_get_renderable_array(_block_render_blocks(array($login_block)));
+
+    if (isset($login_block_array['user_login'])) {
+      $login_block_array['user_login']['#block']->subject = '';
+    }
+
+    $user_edit_block = block_load('qma_membership_code', 'qma_membership_user_edit');
+    $user_edit_block_array = _block_get_renderable_array(_block_render_blocks(array($user_edit_block)));
+
+    if (isset($user_edit_block_array['qma_membership_code_qma_membership_user_edit'])) {
+      $user_edit_block_array['qma_membership_code_qma_membership_user_edit']['#block']->subject = '';
+    }
+
+    $node->content['blocks']['login'] = $login_block_array;
+    $node->content['blocks']['user_edit'] = $user_edit_block_array;
+  }
+}
+
+/**
+ * Implements hook_preprocess_node().
+ */
+function qma_membership_code_preprocess_node(&$variables) {
+  $node = $variables['node'];
+
+  // Add the login and membership blocks to the membership_page render array.
+  if ($node->type === 'membership_page' && $variables['view_mode'] === 'full') {
+    $variables['content']['salutation'] = NULL;
+
+    if (user_is_logged_in()) {
+      global $user;
+      $user_entity = entity_load_single('user', $user->uid);
+      $user_first_name = field_get_items('user', $user_entity, 'field_first_name');
+
+      $t_vals = array(
+        '@name' => $user_first_name[0]['safe_value'],
+      );
+
+      $variables['content']['salutation'] = t('Hello @name,', $t_vals, array('context' => 'QMA'));
+    }
+
+    $variables['content']['log_out'] = array(
+      '#type' => 'link',
+      '#title' => t('Log out', array(), array('context' => 'QMA')),
+      '#href' => 'user/logout',
+      '#attributes' => array(
+        'class' => array(
+          'button',
+          'logout-button',
+        ),
+      ),
+    );
+
+    $variables['content']['sign_up_now'] = array(
+      '#type' => 'link',
+      '#title' => t('Sign up now', array(), array('context' => 'QMA')),
+      '#href' => 'user/register',
+      '#attributes' => array(
+        'class' => array(
+          'button',
+        ),
+      ),
+      '#options' => array(
+        'query' => array(
+          'destination' => drupal_lookup_path('alias',current_path()),
+        ),
+      ),
+    );
+
+    global $user;
+    $variables['content']['membership_number'] = qma_membership_code_membership_number($user->uid);
+
+    $variables['sponsor_image'] = qma_membership_code_sponsor_image();
+  }
+}
+
+
+/**
+ * Implements hook_preprocess_lt_unified_login_page().
+ */
+function qma_membership_code_preprocess_page(&$variables) {
+  if (arg(0) === 'user' && arg(1) === 'register') {
+    $variables['sponsor_image'] = qma_membership_code_sponsor_image();
+  }
+}
+
+/**
+ * Generate a render array for the sponsor image.
+ */
+function qma_membership_code_sponsor_image() {
+  return theme('sponsor_logos');
+}
+
+/**
+ * Preprocesses variables for sponsor-logos.tpl.php.
+ */
+function template_preprocess_sponsor_logos(&$variables) {
+  global $language_content;
+
+  $logos = array();
+  $langcode = $language_content->language;
+  $imagepath = drupal_get_path('module', 'qma_membership_code');
+
+  $logos['left']['SHAQAB'] = array(
+    '#theme' => 'image_formatter',
+    '#item' => array(
+      'uri' => $imagepath . '/images/SHAQAB.png',
+      'alt' => t('SHAQAB', array(), array('context' => 'QMA')),
+      'title' => t('SHAQAB', array(), array('context' => 'QMA')),
+    ),
+    '#prefix' => '<span class="qma-sponsor-logo sponsor-logo">',
+    '#suffix' => '</span>',
+  );
+
+  $logos['left']['vodafone'] = array(
+    '#theme' => 'image_formatter',
+    '#item' => array(
+      'uri' => $imagepath . '/images/vodafone.png',
+      'alt' => t('Vodafone', array(), array('context' => 'QMA')),
+      'title' => t('Vodafone', array(), array('context' => 'QMA')),
+    ),
+    '#path' => array(
+      'path' => 'http://www.vodafone.qa',
+      'options' => array(
+        'attributes' => array(
+          'class' => array(
+            'vodafone-sponsor-logo',
+            'sponsor-logo',
+          ),
+        ),
+      ),
+    ),
+  );
+  $logos['right']['Marwan_Club'] = array(
+    '#theme' => 'image_formatter',
+    '#item' => array(
+      'uri' => $imagepath . '/images/MARAWAN.png',
+      'alt' => t('MARAWAN CLUB', array(), array('context' => 'QMA')),
+      'title' => t('MARWAN CLUB', array(), array('context' => 'QMA')),
+    ),
+    '#path' => array(
+      'path' => "",
+      'options' => array(
+        'attributes' => array(
+          'class' => array(
+            'al-zubarah-sponsor-logo',
+            'sponsor-logo',
+          ),
+        ),
+      ),
+    ),
+  );
+
+
+  $nm_translations = translation_node_get_translations(66);
+  $nm_nid = isset($nm_translations[$langcode]) ? $nm_translations[$langcode]->nid : 66;
+
+  $logos['right']['doha_film_institute'] = array(
+    '#theme' => 'image_formatter',
+    '#item' => array(
+      'uri' => $imagepath . '/images/dohaaflam.png',
+      'alt' => t('Doha Film Institute ', array(), array('context' => 'QMA')),
+      'title' => t('Doha film Institute', array(), array('context' => 'QMA')),
+    ),
+    '#path' => array(
+      'path' => "node/{$nm_nid}",
+      'options' => array(
+        'attributes' => array(
+          'class' => array(
+            'national-museum-sponsor-logo',
+            'sponsor-logo',
+          ),
+        ),
+      ),
+    ),
+  );
+
+  $az_translations = translation_node_get_translations(14);
+  $az_nid = isset($az_translations[$langcode]) ? $az_translations[$langcode]->nid : 14;
+
+  
+  
+
+  $logos['right']['CHEF'] = array(
+    '#theme' => 'image_formatter',
+    '#item' => array(
+      'uri' => $imagepath . '/images/CHEF.png',
+      'alt' => t('CHEF', array(), array('context' => 'QMA')),
+      'title' => t('CHEF', array(), array('context' => 'QMA')),
+    ),
+    '#path' => array(
+      'path' => '',
+      'options' => array(
+        'attributes' => array(
+          'class' => array(
+            'mathaf-sponsor-logo',
+            'sponsor-logo',
+          ),
+        ),
+      ),
+    ),
+  );
+
+  $logos['left']['NUQAT'] = array(
+    '#theme' => 'image_formatter',
+    '#item' => array(
+      'uri' => $imagepath . '/images/NUQAT.png',
+      'alt' => t('NUQAT', array(), array('context' => 'QMA')),
+      'title' => t('NUQAT', array(), array('context' => 'QMA')),
+    ),
+    '#path' => array(
+      'path' => '',
+      'options' => array(
+        'attributes' => array(
+          'class' => array(
+            'qatar-foundation-sponsor-logo',
+            'sponsor-logo',
+          ),
+        ),
+      ),
+    ),
+  );
+
+  $variables['logos'] = $logos;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Adds the same content as locale_language_selector_form() but without the
+ * 'administer users' accesss restriction. This allows users to select their
+ * preferred language when registering.
+ */
+function qma_membership_code_form_user_register_form_alter(&$form, &$form_state, $form_id) {
+  if (drupal_multilingual()) {
+    if (isset($form['locale'])) {
+      if (isset($form['field_recieve_newsletter'])) {
+        $form['field_recieve_newsletter']['title'] = array(
+          '#type' => 'item',
+          '#title' => t('Newsletter', array(), array('context' => 'QMA')),
+          '#weight' => -99,
+        );
+      }
+
+      // Set the user's language based on the current site language.
+      global $language;
+      $form['locale']['language']['#default_value'] = $language->language;
+
+      $form['locale']['#title'] = 'Language';
+      $form['locale']['language']['#title_display'] = 'invisible';
+    }
+  }
+
+  $form['account_details_title'] = array(
+    '#markup' => '<h4 class="form-title">Your account details</h4>',
+  );
+
+  $form['about_you_title'] = array(
+    '#markup' => '<h4 class="form-title">About you</h4>',
+  );
+
+  $form['membership_title'] = array(
+    '#markup' => '<h4 class="form-title">Your membership</h4>',
+  );
+
+  // Remove unnecessary description text.
+  unset($form['account']['mail']['#description']);
+  unset($form['account']['conf_mail']['#description']);
+  unset($form['account']['pass']['#description']);
+
+  // This needs to execute before the user submission function.
+  array_unshift($form['#submit'], 'qma_membership_code_user_register_submit');
+
+  // This needs to execute after logintoboggan to override the redirect.
+  $form['#submit'][] = 'qma_membership_code_user_register_end_submit';
+
+  // Add honeypot protection
+  honeypot_add_form_protection($form, $form_state, array('honeypot', 'time_restriction'));
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function qma_membership_code_form_user_profile_form_alter(&$form, &$form_state, $form_id) {
+  $user = $form_state['user'];
+
+  $form['membership_number'] =  array(
+    '#type' => 'item',
+    '#title' => t('Membership number', array(), array('context' => 'QMA')),
+    '#markup' => qma_membership_code_membership_number($user->uid),
+    '#weight' => -99,
+  );
+
+  $form['timezone']['#collapsible'] = FALSE;
+
+  $form['locale']['#title'] = 'Language';
+  $form['locale']['language']['#title_display'] = 'invisible';
+
+  // Remove unnecessary description text.
+  unset($form['account']['mail']['#description']);
+  unset($form['account']['pass']['#description']);
+
+  $logout = array(
+    '#type' => 'link',
+    '#title' => t('Log out', array(), array('context' => 'QMA')),
+    '#href' => 'user/logout',
+    '#attributes' => array(
+      'class' => array(
+        'logout-button',
+      ),
+    ),
+  );
+
+  $form['actions']['logout'] = array(
+    '#weight' => 1,
+    '#markup' => render($logout),
+  );
+
+  $form['actions']['submit']['#weight'] = 0;
+
+  $form['actions']['cancel']['#weight'] = 2;
+  $form['actions']['cancel']['#attributes']['class'][] = 'button-link';
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function qma_membership_code_form_user_login_alter(&$form, &$form_state, $form_id) {
+  $form['#submit'][] = 'qma_membership_code_user_login_end_submit';
+}
+
+/**
+ * Custom submit hander for the user registration form.
+ *
+ * Adds the 'Member' role when a user registers on the website.
+ */
+function qma_membership_code_user_register_submit($form, &$form_state) {
+  if ($member_role = user_role_load_by_name('Member')) {
+    $form_state['values']['roles'][$member_role->rid] = $member_role->name;
+  }
+}
+
+/**
+ * Custom submit hander for the user registration form.
+ *
+ * Adds a redirect to the membership page on registration.
+ */
+function qma_membership_code_user_register_end_submit($form, &$form_state) {
+  qma_membership_code_form_redirect($form, $form_state);
+}
+
+/**
+ * Custom submit hander for the user login form.
+ *
+ * Adds a redirect to the membership page on login.
+ */
+function qma_membership_code_user_login_end_submit($form, &$form_state) {
+  qma_membership_code_form_redirect($form, $form_state);
+}
+
+/**
+ * Callback function to add redirection on login and registration.
+ *
+ * Will try and redirect to a valid membership page - first in the content
+ * language, then in any available language.
+ */
+function qma_membership_code_form_redirect($form, &$form_state) {
+  global $language_content;
+
+  $nid = _qma_membership_code_get_membership_page_nid($language_content);
+
+  // If we can't find a native version of the page, get any available version.
+  if ($nid === FALSE) {
+    $nid = _qma_membership_code_get_membership_page_nid();
+  }
+
+  // If we have a membership page, redirect here on registration.
+  // Allow this to be overridden by a destination query-string.
+  if ($nid !== FALSE && !isset($_GET['destination'])) {
+    $form_state['redirect'] = url("node/{$nid}", array('absolute' => TRUE));
+  }
+}
+
+/**
+ * Retrieve a membership page in the supplied language.
+ *
+ * @param $language stdClass
+ *   A valid language object.
+ */
+function _qma_membership_code_get_membership_page_nid($language = NULL) {
+  $q = new EntityFieldQuery();
+
+  $q->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', 'membership_page')
+    ->propertyCondition('status', 1)
+    ->range(0, 1);
+
+  if ($language) {
+    $q->propertyCondition('language', $language->language);
+  }
+
+  $result = $q->execute();
+
+  if (isset($result['node']) && !empty($result['node'])) {
+    $node = array_shift($result['node']);
+    return $node->nid;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Implements hook_mail_alter().
+ */
+function qma_membership_code_mail_alter(&$message) {
+  $headers =& $message['headers'];
+
+  // Enable HTML format for the user registration mail and the mail send when
+  // an admin creates an email (used for user imports).
+  if ($message['id'] === 'user_register_no_approval_required' || $message['id'] === 'user_import_welcome') {
+    $headers['Content-Type'] = 'text/html; charset=UTF-8; format=flowed';
+  }
+
+  $user_mail_keys = array(
+    'user_cancel_confirm',
+    'user_password_reset',
+    'user_register_admin_created',
+    'user_register_no_approval_required',
+    'user_register_pending_approval',
+    'user_register_pending_approval_admin',
+    'user_status_activated',
+    'user_status_blocked',
+    'user_status_canceled',
+    'user_import_welcome',
+  );
+
+  // Alter the sender name for all user-related e-mails.
+  if (in_array($message['id'], $user_mail_keys)) {
+    if (module_exists('smtp') && variable_get('smtp_from', FALSE)) {
+      $from_mail = variable_get('smtp_from');
+    }
+    else {
+      $from_mail = variable_get('site_mail', 'noreply@qm.org.qa');
+    }
+
+    $message['from'] = '"Culture Pass" <' . $from_mail . '>';
+    $headers['From'] = $headers['Sender'] = $headers['Return-Path'] = $headers['Reply-To'] = $message['from'];
+  }
+}
+
+/**
+ * A function to be called via a CRON job to save data exports using 
+ * functionality provided by views_data_export.
+ *
+ * This only works if the view doesn't do a batched export.
+ */
+function qma_membership_code_export_user_data() {
+  $scheme = 'private://';
+
+  $display_ids = array(
+    'views_data_export_1',
+    'views_data_export_2',
+  );
+
+  foreach ($display_ids as $display_id) {
+    // Generate the view each time so we don't get old style_plugin info.
+    $view = views_get_view('users');
+
+    if ($view && $view->access($display_id)) {
+      $view->set_display($display_id);
+      $csv = $view->render();
+      $uri = $scheme . $view->style_plugin->generate_filename();
+
+      if ($wrapper = file_stream_wrapper_get_instance_by_uri($uri)) {
+        $path = $wrapper->realpath();
+      }
+      else {
+        $error_message = t('Could not build path to export file. Have you configured the private filesystem?', array(), array('context' => 'QMA'));
+        watchdog('qma_membership_code', $error_message, WATCHDOG_ERROR);
+        continue;
+      }
+
+      if (file_save_data($csv, $uri, FILE_EXISTS_REPLACE)) {
+        $error_message = t('Successfully exported member data to file in @path', array('@path' => $path), array('context' => 'QMA'));
+        watchdog('qma_membership_code', $error_message);
+      }
+    }
+    else {
+      $error_message = t('Failed to export member data to file - cannot access the view display @display_id.', array('@display_id' => $display_id), array('context' => 'QMA'));
+      watchdog('qma_membership_code', $error_message, WATCHDOG_ERROR);
+    }
+  }
+}
+
+/**
+ * Implements hook_user_view().
+ */
+function qma_membership_code_user_view($account) {
+  if (isset($account->twitter_accounts)) {
+    unset($account->twitter_accounts);
+  }
+
+  if (isset($account->content['summary'])) {
+    unset($account->content['summary']);
+  }
+
+  $account->content['membership_number'] = array(
+    '#type' => 'item',
+    '#title' => t('Membership number:', array(), array('context' => 'QMA')),
+    '#markup' => qma_membership_code_membership_number($account->uid),
+    '#weight' => -99,
+    '#prefix' => '<div class="field">',
+    '#suffix' => '</div>',
+  );
+}
+
+/**
+ * Generate a membership number from a uid. The number should be a zero-padded
+ * string, six characters in length.
+ */
+function qma_membership_code_membership_number($uid) {
+  return str_pad(6000 + $uid, 6, '0', STR_PAD_LEFT);
+}
+
+/**
+ * Implements hook_views_pre_render().
+ */
+function qma_membership_code_views_pre_render(&$view) {
+  if ($view->name === 'users') {
+    foreach ($view->result as &$result) {
+      $result->membership_number = qma_membership_code_membership_number($result->uid);
+    }
+
+    // For views export displays, just override the uid since it won't be used
+    // for linking to the user page. Not ideal, but simpler than overriding
+    // the individual theming functions.
+    if (strpos($view->current_display, 'views_data_export_') === 0) {
+      foreach ($view->result as &$result) {
+        $result->uid = $result->membership_number;
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_countries_alter().
+ *
+ * Alters country order so Qatar appears first.
+ *
+ * @see countries_allowed_values().
+ */
+function qma_membership_code_countries_alter(&$countries) {
+  $qatar = $countries['QA'];
+  unset($countries['QA']);
+  $countries = array_merge(array('QA' => $qatar), $countries);
+}
+
+/**
+ * Implements hook_user_cancel_methods_alter().
+ */
+function qma_membership_code_user_cancel_methods_alter(&$methods) {
+  $methods['user_cancel_block']['description'] = t('Do you really want to cancel your free membership?', array(), array('context' => 'QMA'));
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function qma_membership_code_form_user_cancel_confirm_form_alter(&$form, &$form_state, $form_id) {
+  $form['actions']['submit']['#value'] = t('Cancel my account', array(), array('context' => 'QMA'));
+  $form['actions']['cancel']['#title'] = t('Don\'t cancel my account', array(), array('context' => 'QMA'));
+}

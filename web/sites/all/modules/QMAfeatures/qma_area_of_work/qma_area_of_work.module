@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the QMA Area of Work feature.
+ */
+
+include_once 'qma_area_of_work.features.inc';

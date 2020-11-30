@@ -1,0 +1,9 @@
+name = QMA interface
+description = Customisations to the editing interface for QMA
+package = QMA
+
+version = 7.x-1.0
+core = 7.x
+
+files[] = qma_interface.module
+files[] = views/qma_interface_handler_field_date.inc

@@ -1,0 +1,40 @@
+.node-whats-on {
+
+	.field-name-field-intro-text {
+		border-top: 2px solid #000000;
+		padding-top: 0.5em;
+		margin-bottom: 2.5em;
+	}
+
+}
+
+.field-name-field-whatson-event {
+	&>.field-items>.field-item:first-child {
+		border: 9px solid #000000;
+		border-right: none;
+		border-left: none;
+		padding: 1.889em 0 0 0;
+		margin-bottom: 4.444em;
+
+	}
+
+	.field-name-field-event-description p {
+		margin-bottom: 0;
+	}
+
+	.field-name-field-event-location {
+		clear: left;
+
+		&:before {
+      		content: '\2013'; // ascii number for an ndash. see http://css-tricks.com/snippets/html/glyphs/
+      		display: block;
+    	}
+	}
+
+	.field-name-field-event-dates,
+	.field-name-field-event-date-override {
+		@include din-bold;
+		margin-top: 1.4em;
+	}
+
+}
